@@ -4,7 +4,7 @@ import { BookOpen, Check, Code2, Database, Flag, GraduationCap, Lightbulb, Lock,
 // Biểu tượng học tập xoay vòng trên các nút step (sách, bút, mũ tốt nghiệp…).
 const STEP_ICONS = [BookOpen, PenLine, Lightbulb, NotebookPen, GraduationCap, Star];
 import { gradeStage } from "../../../../packages/shared/stageGrading";
-import { isEduHost } from "../../../../packages/shared/eduSite";
+import { CATALOG } from "../../../../packages/courses/catalog";
 import { useEduText } from "../../../education/eduText";
 
 /**
@@ -17,27 +17,13 @@ import { useEduText } from "../../../education/eduText";
  * ponytail: phong cảnh vẽ bằng gradient CSS + vài SVG nội tuyến, nhân vật là ảnh
  * WebP ~15 KB — không WebGL, không thư viện hoạt hình.
  */
-// Mỗi chặng MỘT nhân vật riêng, không lặp: ba ảnh chibi Hugo cho ba chặng hợp
-// vai (chào, gõ laptop, lên đường triển khai) và ba nhân vật vẽ SVG cho phần còn lại.
-const HUGO_LOOK = {
-  basic: { icon: Code2, mascot: "/image/coding/hugo-1.webp" },
-  intermediate: { icon: Database, mascot: "/image/coding/hugo-5.webp" },
-  advanced: { icon: Users, Mascot: RobotMascot, label: "map.robot" },
-  security: { icon: ShieldCheck, Mascot: OwlMascot, label: "map.owl" },
-  project: { icon: Sparkles, Mascot: AstronautMascot, label: "map.astronaut" },
-  devops: { icon: Rocket, mascot: "/image/coding/hugo-6.webp" },
+// Mỗi chặng một nhân vật clay riêng (public/edu/cast-N.svg) — số lấy từ CATALOG.stageCast.
+const STAGE_ICON = {
+  basic: Code2, intermediate: Database, advanced: Users, security: ShieldCheck, project: Sparkles, devops: Rocket,
+  "sql-basic": Database, "sql-filter": Code2, "sql-group": Users, "sql-design": Sparkles,
+  "sql-write": ShieldCheck, "sql-window": Code2, "sql-perf": Rocket, "sql-capstone": Sparkles,
 };
-// Education Hugo: dàn nhân vật clay (scripts/generate-mascots.mjs), mỗi chặng một bạn.
-const EDU_CAST = { basic: 1, intermediate: 4, advanced: 6, security: 2, project: 3, devops: 8 };
-const STAGE_LOOK = typeof window !== "undefined" && isEduHost(window.location.hostname)
-  ? Object.fromEntries(Object.entries(HUGO_LOOK).map(([id, look]) => [id, { icon: look.icon, mascot: `/edu/cast-${EDU_CAST[id]}.svg` }]))
-  : HUGO_LOOK;
-// Khoá SQL: 8 chặng, 8 nhân vật clay khác nhau (dùng hết dàn cast), ở mọi trang.
-const SQL_CAST = [
-  ["sql-basic", 6, Database], ["sql-filter", 7, Code2], ["sql-group", 5, Users], ["sql-design", 3, Sparkles],
-  ["sql-write", 2, ShieldCheck], ["sql-window", 4, Code2], ["sql-perf", 8, Rocket], ["sql-capstone", 1, Sparkles],
-];
-SQL_CAST.forEach(([id, cast, icon]) => { STAGE_LOOK[id] = { icon, mascot: `/edu/cast-${cast}.svg` }; });
+const STAGE_LOOK = Object.fromEntries(CATALOG.flatMap((c) => Object.entries(c.stageCast)).map(([id, cast]) => [id, { icon: STAGE_ICON[id] || Code2, mascot: `/edu/cast-${cast}.svg` }]));
 
 // Màu đất cuối mỗi vùng — vùng sau bắt đầu từ đúng màu này để hai vùng hoà
 // vào nhau thay vì cắt ngang một đường thẳng. Khớp --ground trong CSS.
@@ -59,61 +45,6 @@ const toneOf = (stage) => (GROUND[stage?.tone] ? stage.tone : TONES[((stage?.pha
 // Đường lượn: lệch trái–phải theo hình sin, mỗi chặng lượn ngược chiều chặng trước.
 const offsetOf = (index, flip) => Math.round(Math.sin(index * 0.9) * 70) * (flip ? -1 : 1);
 
-/** Robot CRUD — chặng 3: tay cầm thẻ bài đăng, mắt chớp. */
-function RobotMascot({ label }) {
-  return (
-    <svg viewBox="0 0 100 110" role="img" aria-label={label}>
-      <ellipse cx="50" cy="104" rx="28" ry="5" fill="#000" opacity=".15" />
-      <line x1="50" y1="8" x2="50" y2="20" stroke="#5c6ac4" strokeWidth="3" />
-      <circle cx="50" cy="7" r="5" fill="#ff6b9d" />
-      <rect x="22" y="20" width="56" height="40" rx="14" fill="#e7e9ff" stroke="#5c6ac4" strokeWidth="3" />
-      <rect x="31" y="31" width="38" height="18" rx="9" fill="#262a63" />
-      <g className="cmap-blink"><circle cx="42" cy="40" r="4" fill="#7fffd4" /><circle cx="58" cy="40" r="4" fill="#7fffd4" /></g>
-      <rect x="28" y="62" width="44" height="32" rx="10" fill="#b197fc" stroke="#5c6ac4" strokeWidth="3" />
-      <text x="50" y="83" textAnchor="middle" fontSize="11" fontWeight="900" fill="#fff" fontFamily="system-ui, sans-serif">CRUD</text>
-      <rect x="10" y="64" width="16" height="9" rx="4.5" fill="#b197fc" stroke="#5c6ac4" strokeWidth="2.5" />
-      <g className="cmap-wave-arm"><rect x="74" y="50" width="9" height="20" rx="4.5" fill="#b197fc" stroke="#5c6ac4" strokeWidth="2.5" /></g>
-      <rect x="34" y="94" width="10" height="9" rx="3" fill="#5c6ac4" /><rect x="56" y="94" width="10" height="9" rx="3" fill="#5c6ac4" />
-    </svg>
-  );
-}
-
-/** Cú gác cổng — chặng 4 bảo mật: ôm khiên, mắt tròn canh chừng. */
-function OwlMascot({ label }) {
-  return (
-    <svg viewBox="0 0 100 110" role="img" aria-label={label}>
-      <ellipse cx="50" cy="104" rx="28" ry="5" fill="#000" opacity=".15" />
-      <path d="M22 30 L30 12 L40 26 M78 30 L70 12 L60 26" fill="#8d5a2b" stroke="#6b4220" strokeWidth="2" strokeLinejoin="round" />
-      <ellipse cx="50" cy="62" rx="32" ry="40" fill="#a86b35" />
-      <ellipse cx="50" cy="72" rx="20" ry="26" fill="#f3d9b1" />
-      <circle cx="37" cy="40" r="12" fill="#fff" /><circle cx="63" cy="40" r="12" fill="#fff" />
-      <g className="cmap-blink"><circle cx="38" cy="41" r="6" fill="#262a63" /><circle cx="62" cy="41" r="6" fill="#262a63" /></g>
-      <path d="M46 50 L50 58 L54 50 Z" fill="#ffb347" />
-      <path d="M38 66 h24 v12 c0 10 -12 16 -12 16 s-12 -6 -12 -16 Z" fill="#ff4b4b" stroke="#c92a2a" strokeWidth="2.5" />
-      <path d="M45 78 l4 4 l7 -9" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M38 101 h8 M54 101 h8" stroke="#ffb347" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/** Phi hành gia — chặng 5 hoàn thiện sản phẩm: vẫy tay dưới bầu trời sao. */
-function AstronautMascot({ label }) {
-  return (
-    <svg viewBox="0 0 100 110" role="img" aria-label={label}>
-      <ellipse cx="50" cy="104" rx="28" ry="5" fill="#000" opacity=".2" />
-      <rect x="28" y="56" width="44" height="40" rx="14" fill="#f8f9fa" stroke="#adb5bd" strokeWidth="3" />
-      <rect x="40" y="66" width="20" height="12" rx="3" fill="#5865f2" />
-      <circle cx="45" cy="72" r="2" fill="#ffc800" /><circle cx="55" cy="72" r="2" fill="#69db7c" />
-      <circle cx="50" cy="34" r="26" fill="#f8f9fa" stroke="#adb5bd" strokeWidth="3" />
-      <rect x="31" y="22" width="38" height="26" rx="13" fill="#262a63" />
-      <path d="M38 30 q4 -5 10 -4" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" opacity=".7" />
-      <g className="cmap-blink"><circle cx="43" cy="36" r="3" fill="#ffe066" /><circle cx="57" cy="36" r="3" fill="#ffe066" /></g>
-      <g className="cmap-wave-arm"><rect x="72" y="44" width="11" height="24" rx="5.5" fill="#f8f9fa" stroke="#adb5bd" strokeWidth="2.5" /></g>
-      <rect x="16" y="62" width="14" height="10" rx="5" fill="#f8f9fa" stroke="#adb5bd" strokeWidth="2.5" />
-      <rect x="34" y="94" width="11" height="9" rx="3" fill="#adb5bd" /><rect x="55" y="94" width="11" height="9" rx="3" fill="#adb5bd" />
-    </svg>
-  );
-}
 
 /** Cây, bụi, hoa trang trí — đặt hai bên đường, không bấm được. */
 function Scenery({ seed }) {
@@ -252,11 +183,7 @@ function Unit({ unit, lessons, currentIndex, completedSet, onOpenLesson, focusId
                   </button>
                 </div>
               )}
-              {index === mascotAt && (look.Mascot ? (
-                <span className="cmap-mascot" style={{ "--side": offset > 0 ? -1 : 1 }} aria-hidden="true">
-                  <look.Mascot label={t(look.label)} />
-                </span>
-              ) : (
+              {index === mascotAt && (
                 <img
                   className="cmap-mascot"
                   src={look.mascot}
@@ -267,7 +194,7 @@ function Unit({ unit, lessons, currentIndex, completedSet, onOpenLesson, focusId
                   decoding="async"
                   style={{ "--side": offset > 0 ? -1 : 1 }}
                 />
-              ))}
+              )}
             </li>
           );
         })}
