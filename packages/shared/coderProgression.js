@@ -81,6 +81,8 @@ export function getCoderStageGate(completedLessons, targetStageId) {
 }
 
 export function getCoderLessonGate(completedLessons, lessonId) {
+  // Khoá Python cơ bản (py1–py40) mở hết, không bắt học theo thứ tự.
+  if (/^py\d+$/.test(String(lessonId))) return { unlocked: true, code: null, stage: null, missingLessons: [] };
   const advancedIndex = PYTHON_ADVANCED_STEP_IDS.indexOf(lessonId);
   if (advancedIndex >= 0) {
     const completed = new Set(Array.isArray(completedLessons) ? completedLessons : []);
