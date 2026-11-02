@@ -2,6 +2,7 @@
 // đọc chung. Chỉ import stages.js (nhẹ), không kéo nội dung bài.
 import * as coding from "./coding/stages.js";
 import * as sql from "./sql/stages.js";
+import * as python from "./python/stages.js";
 
 // cast: nhân vật clay của từng chặng (apps/web/public/edu/cast-N.svg) — khớp CourseMap.jsx.
 export const CATALOG = [
@@ -26,6 +27,17 @@ export const CATALOG = [
       zh: "从第一条 SELECT 到 CTE、窗口函数、索引和全文搜索——直接在浏览器中运行真实 SQL。",
     },
     keywords: "học SQL miễn phí, học SQL cho người mới, khoá học SQL, học cơ sở dữ liệu, SQLite, window function, CTE, JOIN, GROUP BY, chỉ mục SQL",
+  },
+  {
+    id: "python", cast: 5, hours: 40, stages: python.STAGES, outline: python.OUTLINE,
+    stageCast: { "py-basic": 5, "py-math": 7, "py-branch": 3, "py-loop": 2, "py-data": 4, "py-func": 6, "py-file": 8, "py-advanced": 1 },
+    title: { vi: "Python cho học sinh", en: "Python for Students", zh: "中学生 Python" },
+    tagline: {
+      vi: "Từ dòng print đầu tiên tới lớp đối tượng và thuật toán — xây Sổ Lớp, chạy Python ngay trong trình duyệt.",
+      en: "From your first print to classes and algorithms — build a class organiser, running Python right in your browser.",
+      zh: "从第一行 print 到类与算法——打造班级小助手，直接在浏览器中运行 Python。",
+    },
+    keywords: "học Python miễn phí, Python cho học sinh, học lập trình Python, Tin học 10 Python, Tin học 11 Python, ôn thi học sinh giỏi tin học",
   },
 ];
 

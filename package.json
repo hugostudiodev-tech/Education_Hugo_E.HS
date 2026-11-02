@@ -13,9 +13,10 @@
     "preview": "vite preview",
     "lint": "eslint src packages scripts server middleware.js",
     "check:sql-course": "node scripts/checks/check-sql-course.mjs",
+    "check:python-course": "node scripts/checks/check-python-course.mjs",
     "check:coder-content": "node scripts/checks/check-coder-content.mjs",
     "check:edu-streak": "node scripts/checks/check-edu-streak.mjs",
-    "check:all": "npm run lint && npm run check:sql-course && npm run check:coder-content && npm run check:edu-streak && npm run build",
+    "check:all": "npm run lint && npm run check:sql-course && npm run check:python-course && npm run check:coder-content && npm run check:edu-streak && npm run build",
     "build:sdk": "mkdir -p dist-sdk && vite build --config sdk/vite.config.js && cd sdk && npm pack --pack-destination ../dist-sdk"
   },
   "dependencies": {
@@ -53,6 +54,7 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.7.0",
+    "playwright-core": "^1.63.0",
     "postcss": "^8.5.16",
     "tailwindcss": "^3.4.19",
     "vite": "^8.1.2",

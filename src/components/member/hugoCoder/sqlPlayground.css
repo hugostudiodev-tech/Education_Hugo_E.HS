@@ -16,3 +16,9 @@
 .sql-play-hint { margin: 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--edu-blue, #1cb0f6) 10%, transparent); font-size: 14px; animation: sql-pop .35s ease-out; }
 @keyframes sql-pop { from { transform: scale(.94); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sql-play-verdict, .sql-play-hint { animation: none; } }
+/* PyPlayground dùng chung khung trên; thêm ô dữ liệu nhập và màn hình kết quả. */
+.py-play-input { display: grid; gap: 4px; }
+.py-play-input small { opacity: .7; font-size: 12px; font-weight: 700; }
+.py-play-input textarea { font-size: 13px; padding: 8px 12px; }
+.py-play-out { margin: 0; padding: 12px 14px; border-radius: 14px; background: #1b1f2a; color: #e8ecf4; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; }
+.py-play-out .sql-play-error { display: block; margin-top: 6px; white-space: pre-wrap; }

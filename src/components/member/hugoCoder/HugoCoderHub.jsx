@@ -37,9 +37,9 @@ export function ManageTab({ bio, courses, stages }) {
   const scoredSteps = courses.filter((course) => scores[course.id]);
   const earnedCount = stages.filter(stageEarned).length;
   // Danh hiệu theo chặng đã đi qua (6 / 11 / 15 / 19 / 22 step).
-  // Khoá SQL: danh hiệu = chặng gần nhất đã hoàn thành (bảng danh hiệu kia viết cho khoá Coding).
-  const sql = courses[0]?.id?.startsWith("sql");
-  const rank = sql
+  // Khoá SQL/Python: danh hiệu = chặng gần nhất đã hoàn thành (bảng danh hiệu kia viết cho khoá Coding).
+  const otherCourse = courses[0]?.id && !courses[0].id.startsWith("step");
+  const rank = otherCourse
     ? (stages.filter(stageEarned).at(-1) || stages[0])?.title
     : edu("hub.ranks")[[6, 11, 15, 19, 22].filter((need) => completed.length >= need).length];
 

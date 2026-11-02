@@ -12,6 +12,7 @@ import LessonBuddy from "./LessonBuddy";
 import CodingVisual from "./CodingVisual";
 // SQLite wasm chỉ tải khi slide có ô SQL.
 const SqlPlayground = lazy(() => import("./SqlPlayground"));
+const PyPlayground = lazy(() => import("./PyPlayground"));
 import "../../../styles/hugoCoderLearning.css";
 import { CODER_STORAGE_KEYS } from "./workspaceUtils";
 import { useEduText } from "../../../education/eduText";
@@ -497,6 +498,7 @@ export default function LessonPlayer({ course, onExit, onSubmitQuiz, onNextLesso
           {step.code && <CodeCard code={step.code.content} file={step.code.file} />}
 
           {step.sql && <Suspense fallback={null}><SqlPlayground key={`${course.id}-${step.title}`} id={`${course.id}-${step.title}`} {...step.sql} /></Suspense>}
+          {step.py && <Suspense fallback={null}><PyPlayground key={`${course.id}-${step.title}`} id={`${course.id}-${step.title}`} {...step.py} /></Suspense>}
 
           {step.kind === "check" && (
             <QuizQuestion

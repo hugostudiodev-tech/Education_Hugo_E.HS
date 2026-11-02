@@ -36,7 +36,7 @@ export const EDU_COPY = {
       progress: "Tiến độ khoá Coding", cardLink: "Thẻ thành viên & kết bạn",
     },
     topbar: {
-      courses: "Khoá học của bạn", course: { coding: "Lập trình Web", sql: "SQL & Cơ sở dữ liệu", quan: "Quán — khoá 2" }, courseProgress: "{done}/{total} step đã qua",
+      courses: "Khoá học của bạn", course: { coding: "Lập trình Web", sql: "SQL & Cơ sở dữ liệu", python: "Python cho học sinh", quan: "Quán — khoá 2" }, courseProgress: "{done}/{total} step đã qua",
       addCourse: "Thêm khoá học (sắp ra mắt)", joyBody: "Ngọc kiếm được khi qua bài lần đầu và giữ chuỗi lửa. Dùng để mua vật phẩm trong Cửa hàng và phá băng chuỗi.",
       toStore: "Mở Cửa hàng", notifications: "Thông báo", readAll: "Đánh dấu đã đọc", empty: "Chưa có thông báo nào. Hugo sẽ nhắc bạn khi có tin mới.",
     },
@@ -227,6 +227,7 @@ export const EDU_COPY = {
     },
     courses: { kicker: "Khoá học miễn phí · Education Hugo", steps: "step", stages: "chặng", hours: "giờ học", free: "miễn phí", start: "Bắt đầu học", path: "Lộ trình", seeSteps: "Xem {n} step", also: "Khoá khác", title: "Khoá học", pageTitle: "{name} — khoá học miễn phí | Education Hugo" },
     sqlPlay: { task: "Bài tập", solved: " · đã đạt", todo: " · viết câu SQL rồi bấm Chạy để chấm", run: "Chạy", grade: "Chạy & chấm", reset: "Đặt lại", reveal: "Xem lời giải", ok: "Chính xác! Kết quả khớp với yêu cầu.", miss: "Chưa khớp — so lại số cột, số dòng", missOrder: " và thứ tự", hint: "Gợi ý {n}", rows: "{n} dòng", shown: " (hiện {n})", done: "Đã chạy · {n} dòng thay đổi · câu cuối không trả bảng", loadFail: "Không tải được SQLite. Kiểm tra mạng rồi mở lại slide." },
+    pyPlay: { task: "Bài tập", solved: " · đã đạt", todo: " · viết code rồi bấm Chạy để chấm", run: "Chạy", grade: "Chạy & chấm", reset: "Đặt lại", reveal: "Xem lời giải", ok: "Chính xác! Kết quả in ra khớp với yêu cầu.", miss: "Chưa khớp — so lại từng dòng in ra, kể cả dấu cách và dấu câu.", hint: "Gợi ý {n}", input: "Dữ liệu nhập (mỗi dòng là một lần input())", loading: "Đang tải Python…", running: "Đang chạy…", empty: "(chương trình không in gì)", timeout: "Chạy quá lâu nên đã dừng — có thể vòng lặp không có điểm dừng.", loadFail: "Không tải được Python. Kiểm tra mạng rồi mở lại slide." },
     seo: {
       title: "Học lập trình miễn phí cho người mới bắt đầu | Education Hugo",
       description: "Học lập trình web miễn phí từ con số 0: HTML, CSS, JavaScript, PHP, MySQL, Git và triển khai website. Bài ngắn vài phút, làm sản phẩm thật, trắc nghiệm chấm ngay. Dự án phi lợi nhuận của Hugo Studio.",
@@ -277,7 +278,7 @@ export const EDU_COPY = {
       progress: "Coding course progress", cardLink: "Member card & friends",
     },
     topbar: {
-      courses: "Your courses", course: { coding: "Web Programming", sql: "SQL & Databases", quan: "Quán — course 2" }, courseProgress: "{done}/{total} steps passed",
+      courses: "Your courses", course: { coding: "Web Programming", sql: "SQL & Databases", python: "Python for Students", quan: "Quán — course 2" }, courseProgress: "{done}/{total} steps passed",
       addCourse: "Add a course (coming soon)", joyBody: "Earn gems by passing lessons the first time and keeping your streak. Spend them on Shop items or to thaw a frozen streak.",
       toStore: "Open the Shop", notifications: "Notifications", readAll: "Mark all read", empty: "No notifications yet. Hugo will let you know when something new arrives.",
     },
@@ -468,6 +469,7 @@ export const EDU_COPY = {
     },
     courses: { kicker: "Free course · Education Hugo", steps: "steps", stages: "stages", hours: "of learning", free: "free", start: "Start learning", path: "Learning path", seeSteps: "See {n} steps", also: "Also try", title: "Courses", pageTitle: "{name} — free course | Education Hugo" },
     sqlPlay: { task: "Exercise", solved: " · passed", todo: " · write your SQL, then press Run to check", run: "Run", grade: "Run & check", reset: "Reset", reveal: "Show solution", ok: "Correct! Your result matches.", miss: "Not a match yet — compare the number of columns and rows", missOrder: " and their order", hint: "Hint {n}", rows: "{n} rows", shown: " (showing {n})", done: "Ran · {n} rows changed · the last statement returned no table", loadFail: "Couldn't load SQLite. Check your connection and reopen the slide." },
+    pyPlay: { task: "Exercise", solved: " · passed", todo: " · write your code, then press Run to check", run: "Run", grade: "Run & check", reset: "Reset", reveal: "Show solution", ok: "Correct! Your output matches.", miss: "Not a match yet — compare each printed line, including spaces and punctuation.", hint: "Hint {n}", input: "Input (one line per input() call)", loading: "Loading Python…", running: "Running…", empty: "(the program printed nothing)", timeout: "Stopped for running too long — maybe a loop never ends.", loadFail: "Couldn't load Python. Check your connection and reopen the slide." },
     seo: {
       title: "Learn to Code Free for Beginners | Education Hugo",
       description: "Learn web development for free from zero: HTML, CSS, JavaScript, PHP, MySQL, Git and deploying a website. Short lessons, real projects and instantly graded quizzes. A non-profit project by Hugo Studio.",
@@ -530,6 +532,14 @@ export const EDU_COPY = {
         "sql-window": {"title": "Advanced queries: CTEs and window functions", "tagline": "Rank, run totals and compare with yesterday — in one SQL statement.", "learn": ["CTEs with WITH, recursive CTEs", "ROW_NUMBER, RANK, DENSE_RANK", "LAG, LEAD, running totals, moving averages", "Window frames: ROWS / RANGE"], "challenge": "No loops, no application code: every calculation lives in the query.", "promise": "Stage result: a revenue dashboard with rankings and trends."},
         "sql-perf": {"title": "Performance and advanced features", "tagline": "Read a query plan like a map.", "learn": ["B-tree, covering and partial indexes", "EXPLAIN QUERY PLAN and optimisation", "JSON in SQL", "Full-text search with FTS"], "challenge": "A 2-second query on a million rows must drop below 20 ms.", "promise": "Stage result: instant menu search by keyword, accents optional."},
         "sql-capstone": {"title": "Capstone project", "tagline": "A real reporting system written in pure SQL.", "learn": ["Cohort analysis and customer retention", "Multi-dimensional reports", "Moving SQL to PostgreSQL/MySQL", "Wrap-up and next steps"], "challenge": "Every number in the report must trace back to the source data.", "promise": "Stage result: 10 auto-graded report queries for the Hạt café."},
+        "py-basic": {"title": "Getting started with Python", "tagline": "Your first line of code, running right on your phone.", "learn": ["What Python is and why schools teach it", "print() and running a program", "Variables and assignment", "Data types and input()"], "challenge": "Nothing to install: Python runs right in your browser.", "promise": "Stage result: a profile card about yourself — the first page of the class organiser."},
+        "py-math": {"title": "Calculations", "tagline": "Let the computer work out the marks — and never add them up wrong.", "learn": ["Operators + − * / // % **", "Precedence and rounding", "f-strings for tidy output", "The math module"], "challenge": "0.1 + 0.2 is not 0.3 — and you'll see why.", "promise": "Stage result: a weighted subject-average calculator."},
+        "py-branch": {"title": "Branching", "tagline": "The program decides for itself: excellent, good, or keep trying.", "learn": ["Comparisons and bool", "if / else", "Multi-way elif", "and, or, not"], "challenge": "One wrong space of indentation changes what the program means.", "promise": "Stage result: academic ranking and scholarship checks."},
+        "py-loop": {"title": "Loops", "tagline": "Something repeated 1000 times only needs writing once.", "learn": ["for and range()", "while", "break, continue", "Nested loops and the accumulator pattern"], "challenge": "A loop with no way out runs forever — learn to avoid it.", "promise": "Stage result: times tables, an exam countdown and a savings book."},
+        "py-data": {"title": "Lists and dictionaries", "tagline": "From one mark to the whole class's mark sheet.", "learn": ["list: add, change, remove, sort", "Strings and slicing", "dict: look up by name", "tuple and set"], "challenge": "Two variables pointing at one list — change one, the other changes too.", "promise": "Stage result: a class mark sheet, the top 3 and a class-fund ledger."},
+        "py-func": {"title": "Functions", "tagline": "Write it once, call it anywhere.", "learn": ["def and return", "Parameters, defaults and scope", "Docstrings and breaking problems down", "Modules and import"], "challenge": "A function does one thing — and does it well.", "promise": "Stage result: a reusable marks library for the whole organiser."},
+        "py-file": {"title": "Data, files and errors", "tagline": "Read marks from a file, write a report, survive bad data.", "learn": ["try / except", "Reading and writing files", "CSV files", "List and dict comprehensions"], "challenge": "Someone types \"eight\" instead of 8 — the program still must not crash.", "promise": "Stage result: a class report built from a CSV file."},
+        "py-advanced": {"title": "Advanced topics and capstone", "tagline": "Classes, algorithms and a finished product.", "learn": ["Classes and objects", "random and a revision quiz game", "Searching and sorting", "Recursion and complexity (olympiad track)"], "challenge": "A correct algorithm isn't enough — it must be fast enough too.", "promise": "Stage result: the complete class organiser, running on your own computer."},
       },
       steps: [
         "Thinking like a programmer: algorithms, variables and your first program",
@@ -561,6 +571,8 @@ export const EDU_COPY = {
       ],
       // Khoá SQL: tên step theo đúng thứ tự packages/courses/sql/stages.js (OUTLINE).
       sqlSteps: ["Data all around us: from notebooks to databases", "The relational model: tables, rows, columns and keys", "SQLite in the browser: running your first SQL", "SELECT and FROM: choosing columns, aliases and DISTINCT", "Data types: numbers, text, dates and NULL", "WHERE and comparison operators", "AND, OR, NOT, IN, BETWEEN", "LIKE, GLOB and string search", "NULL and three-valued logic", "ORDER BY, LIMIT, OFFSET and pagination", "Expressions, CASE, string and date functions", "Aggregate functions: COUNT, SUM, AVG, MIN, MAX", "GROUP BY and HAVING", "INNER JOIN: joining orders to the menu", "LEFT JOIN, self-joins and the row-multiplication trap", "Subqueries, IN, EXISTS", "UNION, INTERSECT, EXCEPT", "Entity–relationship diagrams (ERD)", "CREATE TABLE, primary keys and foreign keys", "Constraints: NOT NULL, UNIQUE, CHECK, DEFAULT", "Normalisation: 1NF, 2NF, 3NF", "Many-to-many relationships and junction tables", "INSERT, UPDATE, DELETE", "UPSERT and RETURNING", "Transactions and ACID", "Views, triggers and generated columns", "SQL injection and parameterised queries", "CTEs: naming each step of a query", "Recursive CTEs: category trees and date series", "Window functions: ROW_NUMBER, RANK, DENSE_RANK", "LAG, LEAD and time-based comparison", "Running totals, moving averages and window frames", "B-tree indexes: why lookups are fast", "EXPLAIN QUERY PLAN and query optimisation", "Covering, partial and expression indexes", "JSON in SQL", "Full-text search (FTS4/FTS5)", "Cohort analysis: how soon customers come back", "From SQLite to PostgreSQL and MySQL", "Capstone: 10 report queries for the Hạt café"],
+      // Khoá Python: tên step theo đúng thứ tự packages/courses/python/stages.js (OUTLINE).
+      pySteps: ["Hello Python: running your first line of code", "Variables: naming your data", "Data types: integers, floats, strings and bool", "input(): asking the user and converting types", "Reading error messages and a mini project: a profile card", "Arithmetic operators: floor division, remainder, powers", "Precedence, rounding and floating-point error", "f-strings: printing results nicely", "The math module: square roots, ceiling and floor", "Mini project: weighted subject average", "Comparisons and the bool type", "if and else: two paths", "elif: academic ranking", "and, or, not: combining conditions", "Mini project: scholarship check", "for and range(): looping a set number of times", "while: looping until a condition is met", "break, continue and infinite loops", "Nested loops: times tables", "The accumulator pattern: sum, count, maximum — a savings book", "list: a list of marks", "Looping, changing and sorting lists: finding the top 3", "Strings: slicing and methods", "dict: looking up marks by name", "tuple, set and a mini project: the class fund", "def and return: your first function", "Parameters, default values and scope", "Breaking problems down: functions calling functions, docstrings", "Modules and import", "Mini project: a marks library", "try and except: programs that don't crash", "Reading and writing text files", "CSV files: the whole class's marks", "List and dict comprehensions", "Mini project: a marks report from a CSV file", "Classes and objects: modelling a student", "random: a revision quiz game", "Searching and sorting: linear, binary, bubble", "Recursion and complexity (olympiad track)", "Installing Python and the capstone: the class organiser"],
     },
   },
 
@@ -586,7 +598,7 @@ export const EDU_COPY = {
       progress: "编程课程进度", cardLink: "会员卡与好友",
     },
     topbar: {
-      courses: "你的课程", course: { coding: "网页编程", sql: "SQL 与数据库", quan: "Quán —— 第 2 门课" }, courseProgress: "已完成 {done}/{total} 个 step",
+      courses: "你的课程", course: { coding: "网页编程", sql: "SQL 与数据库", python: "中学生 Python", quan: "Quán —— 第 2 门课" }, courseProgress: "已完成 {done}/{total} 个 step",
       addCourse: "添加课程（即将上线）", joyBody: "首次通过课程和保持连续记录可赚取宝石，用于在商店兑换道具或给连续记录破冰。",
       toStore: "打开商店", notifications: "通知", readAll: "全部标为已读", empty: "还没有通知。有新消息时 Hugo 会告诉你。",
     },
@@ -777,6 +789,7 @@ export const EDU_COPY = {
     },
     courses: { kicker: "免费课程 · Education Hugo", steps: "个 step", stages: "个阶段", hours: "学习时长", free: "免费", start: "开始学习", path: "学习路线", seeSteps: "查看 {n} 个 step", also: "其他课程", title: "课程", pageTitle: "{name} —— 免费课程 | Education Hugo" },
     sqlPlay: { task: "练习", solved: " · 已通过", todo: " · 写好 SQL 后点击运行进行评分", run: "运行", grade: "运行并评分", reset: "重置", reveal: "查看答案", ok: "正确！结果与要求一致。", miss: "还不一致——请核对列数和行数", missOrder: "以及顺序", hint: "提示 {n}", rows: "{n} 行", shown: "（显示 {n} 行）", done: "已运行 · {n} 行被修改 · 最后一条语句没有返回表", loadFail: "无法加载 SQLite。请检查网络后重新打开此页。" },
+    pyPlay: { task: "练习", solved: " · 已通过", todo: " · 写好代码后点击运行进行评分", run: "运行", grade: "运行并评分", reset: "重置", reveal: "查看答案", ok: "正确！输出与要求一致。", miss: "还不一致——逐行核对输出，包括空格和标点。", hint: "提示 {n}", input: "输入数据（每行对应一次 input()）", loading: "正在加载 Python…", running: "正在运行…", empty: "（程序没有输出）", timeout: "运行时间过长已停止——可能是循环没有结束条件。", loadFail: "无法加载 Python。请检查网络后重新打开此页。" },
     seo: {
       title: "零基础免费学编程 | Education Hugo",
       description: "零基础免费学习网页开发：HTML、CSS、JavaScript、PHP、MySQL、Git 和网站部署。每课几分钟，做真实项目，测验即时评分。Hugo Studio 的非营利项目。",
@@ -839,6 +852,14 @@ export const EDU_COPY = {
         "sql-window": {"title": "进阶查询：CTE 与窗口函数", "tagline": "排名、累计、与昨日对比——一条 SQL 搞定。", "learn": ["WITH 子句（CTE）与递归 CTE", "ROW_NUMBER、RANK、DENSE_RANK", "LAG、LEAD、累计和、移动平均", "窗口框架：ROWS / RANGE"], "challenge": "没有循环，没有应用代码：所有计算都在查询里完成。", "promise": "阶段成果：带排名和趋势的营收仪表盘。"},
         "sql-perf": {"title": "性能与高级特性", "tagline": "像读地图一样读懂查询计划。", "learn": ["B-tree、覆盖索引与部分索引", "EXPLAIN QUERY PLAN 与优化", "SQL 中的 JSON", "FTS 全文搜索"], "challenge": "百万行上耗时 2 秒的查询要降到 20 毫秒以内。", "promise": "阶段成果：按关键词即时搜索菜单，无需输入声调。"},
         "sql-capstone": {"title": "结业项目", "tagline": "一套用纯 SQL 编写的真实报表系统。", "learn": ["同期群分析与客户留存", "多维度报表", "把 SQL 迁移到 PostgreSQL/MySQL", "总结与后续学习路线"], "challenge": "报表中的每个数字都必须能追溯到原始数据。", "promise": "阶段成果：为 Hạt 咖啡馆编写 10 条自动评分的报表查询。"},
+        "py-basic": {"title": "初识 Python", "tagline": "第一行代码，直接在手机上运行。", "learn": ["Python 是什么，为什么学校教它", "print() 与运行程序", "变量与赋值", "数据类型与 input()"], "challenge": "无需安装：Python 直接在浏览器中运行。", "promise": "阶段成果：一张自我介绍卡——班级小助手的第一页。"},
+        "py-math": {"title": "计算", "tagline": "让电脑帮你算成绩——永远不会算错。", "learn": ["运算符 + − * / // % **", "优先级与四舍五入", "用 f-string 整齐输出", "math 模块"], "challenge": "0.1 + 0.2 不等于 0.3——你会明白为什么。", "promise": "阶段成果：按权重计算科目平均分。"},
+        "py-branch": {"title": "分支", "tagline": "程序自己做判断：优秀、良好还是继续努力。", "learn": ["比较与 bool", "if / else", "多分支 elif", "and、or、not"], "challenge": "缩进差一个空格，程序的意思就完全不同。", "promise": "阶段成果：学业等级评定与奖学金审核。"},
+        "py-loop": {"title": "循环", "tagline": "重复 1000 次的事只需写一次。", "learn": ["for 与 range()", "while", "break、continue", "嵌套循环与累加模式"], "challenge": "没有出口的循环会永远运行——学会避免它。", "promise": "阶段成果：九九乘法表、考试倒计时与储蓄本。"},
+        "py-data": {"title": "列表与字典", "tagline": "从一个分数到全班成绩单。", "learn": ["list：添加、修改、删除、排序", "字符串与切片", "dict：按名字查找", "tuple 与 set"], "challenge": "两个变量指向同一个列表——改一个，另一个也变。", "promise": "阶段成果：全班成绩单、前三名与班费账本。"},
+        "py-func": {"title": "函数", "tagline": "写一次，到处调用。", "learn": ["def 与 return", "参数、默认值与作用域", "文档字符串与拆分问题", "模块与 import"], "challenge": "一个函数只做一件事——并把它做好。", "promise": "阶段成果：可复用的成绩计算库。"},
+        "py-file": {"title": "数据、文件与错误", "tagline": "从文件读成绩、输出报告，不怕数据出错。", "learn": ["try / except", "读写文件", "CSV 文件", "列表与字典推导式"], "challenge": "有人输入“八”而不是 8——程序也不能崩溃。", "promise": "阶段成果：从 CSV 文件生成全班成绩报告。"},
+        "py-advanced": {"title": "进阶与结业项目", "tagline": "类、算法与一个完整的作品。", "learn": ["类与对象", "random 与复习问答游戏", "查找与排序", "递归与复杂度（信息学竞赛方向）"], "challenge": "算法正确还不够——还要足够快。", "promise": "阶段成果：完整的班级小助手，在你自己的电脑上运行。"},
       },
       steps: [
         "编程思维：算法、变量和第一个程序",
@@ -870,6 +891,8 @@ export const EDU_COPY = {
       ],
       // Khoá SQL: tên step theo đúng thứ tự packages/courses/sql/stages.js (OUTLINE).
       sqlSteps: ["身边的数据：从记账本到数据库", "关系模型：表、行、列与键", "浏览器中的 SQLite：运行第一条 SQL", "SELECT 与 FROM：选择列、别名与去重", "数据类型：数字、文本、日期与 NULL", "WHERE 与比较运算符", "AND、OR、NOT、IN、BETWEEN", "LIKE、GLOB 与字符串搜索", "NULL 与三值逻辑", "ORDER BY、LIMIT、OFFSET 与分页", "表达式、CASE、字符串与日期函数", "聚合函数：COUNT、SUM、AVG、MIN、MAX", "GROUP BY 与 HAVING", "INNER JOIN：把订单与菜单连接起来", "LEFT JOIN、自连接与行数倍增陷阱", "子查询、IN、EXISTS", "UNION、INTERSECT、EXCEPT", "实体关系图（ERD）", "CREATE TABLE、主键与外键", "约束：NOT NULL、UNIQUE、CHECK、DEFAULT", "规范化：1NF、2NF、3NF", "多对多关系与关联表", "INSERT、UPDATE、DELETE", "UPSERT 与 RETURNING", "事务与 ACID", "视图、触发器与生成列", "SQL 注入与参数化查询", "CTE：为查询的每一步命名", "递归 CTE：分类树与日期序列", "窗口函数：ROW_NUMBER、RANK、DENSE_RANK", "LAG、LEAD 与按时间对比", "累计和、移动平均与窗口框架", "B-tree 索引：为什么查找这么快", "EXPLAIN QUERY PLAN 与查询优化", "覆盖索引、部分索引与表达式索引", "SQL 中的 JSON", "全文搜索（FTS4/FTS5）", "同期群分析：顾客多久回头", "从 SQLite 到 PostgreSQL 和 MySQL", "结业项目：为 Hạt 咖啡馆编写 10 条报表查询"],
+      // Khoá Python: tên step theo đúng thứ tự packages/courses/python/stages.js (OUTLINE).
+      pySteps: ["你好 Python：运行第一行代码", "变量：给数据起名字", "数据类型：整数、浮点数、字符串与 bool", "input()：向用户提问并转换类型", "读懂错误信息与小项目：自我介绍卡", "算术运算符：整除、取余、乘方", "优先级、四舍五入与浮点误差", "f-string：漂亮地输出结果", "math 模块：平方根、向上取整、向下取整", "小项目：按权重计算科目平均分", "比较与 bool 类型", "if 与 else：两条路", "elif：学业等级评定", "and、or、not：组合多个条件", "小项目：奖学金审核", "for 与 range()：循环固定次数", "while：循环直到满足条件", "break、continue 与无限循环", "嵌套循环：九九乘法表", "累加模式：求和、计数、最大值——储蓄本", "list：成绩列表", "遍历、修改与排序列表：找出前三名", "字符串：切片与方法", "dict：按名字查成绩", "tuple、set 与小项目：班费账本", "def 与 return：第一个函数", "参数、默认值与变量作用域", "拆分问题：函数调用函数、文档字符串", "模块与 import", "小项目：成绩计算库", "try 与 except：不会崩溃的程序", "读写文本文件", "CSV 文件：全班成绩", "列表与字典推导式", "小项目：从 CSV 文件生成成绩报告", "类与对象：为学生建模", "random：复习问答游戏", "查找与排序：顺序、二分、冒泡", "递归与复杂度（信息学竞赛方向）", "在电脑上安装 Python 与结业项目：班级小助手"],
     },
   },
 };

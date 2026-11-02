@@ -23,6 +23,8 @@ const STAGE_ICON = {
   basic: Code2, intermediate: Database, advanced: Users, security: ShieldCheck, project: Sparkles, devops: Rocket,
   "sql-basic": Database, "sql-filter": Code2, "sql-group": Users, "sql-design": Sparkles,
   "sql-write": ShieldCheck, "sql-window": Code2, "sql-perf": Rocket, "sql-capstone": Sparkles,
+  "py-basic": Code2, "py-math": Database, "py-branch": Users, "py-loop": Rocket,
+  "py-data": Database, "py-func": Sparkles, "py-file": ShieldCheck, "py-advanced": Rocket,
 };
 const STAGE_LOOK = Object.fromEntries(CATALOG.flatMap((c) => Object.entries(c.stageCast)).map(([id, cast]) => [id, { icon: STAGE_ICON[id] || Code2, mascot: `/edu/cast-${cast}.svg` }]));
 

@@ -77,3 +77,5 @@ export const STAGE_THEME = {
 // Khoá SQL mượn màu của sáu chặng Coding theo thứ tự (8 chặng → quay vòng).
 ["sql-basic", "sql-filter", "sql-group", "sql-design", "sql-write", "sql-window", "sql-perf", "sql-capstone"]
   .forEach((id, i) => { STAGE_THEME[id] = Object.values(STAGE_THEME)[i % 6]; });
+["py-basic", "py-math", "py-branch", "py-loop", "py-data", "py-func", "py-file", "py-advanced"]
+  .forEach((id, i) => { STAGE_THEME[id] = Object.values(STAGE_THEME)[i % 6]; });

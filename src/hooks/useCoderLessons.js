@@ -3,8 +3,8 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchLesson, fetchLessonPage } from "../services/api/modules/coderLessonsApi";
 import { localizeStage, localizeStepTitle, useEduText } from "../education/eduText";
 
-/** Khoá của một step: id "sqlN" thuộc khoá SQL, còn lại là Coding. */
-export const courseOfStep = (id) => (/^sql\d+$/.test(String(id || "")) ? "sql" : "coding");
+/** Khoá của một step: "sqlN" → SQL, "pyN" → Python, còn lại là Coding. */
+export const courseOfStep = (id) => { const s = String(id || ""); return /^sql\d+$/.test(s) ? "sql" : /^py\d+$/.test(s) ? "python" : "coding"; };
 
 export function useCoderLessons(activeCourseId, { enabled = true, program = "coding", course: wanted } = {}) {
   const course = wanted || courseOfStep(activeCourseId);
@@ -63,7 +63,7 @@ export function useCoderLessons(activeCourseId, { enabled = true, program = "cod
   const courses = useMemo(
     () => summaries.map((item, index) => {
       const course = item.id === selectedLesson?.id ? { ...item, ...selectedLesson } : item;
-      return { ...course, title: localizeStepTitle(course.title, index, lang, item.id.startsWith("sql") ? "sql" : "coding") };
+      return { ...course, title: localizeStepTitle(course.title, index, lang, courseOfStep(item.id)) };
     }),
     [summaries, selectedLesson, lang],
   );

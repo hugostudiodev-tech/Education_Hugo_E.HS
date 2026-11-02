@@ -8,6 +8,7 @@ import { useEduText } from "./eduText";
 import AnimIcon from "../components/icons/animated/AnimIcon";
 import { playEduSound } from "./eduSound";
 import { setEduCourse, useEduCourse } from "./useEduCourse";
+import { courseOfStep } from "../../packages/courses/index.js";
 
 /**
  * Thanh trên Education Hugo — 4 ô kiểu Duolingo: khoá học · chuỗi lửa · Ngọc · thông báo.
@@ -16,6 +17,7 @@ import { setEduCourse, useEduCourse } from "./useEduCourse";
 const COURSES = [
   { id: "coding", cast: 1, ready: true, total: 26 },
   { id: "sql", cast: 6, ready: true, total: 40 }, // packages/courses/sql
+  { id: "python", cast: 5, ready: true, total: 40 }, // packages/courses/python
   { id: "quan", cast: 3, ready: false }, // khoá 2 "Quán" — docs/khoa-2-quan.md
 ];
 
@@ -38,8 +40,8 @@ function CoursePanel({ learner, onPick }) {
   const { t } = useEduText();
   const current = useEduCourse();
   const done = learner?.completedLessons || [];
-  // Step khoá SQL mang id "sqlN", khoá Coding "stepN".
-  const doneIn = (id) => done.filter((s) => (id === "sql" ? /^sql\d+$/ : /^step\d+$/).test(s)).length;
+  // Step khoá SQL mang id "sqlN", Python "pyN", Coding "stepN".
+  const doneIn = (id) => done.filter((s) => courseOfStep(s) === id).length;
   return (
     <div className="edu-pop" role="dialog" aria-label={t("topbar.courses")}>
       <h3>{t("topbar.courses")}</h3>

@@ -1,18 +1,21 @@
-// Sổ đăng ký các khoá: id step không trùng giữa các khoá (step1… / sql1…), nên
+// Sổ đăng ký các khoá: id step không trùng giữa các khoá (step1… / sql1… / py1…), nên
 // tra một step không cần biết trước nó thuộc khoá nào.
 import * as coding from "./coding/index.js";
 import * as sql from "./sql/index.js";
+import * as python from "./python/index.js";
 import { localizeCourse as localizeCoding } from "./coding/localize.js";
 import { localizeCourse as localizeSql } from "./sql/localize.js";
+import { localizeCourse as localizePython } from "./python/localize.js";
 
 export const COURSES = {
   coding: { ...coding, preview: 6, localize: localizeCoding },
   sql: { ...sql, preview: 5, getStageBenefits: null, localize: localizeSql },
+  python: { ...python, preview: 5, getStageBenefits: null, localize: localizePython },
 };
 
 export const ALL_STEPS = Object.values(COURSES).flatMap((c) => c.WEB_COURSES);
 
-export const courseOfStep = (id) => (/^sql\d+$/.test(String(id)) ? "sql" : "coding");
+export const courseOfStep = (id) => (/^sql\d+$/.test(String(id)) ? "sql" : /^py\d+$/.test(String(id)) ? "python" : "coding");
 
 /** { key, course, step, index } hoặc null; index đếm trong khoá của nó. */
 export function findStep(id) {
