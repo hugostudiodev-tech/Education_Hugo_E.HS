@@ -189,3 +189,12 @@ export const DevSignup = model('DevSignup', new Schema({
   name: String,
   status: { type: String, enum: ['new', 'contacted', 'accepted', 'declined'], default: 'new' },
 }, { timestamps: true }));
+
+// Quảng cáo trong app (vd. thẻ Hugo Developer ở Hồ sơ). Admin sửa chữ (vi/en/zh), ảnh, link, bật/tắt.
+export const Promo = model('Promo', new Schema({
+  key: { type: String, required: true, unique: true },
+  enabled: { type: Boolean, default: true },
+  image: String,
+  href: String,
+  text: Mixed, // { vi: { badge, title, body, cta }, en: {…}, zh: {…} }
+}, { timestamps: true }));

@@ -479,5 +479,170 @@ const ZH = {
 };
 
 /** Văn bản theo ngôn ngữ giao diện (mặc định tiếng Anh nếu thiếu). */
+// Quy định đối tác — điều kiện cấp key thư viện step (education-hugo-react, REST API).
+// Khớp với hệ thống thật: key 32 ký tự, băm SHA-256, hạn ≤ 365 ngày, khoá tên miền, đếm lượt, thu hồi được.
+EN.partners = {
+  title: "Partner Policy",
+  lead: "Hugo Studio is a system of personal projects developed by Hugo Wishpax Le. The step library (education-hugo-react and the lesson REST API) is offered free of charge to partners approved under this Policy. Applying does not create any right to a key: every application is reviewed individually and Hugo Studio may accept or decline it at its sole discretion.",
+  sections: [
+    {
+      h: "1. Who may apply",
+      p: ["A partnership is approved only when all of the following conditions are met:"],
+      list: [
+        "The applicant is at least 18 years of age and has full legal capacity to enter into an agreement. An applicant acting for an organisation must be authorised to represent it.",
+        "The applicant already operates an organisational or personal project or system (a school, centre, club, product or website) into which the lessons will be integrated, and describes it in the application email.",
+        "The application email states the period for which the library will be used, with a start date and an end date.",
+      ],
+    },
+    {
+      h: "2. How to apply",
+      p: [`Send an email to ${CONTACT} with the subject “Education Hugo partner key”, including:`],
+      list: [
+        "Your full name, date of birth, and — for an organisation — its name and your role in it.",
+        "A description of your project or system, with links (website, repository, introduction) or attachments.",
+        "The domain(s) that will call the library, including any development domain such as http://localhost:5173.",
+        "The requested period of use (from … to …), not exceeding 365 days per key.",
+      ],
+    },
+    {
+      h: "3. Your key",
+      list: [
+        "If approved, a 32-character key is sent once to the email you applied from. Hugo Studio stores only a hash of it and cannot show it again.",
+        "The key is valid for the approved period only and is locked to the registered domains; calls from any other domain are refused. Each use is recorded (number of uses, most recent use).",
+        "The key is personal to the approved partner. Do not sell, share, publish or transfer it. Report a leaked key immediately so it can be revoked and replaced.",
+        "To extend the period or add a domain, email us before the key expires.",
+      ],
+    },
+    {
+      h: "4. Use of the content",
+      list: [
+        "The lessons are written by Education Hugo. You may display them only through the library or the API, with the Education Hugo attribution intact.",
+        "You may not copy, store, export, translate, resell or redistribute the lessons outside the library, or present them as your own work.",
+        "You may customise only the design tokens documented on the Developers page; the layout, mascots and lesson text may not be altered.",
+        "Learner progress stays in each learner's browser. You are responsible for your own learners' data and for complying with the law that applies to your project.",
+      ],
+    },
+    {
+      h: "5. Suspension and revocation",
+      p: [
+        "Hugo Studio may suspend or revoke a key at any time, without prior notice, if this Policy is breached, if the information in the application proves false, or if the library is used in a way that harms learners or Hugo Studio. A key also stops working automatically when its period ends.",
+        "The library and API are provided free of charge and “as is”, without any guarantee of availability. Hugo Studio may change or discontinue them, and may amend this Policy; the current version is always published on this page.",
+      ],
+    },
+    {
+      h: "6. Contact",
+      p: [`Questions about this Policy or about an application: ${CONTACT}.`],
+    },
+  ],
+};
+VI.partners = {
+  title: "Quy định đối tác",
+  lead: "Hugo Studio là hệ thống dự án cá nhân do Hugo Wishpax Le phát triển. Thư viện step (education-hugo-react và REST API bài học) được cấp miễn phí cho đối tác được chấp thuận theo Quy định này. Gửi đơn không đồng nghĩa với việc được cấp key: mỗi đơn được xét riêng, Hugo Studio toàn quyền chấp thuận hoặc từ chối.",
+  sections: [
+    {
+      h: "1. Điều kiện được chấp thuận",
+      p: ["Đối tác chỉ được chấp thuận khi đáp ứng đủ cả ba điều kiện sau:"],
+      list: [
+        "Từ đủ 18 tuổi trở lên và có đầy đủ năng lực hành vi dân sự để tự xác lập, thực hiện thoả thuận. Người đứng đơn thay mặt tổ chức phải là người có thẩm quyền đại diện tổ chức đó.",
+        "Đã có hệ thống dự án của tổ chức hoặc dự án cá nhân (trường, trung tâm, câu lạc bộ, sản phẩm, website) để tích hợp bài học, và đính kèm thông tin dự án trong mail.",
+        "Trong mail phải thông báo rõ thời gian xin sử dụng, gồm ngày bắt đầu và ngày kết thúc.",
+      ],
+    },
+    {
+      h: "2. Cách gửi đơn",
+      p: [`Gửi mail tới ${CONTACT} với tiêu đề “Xin key đối tác Education Hugo”, gồm:`],
+      list: [
+        "Họ tên, ngày sinh; nếu là tổ chức thì ghi tên tổ chức và vai trò của bạn.",
+        "Mô tả hệ thống / dự án kèm đường dẫn (website, kho mã, bài giới thiệu) hoặc tệp đính kèm.",
+        "Tên miền sẽ gọi thư viện, kể cả tên miền phát triển như http://localhost:5173.",
+        "Thời gian xin sử dụng (từ … đến …), tối đa 365 ngày cho mỗi key.",
+      ],
+    },
+    {
+      h: "3. Key của bạn",
+      list: [
+        "Nếu được chấp thuận, key 32 ký tự được gửi một lần duy nhất tới email đã gửi đơn. Hugo Studio chỉ lưu bản băm, không xem lại được key gốc.",
+        "Key chỉ có hiệu lực trong thời gian được duyệt và bị khoá theo tên miền đã đăng ký; gọi từ tên miền khác sẽ bị từ chối. Mỗi lượt dùng đều được ghi nhận (số lượt, lần dùng gần nhất).",
+        "Key thuộc riêng đối tác được duyệt. Không bán, chia sẻ, công khai hay chuyển nhượng. Lộ key thì báo ngay để thu hồi và cấp key mới.",
+        "Muốn gia hạn hoặc thêm tên miền, gửi mail trước khi key hết hạn.",
+      ],
+    },
+    {
+      h: "4. Sử dụng nội dung",
+      list: [
+        "Bài học do Education Hugo tự biên soạn. Chỉ được hiển thị qua thư viện hoặc API, giữ nguyên ghi công Education Hugo.",
+        "Không sao chép, lưu trữ, xuất ra, dịch, bán lại hay phân phối lại bài học ngoài thư viện, và không nhận là sản phẩm của mình.",
+        "Chỉ được tuỳ biến các token giao diện ghi trên trang Nhà phát triển; không đổi bố cục, mascot hay chữ bài học.",
+        "Tiến độ học viên nằm trong trình duyệt của học viên. Đối tác tự chịu trách nhiệm về dữ liệu học viên của mình và tuân thủ pháp luật áp dụng cho dự án của mình.",
+      ],
+    },
+    {
+      h: "5. Tạm ngưng và thu hồi",
+      p: [
+        "Hugo Studio có thể tạm ngưng hoặc thu hồi key bất cứ lúc nào, không cần báo trước, khi đối tác vi phạm Quy định này, thông tin trong đơn không đúng sự thật, hoặc thư viện bị dùng theo cách gây hại cho học viên hay cho Hugo Studio. Key cũng tự ngừng khi hết thời hạn.",
+        "Thư viện và API được cung cấp miễn phí và “nguyên trạng”, không cam kết luôn hoạt động. Hugo Studio có thể thay đổi, ngừng cung cấp, hoặc sửa Quy định này; bản hiện hành luôn đăng tại trang này.",
+      ],
+    },
+    {
+      h: "6. Liên hệ",
+      p: [`Thắc mắc về Quy định hoặc về đơn: ${CONTACT}.`],
+    },
+  ],
+};
+ZH.partners = {
+  title: "合作伙伴规定",
+  lead: "Hugo Studio 是由 Hugo Wishpax Le 开发的个人项目体系。课程步骤库（education-hugo-react 与课程 REST API）免费提供给依本规定获批的合作伙伴。提交申请并不等于获得密钥：每份申请单独审核，Hugo Studio 有权自行决定批准或拒绝。",
+  sections: [
+    {
+      h: "1. 获批条件",
+      p: ["须同时满足以下全部条件方可获批："],
+      list: [
+        "年满 18 周岁，具有完全民事行为能力，能够独立订立协议。代表机构申请的，须为有权代表该机构的人。",
+        "已有机构项目或个人项目（学校、培训中心、社团、产品或网站）用于集成课程，并在邮件中附上项目信息。",
+        "邮件中须写明申请使用的期限，包括开始日期和结束日期。",
+      ],
+    },
+    {
+      h: "2. 如何申请",
+      p: [`发送邮件至 ${CONTACT}，主题为“Education Hugo 合作伙伴密钥”，内容包括：`],
+      list: [
+        "姓名、出生日期；机构申请须写明机构名称及你的职务。",
+        "项目或系统的介绍，附链接（网站、代码仓库、介绍页）或附件。",
+        "将调用库的域名，包括开发域名，例如 http://localhost:5173。",
+        "申请使用期限（从……到……），每个密钥最长 365 天。",
+      ],
+    },
+    {
+      h: "3. 你的密钥",
+      list: [
+        "获批后，32 位密钥仅发送一次至申请邮箱。Hugo Studio 只保存其哈希值，无法再次查看原密钥。",
+        "密钥仅在获批期限内有效，并绑定已登记的域名；来自其他域名的调用将被拒绝。每次使用都会被记录（次数、最近一次使用）。",
+        "密钥仅归获批合作伙伴所有，不得出售、分享、公开或转让。密钥泄露请立即告知，以便吊销并重新签发。",
+        "如需延期或增加域名，请在密钥到期前发邮件联系。",
+      ],
+    },
+    {
+      h: "4. 内容使用",
+      list: [
+        "课程由 Education Hugo 自行编写，只能通过库或 API 展示，并须保留 Education Hugo 署名。",
+        "不得在库之外复制、存储、导出、翻译、转售或再分发课程，也不得将其冒充为自己的作品。",
+        "只能自定义开发者页面列出的界面令牌；不得修改布局、吉祥物或课程文字。",
+        "学员进度保存在学员自己的浏览器中。合作伙伴自行负责其学员数据，并遵守其项目适用的法律。",
+      ],
+    },
+    {
+      h: "5. 暂停与吊销",
+      p: [
+        "如违反本规定、申请信息不实，或库的使用方式损害学员或 Hugo Studio，Hugo Studio 可随时暂停或吊销密钥，无需事先通知。密钥到期后也会自动失效。",
+        "库与 API 免费并按“现状”提供，不保证持续可用。Hugo Studio 可修改或停止提供，并可修订本规定；现行版本始终发布在本页面。",
+      ],
+    },
+    {
+      h: "6. 联系方式",
+      p: [`关于本规定或申请的问题：${CONTACT}。`],
+    },
+  ],
+};
+
 export const LEGAL_BY_LANG = { en: EN, vi: VI, zh: ZH };
 export const legalFor = (lang) => LEGAL_BY_LANG[lang] || EN;

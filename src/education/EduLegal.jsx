@@ -7,7 +7,7 @@ import { useEduText } from "./eduText";
  * Ba bản vi/en/zh — giao diện ngôn ngữ nào hiện bản đó (lang đúng để trình đọc màn hình đọc đúng giọng).
  */
 const LEGAL_LANGS = ["vi", "en", "zh"];
-const DOCS = [["terms", "/terms"], ["privacy", "/privacy"], ["guidelines", "/guidelines"]];
+const DOCS = [["terms", "/terms"], ["privacy", "/privacy"], ["guidelines", "/guidelines"], ["partners", "/partners"]];
 
 export default function EduLegal({ doc }) {
   const { t, lang } = useEduText();

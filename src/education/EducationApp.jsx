@@ -201,7 +201,7 @@ export default function EducationApp() {
   const device = detectInstallTarget();
   const phoneWeb = (device.iOS || device.android) && !standalone;
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
-  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/");
+  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/");
   const gated = phoneWeb && !publicPage;
   // Quét QR thẻ bạn bè bằng camera điện thoại luôn mở trình duyệt, không mở PWA (iOS cấm, Android mở tab nhúng).
   const qrCode = /^\/u\/([A-Za-z0-9]{4,12})$/.exec(location.pathname)?.[1];
@@ -218,6 +218,8 @@ export default function EducationApp() {
         <Route path="/en" element={<LangLanding lang="en" signedIn={signedIn} />} />
         <Route path="/zh" element={<LangLanding lang="zh" signedIn={signedIn} />} />
         <Route path="/install" element={<EduInstallGate />} />
+        {/* Trang nhà phát triển: trang riêng, công khai, không khung app. */}
+        <Route path="/developers" element={<EduDevelopers />} />
         <Route path="/login" element={signedIn ? <Navigate to="/learn" replace /> : (standalone ? <EduOnboard start={hasSavedAccounts() ? "signin" : "signinAs"} /> : <EduLogin onSignedIn={afterLogin} />)} />
         <Route path="/learn/:lessonId" element={<LessonView learner={me} onLearnerUpdate={mergeLearner} />} />
         <Route path="/streak" element={signedIn ? <StreakView learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
@@ -227,9 +229,8 @@ export default function EducationApp() {
           <Route path="/learn" element={<LearnMap learner={me} onLearnerUpdate={mergeLearner} />} />
           <Route path="/courses/:id" element={<EduCourseIntro />} />
           {/* Văn bản pháp lý: công khai, không cần đăng nhập. */}
-          <Route path="/developers" element={<EduDevelopers />} />
           <Route path="/developer-team" element={signedIn ? <EduDeveloperTeam /> : needsLogin} />
-          {["terms", "privacy", "guidelines"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
+          {["terms", "privacy", "guidelines", "partners"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
           <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />

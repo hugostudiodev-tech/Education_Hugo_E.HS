@@ -4,7 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { requireAdmin } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
-import { AdminLog, DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
+import { AdminLog, DevSignup, Promo, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
 import { addGems } from '../services/gems.js';
 import { issuePartnerKey, listPartnerKeys, revokePartnerKey } from '../services/partner.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
@@ -179,6 +179,28 @@ router.post('/developers/:id', handle(async (req) => {
   if (!r.matchedCount) throw fail(404, 'NOT_FOUND');
   await log(req, `developer_${status}`, req.params.id);
   return { success: true };
+}));
+// ── Quảng cáo ────────────────────────────────────────────────────────────────
+const PROMO_KEYS = ['developer'];
+const PROMO_FIELDS = { badge: 30, title: 80, body: 240, cta: 30 };
+const clip = (v, n) => String(v || '').trim().slice(0, n);
+// Ảnh: đường dẫn trong site, https, hoặc ảnh tải lên dạng data URL (≤ ~150 KB, vừa giới hạn body 200 KB).
+const okImage = (v) => !v || /^\/[\w./-]+$/.test(v) || /^https:\/\/\S+$/.test(v) || (/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length <= 200000);
+const okHref = (v) => /^\/[\w./?=&-]*$/.test(v) || /^https:\/\/\S+$/.test(v);
+const promoKey = (k) => { if (!PROMO_KEYS.includes(k)) throw fail(404, 'NOT_FOUND'); return k; };
+router.get('/promo/:key', handle(async (req) => ({ promo: await Promo.findOne({ key: promoKey(req.params.key) }).lean() })));
+router.put('/promo/:key', handle(async (req) => {
+  const key = promoKey(req.params.key);
+  const b = req.body || {};
+  const image = String(b.image || '');
+  const href = String(b.href || '/developer-team');
+  if (!okImage(image)) throw fail(400, 'BAD_IMAGE', 'Ảnh phải là đường dẫn /…, https://… hoặc ảnh tải lên ≤ 150 KB.');
+  if (!okHref(href)) throw fail(400, 'BAD_HREF', 'Link phải bắt đầu bằng / hoặc https://');
+  const text = Object.fromEntries(['vi', 'en', 'zh'].map((lang) => [lang,
+    Object.fromEntries(Object.entries(PROMO_FIELDS).map(([f, n]) => [f, clip(b.text?.[lang]?.[f], n)]))]));
+  const promo = await Promo.findOneAndUpdate({ key }, { $set: { enabled: b.enabled !== false, image, href, text } }, { upsert: true, new: true }).lean();
+  await log(req, 'promo_update', key, { enabled: promo.enabled });
+  return { promo };
 }));
 router.get('/log', handle(async () => ({ items: await AdminLog.find().sort({ createdAt: -1 }).limit(300).lean() })));
 

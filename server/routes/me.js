@@ -3,7 +3,7 @@ import express from 'express';
 import { requireUser } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
 import { finishLesson, savePrefs, snapshot, submitQuiz, thaw } from '../services/learning.js';
-import { DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Receipt, Report } from '../models.js';
+import { DevSignup, Feedback, Promo, GemTxn, Learner, LessonFeedback, Receipt, Report } from '../models.js';
 import { checkNickname } from '../../packages/persona/nickname.js';
 import { checkAvatar } from '../../packages/persona/avatar.js';
 import { checkIntro } from '../../packages/persona/intro.js';
@@ -13,6 +13,11 @@ const router = express.Router();
 router.use(['/me', '/learn', '/persona', '/feedback', '/developer'], requireUser);
 
 // Hugo Developer: đăng ký một lần (upsert theo email — bấm lại không tạo bản ghi mới).
+// Quảng cáo: công khai, chỉ trả bản đang bật. Không có thì client dùng chữ mặc định.
+router.get('/promo/:key', handle(async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60');
+  return { promo: await Promo.findOne({ key: String(req.params.key), enabled: true }).select('image href text -_id').lean() };
+}));
 router.get('/developer', handle(async (req) => ({ signedUp: Boolean(await DevSignup.exists({ email: req.email })) })));
 router.post('/developer/signup', limit(5), handle(async (req) => {
   await DevSignup.updateOne({ email: req.email }, { $setOnInsert: { email: req.email, name: req.user?.name || '' } }, { upsert: true });

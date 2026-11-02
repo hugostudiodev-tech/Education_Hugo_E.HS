@@ -86,26 +86,47 @@ function Dancers({ ids = [1, 3, 5, 6], size = 72 }) {
   );
 }
 
-/** Thẻ quảng cáo trong Hồ sơ. */
+/** Nội dung quảng cáo do admin soạn (tab "Quảng cáo"); ô nào trống thì dùng chữ mặc định. */
+function usePromo() {
+  const { lang } = useEduText();
+  const c = COPY[lang] || COPY.vi;
+  const [promo, setPromo] = useState(null);
+  useEffect(() => {
+    fetch(`${API_BASE}/promo/developer`).then((r) => r.json()).then((d) => setPromo(d.promo || false)).catch(() => setPromo(false));
+  }, []);
+  const text = promo?.text?.[lang] || {};
+  const pick = (field, fallback) => text[field] || fallback;
+  return {
+    hidden: promo === null, // chờ tải thì chưa vẽ, tránh nháy chữ cũ rồi đổi
+    image: promo?.image || "/edu/dev-rocket.webp",
+    href: promo?.href || "/developer-team",
+    badge: pick("badge", c.badge), title: pick("title", c.promoTitle), body: pick("body", c.promoBody), cta: pick("cta", c.promoCta),
+  };
+}
+
+/** Thẻ quảng cáo trong Hồ sơ: một thẻ như mọi thẻ khác — chữ bên trái, ảnh gọn bên phải. */
 export function DeveloperPromo() {
-  const c = useCopy();
-  return (
-    <Link to="/developer-team" className="edu-dev-promo">
-      <div className="edu-dev-art">
-        <img src="/edu/dev-rocket.webp" alt="" width="800" height="856" />
-        <span className="edu-dev-badge">{c.badge}</span>
-      </div>
+  const p = usePromo();
+  if (p.hidden) return null;
+  const inner = (
+    <>
       <div className="edu-dev-promo-body">
-        <b>{c.promoTitle}</b>
-        <p>{c.promoBody}</p>
-        <span className="edu-dev-link">{c.promoCta}</span>
+        <span className="edu-dev-badge">{p.badge}</span>
+        <b>{p.title}</b>
+        <p>{p.body}</p>
+        <span className="edu-dev-link">{p.cta}</span>
       </div>
-    </Link>
+      <img className="edu-dev-promo-img" src={p.image} alt="" loading="lazy" />
+    </>
   );
+  return p.href.startsWith("/")
+    ? <Link to={p.href} className="edu-card edu-dev-promo">{inner}</Link>
+    : <a href={p.href} className="edu-card edu-dev-promo" target="_blank" rel="noopener">{inner}</a>;
 }
 
 export default function EduDeveloperTeam() {
   const c = useCopy();
+  const hero = usePromo();
   const navigate = useNavigate();
   const [state, setState] = useState("loading"); // loading · open · sending · done · error
   useEffect(() => {
@@ -131,10 +152,8 @@ export default function EduDeveloperTeam() {
         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </button>
       <div className="edu-dev-hero">
-        <div className="edu-dev-art">
-          <img src="/edu/dev-rocket.webp" alt="" width="800" height="856" />
-          <span className="edu-dev-badge">{c.badge}</span>
-        </div>
+        <img className="edu-dev-hero-img" src={hero.image} alt="" />
+        <span className="edu-dev-badge">{hero.badge}</span>
         <Dancers ids={[3, 6, 1, 8, 5]} size={84} />
         <h1>{c.heroTitle}</h1>
         <p>{c.heroBody}</p>

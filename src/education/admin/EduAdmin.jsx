@@ -310,12 +310,79 @@ function Table({ list, head, row }) {
   );
 }
 
+const LANGS = [["vi", "Tiếng Việt"], ["en", "English"], ["zh", "中文"]];
+const PROMO_FIELDS = [["badge", "Nhãn", 30], ["title", "Tiêu đề", 80], ["body", "Nội dung", 240], ["cta", "Nút", 30]];
+
+/** Quảng cáo Hugo Developer ở Hồ sơ: chữ theo ngôn ngữ, ảnh, link, bật/tắt. Ô trống → app dùng chữ mặc định. */
+function Promos() {
+  const [form, setForm] = useState(null);
+  const [lang, setLang] = useState("vi");
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    call("/admin/promo/developer").then((d) => setForm({ enabled: true, image: "", href: "/developer-team", text: {}, ...d.promo }))
+      .catch((e) => setMsg(e.message));
+  }, []);
+  if (!form) return <p className="text-muted-foreground">{msg || "Đang tải…"}</p>;
+  const setText = (field, value) => setForm({ ...form, text: { ...form.text, [lang]: { ...form.text?.[lang], [field]: value } } });
+  const upload = (file) => {
+    if (!file) return;
+    if (file.size > 150_000) return setMsg("Ảnh quá 150 KB — nén lại (WebP) rồi tải lên.");
+    const reader = new FileReader();
+    reader.onload = () => { setForm((f) => ({ ...f, image: reader.result })); setMsg(""); };
+    reader.readAsDataURL(file);
+  };
+  const save = async () => {
+    try { const d = await call("/admin/promo/developer", { method: "PUT", body: form }); setForm({ ...form, ...d.promo }); setMsg("Đã lưu. App cập nhật trong khoảng 1 phút."); } catch (e) { setMsg(e.message); }
+  };
+  const t = form.text?.[lang] || {};
+  const image = form.image || "/edu/dev-rocket.webp";
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+      <Card className="space-y-3">
+        <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" checked={form.enabled !== false} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} /> Hiện quảng cáo ở Hồ sơ</label>
+        <div className="flex gap-2">{LANGS.map(([id, label]) => <Btn key={id} tone={lang === id ? undefined : "ghost"} onClick={() => setLang(id)}>{label}</Btn>)}</div>
+        {PROMO_FIELDS.map(([field, label, max]) => (
+          <label key={field} className="block text-[14px] text-muted-foreground">{label} ({(t[field] || "").length}/{max})
+            {field === "body"
+              ? <textarea value={t[field] || ""} maxLength={max} rows={3} onChange={(e) => setText(field, e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" />
+              : <Input value={t[field] || ""} maxLength={max} onChange={(e) => setText(field, e.target.value)} className="mt-1" />}
+          </label>
+        ))}
+        <label className="block text-[14px] text-muted-foreground">Ảnh (đường dẫn /…, https://… hoặc tải lên ≤ 150 KB)
+          <Input value={form.image?.startsWith("data:") ? "(ảnh đã tải lên)" : form.image || ""} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="/edu/dev-rocket.webp" className="mt-1" />
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <label className="inline-flex min-h-[40px] cursor-pointer items-center rounded-lg border border-border px-3 text-[14px] font-semibold">Tải ảnh lên<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => upload(e.target.files?.[0])} /></label>
+          <Btn tone="ghost" onClick={() => setForm({ ...form, image: "" })}>Dùng ảnh mặc định</Btn>
+        </div>
+        <label className="block text-[14px] text-muted-foreground">Link khi bấm
+          <Input value={form.href || ""} onChange={(e) => setForm({ ...form, href: e.target.value })} placeholder="/developer-team" className="mt-1" />
+        </label>
+        <div className="flex items-center gap-3"><Btn onClick={save}>Lưu</Btn>{msg && <span className="text-[14px] text-muted-foreground">{msg}</span>}</div>
+      </Card>
+      <div>
+        <p className="mb-2 text-[14px] text-muted-foreground">Xem trước ({LANGS.find(([id]) => id === lang)[1]}) — ô trống sẽ hiện chữ mặc định trong app</p>
+        <Card className={`flex items-center gap-3 ${form.enabled === false ? "opacity-40" : ""}`}>
+          <div className="min-w-0 flex-1 space-y-1">
+            <span className="inline-block rounded-md bg-yellow-400 px-2 py-0.5 text-[12px] font-black italic text-blue-900">{t.badge || "HUGO DEVELOPER"}</span>
+            <b className="block text-[17px]">{t.title || "(tiêu đề mặc định)"}</b>
+            <p className="text-[14px] text-muted-foreground">{t.body || "(nội dung mặc định)"}</p>
+            <span className="text-[13px] font-black uppercase text-sky-500">{t.cta || "Tìm hiểu"}</span>
+          </div>
+          <img src={image} alt="" className="h-[112px] w-[112px] flex-none rounded-2xl object-cover" />
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   ["overview", "Tổng quan", "space_dashboard", Overview],
   ["learners", "Người học", "group", Learners],
   ["store", "Cửa hàng", "storefront", Store],
   ["partners", "Đối tác", "key", Partners],
   ["developers", "Hugo Developer", "code", Developers],
+  ["promos", "Quảng cáo", "campaign", Promos],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],
