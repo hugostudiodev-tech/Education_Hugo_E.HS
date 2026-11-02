@@ -1459,3 +1459,9 @@ button.edu-pop-course:disabled { cursor: default; }
 .comm-empty.is-art img { animation: edu-dev-hop 1.6s ease-in-out infinite; }
 .comm-empty.is-art p { margin: 0; font-size: 16px; font-weight: 700; color: var(--edu-ink); }
 .dev-legal { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+/* Khung giả của phần đối tác (không chứa chữ thật). */
+.edu .dev-locked-body { display: grid; gap: 14px; padding: 8px 0; }
+.edu .dev-fake { display: block; width: var(--w); border-radius: 8px; background: var(--edu-line, #e5e5e5); }
+.edu .dev-fake.is-h { height: 22px; width: 40%; }
+.edu .dev-fake.is-p { height: 14px; }
+.edu .dev-fake.is-code { height: 84px; width: 100%; border-radius: 14px; background: #1e293b; }

@@ -21,7 +21,6 @@ const SqlPlayground = lazy(() => import("../components/member/hugoCoder/SqlPlayg
  * không tải được gói và không đọc được bài nào.
  */
 const SITE = "https://education.hugowishpax.studio";
-const API = "https://education.hugowishpax.studio/api";
 const KEY_STORE = "edu.partner.key";
 
 const COMPONENTS = [
@@ -63,20 +62,6 @@ const COMPONENTS = [
   ["useCoderLessons(id, { course })", "Hook tải danh mục và chi tiết step (đã gắn key).", [["→", "{ courses, stages, selectedLesson, loading, error }", "", ""]]],
 ];
 
-const REST = [
-  ["GET", "/lessons?course=sql&page=1&limit=25", "Danh mục step + chặng (trang 1). Không cần key.", '{ items: [{ id, title, stage, lessons }], stages: [...], pagination }'],
-  ["GET", "/lessons/:id?lang=en", "Toàn bộ một step: slides, trắc nghiệm (đã xáo, KHÔNG kèm đáp án).", '{ lesson: { id, title, slides, quiz } }'],
-  ["POST", "/lessons/:id/grade", "Chấm trắc nghiệm. Body { answers: [...] }.", '{ score, correct, total, passed, review: [...] }'],
-  ["POST", "/partner/verify", "Kiểm key còn hiệu lực.", '{ ok: true, email: "pa***@abc.edu.vn", expiresAt }'],
-];
-
-const ERRORS = [
-  ["401 PARTNER_KEY_INVALID", "Key sai, hết hạn, bị thu hồi, hoặc gọi từ tên miền không đăng ký."],
-  ["429", "Gọi quá nhanh (đọc 90/phút, chấm 20/phút, kiểm key 20/10 phút mỗi IP)."],
-  ["404", "Không có step này."],
-  ["409 STEP_NOT_READY", "Step đang soạn."],
-];
-
 const SAMPLE_Q = { kind: "single", q: "Mệnh đề nào lọc NHÓM sau GROUP BY?", o: ["WHERE", "HAVING", "ORDER BY", "LIMIT"] };
 
 function Code({ children }) {
@@ -89,11 +74,34 @@ function Code({ children }) {
   );
 }
 
-function Locked({ unlocked, children }) {
+/** Vẽ tài liệu đối tác nhận từ máy chủ — chỉ chữ thuần qua React (không HTML thô), nên không chèn được script. */
+function DocBlocks({ blocks }) {
+  return blocks.map((b, i) => {
+    if (b.h) return <h3 key={i}>{b.h}</h3>;
+    if (b.p) return <p key={i}>{b.p}</p>;
+    if (b.code) return <Code key={i}>{b.code}</Code>;
+    if (b.list) return <ul key={i}>{b.list.map((item) => <li key={item}>{item}</li>)}</ul>;
+    if (b.table) return (
+      <div key={i} className="dev-table-wrap"><table className="dev-table">
+        {b.table.head && <thead><tr>{b.table.head.map((c, j) => <th key={j}>{c}</th>)}</tr></thead>}
+        <tbody>{b.table.rows.map((row, r) => <tr key={r}>{row.map((c, j) => <td key={j}>{j === 0 ? <b>{c}</b> : <code>{c}</code>}</td>)}</tr>)}</tbody>
+      </table></div>
+    );
+    return null;
+  });
+}
+
+// Khung giả khi chưa có key: chỉ là thanh xám + khối tối, KHÔNG có chữ nào của tài liệu thật
+// (tài liệu thật chưa từng được tải xuống), nên xoá lớp mờ cũng chỉ thấy khung trống.
+const FAKE = ["h", "p", "code", "h", "code", "h", "p", "p"];
+function Locked({ blocks }) {
+  if (blocks) return <DocBlocks blocks={blocks} />;
   return (
-    <div className={`dev-locked${unlocked ? " is-open" : ""}`}>
-      <div className="dev-locked-body" aria-hidden={!unlocked} inert={unlocked ? undefined : ""}>{children}</div>
-      {!unlocked && <div className="dev-locked-veil"><span className="material-symbols-outlined">lock</span><b>Dành cho đối tác</b><span>Nhập key ở mục Đối tác để xem.</span></div>}
+    <div className="dev-locked">
+      <div className="dev-locked-body" aria-hidden="true">
+        {FAKE.map((kind, i) => <i key={i} className={`dev-fake is-${kind}`} style={{ "--w": `${55 + ((i * 37) % 40)}%` }} />)}
+      </div>
+      <div className="dev-locked-veil"><span className="material-symbols-outlined">lock</span><b>Dành cho đối tác</b><span>Nhập key ở mục "Nhập key đối tác" để xem.</span></div>
     </div>
   );
 }
@@ -339,20 +347,22 @@ export default function EduDevelopers() {
   const [partner, setPartner] = useState(null);
   const [state, setState] = useState({ busy: false, error: "" });
   const unlocked = Boolean(partner);
-  const shown = unlocked ? key : "••••••••••••••••••••••••••••••••";
 
   const unlock = async (event) => {
     event?.preventDefault();
     setState({ busy: true, error: "" });
     try {
-      const data = await apiFetch("/partner/verify", { method: "POST", body: JSON.stringify({ key: key.trim() }) });
+      const data = await apiFetch("/partner/verify", { method: "POST", body: JSON.stringify({ key: key.trim(), docs: true }) });
       setPartner(data);
       try { sessionStorage.setItem(KEY_STORE, key.trim()); } catch { /* chế độ riêng tư */ }
       setState({ busy: false, error: "" });
     } catch (error) {
+      try { sessionStorage.removeItem(KEY_STORE); } catch { /* chế độ riêng tư */ }
       setState({ busy: false, error: error.message });
     }
   };
+  // Đã mở khoá trong phiên này (tải lại trang): tự kiểm lại key, không bắt nhập lại.
+  useEffect(() => { if (key.length === 32) unlock(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <DevSite>
@@ -406,35 +416,7 @@ export default function EduDevelopers() {
 
       <section id="start" className="dev-card">
         <h2>Cài đặt và chạy</h2>
-        <Locked unlocked={unlocked}>
-          <h3>1. Cài gói</h3>
-          <p>Gói chỉ tải được bằng key còn hiệu lực. Lệnh dưới đã điền sẵn key của bạn.</p>
-          <Code>{`npm i ${SITE}/sdk/${shown}/education-hugo-react.tgz`}</Code>
-          <h3>2. Lưu key vào biến môi trường</h3>
-          <Code>{`# .env (Vite)\nVITE_EDU_KEY=${shown}\n\n# .env (Next.js)\nNEXT_PUBLIC_EDU_KEY=${shown}`}</Code>
-          <h3>3. Gắn vào trang</h3>
-          <Code>{`import { EducationHugo } from "education-hugo-react";
-import "education-hugo-react/style.css";
-
-export default function HocSQL() {
-  return (
-    <EducationHugo
-      apiKey={import.meta.env.VITE_EDU_KEY}
-      course="sql"
-      lang="vi"
-      onProgress={(p) => console.log("đã xong", p.done.length, "step")}
-    />
-  );
-}`}</Code>
-          <h3>4. Đăng ký tên miền</h3>
-          <p>Key nằm trong mã trang web nên ai xem nguồn cũng thấy. Vì vậy key được khoá theo <b>tên miền</b> đã đăng ký với admin: trình duyệt gọi từ tên miền khác sẽ bị từ chối. Thêm tên miền mới (kể cả <code>http://localhost:5173</code> khi phát triển) thì gửi mail tới {CONTACT}.</p>
-          <h3>Yêu cầu</h3>
-          <ul>
-            <li>React 18 trở lên. Gói đã kèm sẵn mọi thứ khác (sql.js, framer-motion, react-markdown…).</li>
-            <li>Trình duyệt hỗ trợ WebAssembly (mọi trình duyệt hiện đại) để chạy ô SQL.</li>
-            <li>Next.js: dùng trong Client Component (<code>"use client"</code>).</li>
-          </ul>
-        </Locked>
+        <Locked blocks={partner?.docs?.start} />
       </section>
 
       <section id="components" className="dev-card">
@@ -460,19 +442,7 @@ export default function HocSQL() {
 
       <section id="api" className="dev-card">
         <h2>REST API</h2>
-        <Locked unlocked={unlocked}>
-          <p>Gốc: <code>{API}</code>. Gửi key qua header <code>X-Edu-Partner-Key</code>. Không cookie, CORS mở cho tên miền đã đăng ký.</p>
-          <Code>{`curl -H "X-Edu-Partner-Key: ${shown}" \\\n  "${API}/lessons/sql12?lang=en"`}</Code>
-          <div className="dev-table-wrap"><table className="dev-table">
-            <thead><tr><th></th><th>Đường dẫn</th><th>Làm gì</th><th>Trả về</th></tr></thead>
-            <tbody>{REST.map(([m, p, d, r]) => <tr key={p}><td><b>{m}</b></td><td><code>{p}</code></td><td>{d}</td><td><code>{r}</code></td></tr>)}</tbody>
-          </table></div>
-          <h3>Lỗi</h3>
-          <div className="dev-table-wrap"><table className="dev-table">
-            <tbody>{ERRORS.map(([c, d]) => <tr key={c}><td><code>{c}</code></td><td>{d}</td></tr>)}</tbody>
-          </table></div>
-          <p>Đáp án trắc nghiệm không bao giờ nằm trong bài tải về. Chỉ <code>/grade</code> trả lời giải, sau khi học viên đã nộp.</p>
-        </Locked>
+        <Locked blocks={partner?.docs?.api} />
       </section>
 
       <section id="demo" className="dev-card">
