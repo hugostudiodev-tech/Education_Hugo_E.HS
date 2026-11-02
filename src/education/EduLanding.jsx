@@ -480,7 +480,7 @@ function Final() {
 const WWW = "https://www.hugowishpax.studio";
 // [khoá tiêu đề, [[khoá chữ, đường dẫn]]] — chữ ở eduCopy (footer.*); "/…" là trang trong Edu.
 const FOOTER = [
-  [["learn", [["start", "/learn"], ["common.login", "/login"], ["progress", "/progress"], ["store", "/store"]]]],
+  [["learn", [["start", "/learn"], ["common.login", "/login"], ["store", "/store"]]]],
   [["about", [["member", `${WWW}/member`], ["web", `${WWW}/`], ["portfolio", "https://portfolio.hugowishpax.studio"], ["student", `${WWW}/student-pricing`]]]],
   [["help", [["faq", `${WWW}/faq`], ["request", `${WWW}/support-request`], ["guide", `${WWW}/terms-and-guide`]]]],
   [

@@ -24,7 +24,6 @@ import { DeveloperPromo } from "./EduDeveloperTeam";
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
-  { to: "/progress", icon: "chart", key: "progress" },
   { to: "/friends", icon: "users", key: "friends" },
   { to: "/community", icon: "message", key: "community" },
   { to: "/store", icon: "bag", key: "store" },
@@ -192,7 +191,6 @@ export default function EduShell({ view, learner, signedIn, onLearnerUpdate, chi
 
       <main className="edu-main">
         {children}
-        {view === "progress" && signedIn && <div className="edu-rail-inline"><Rail learner={learner} signedIn stats={stats} /></div>}
       </main>
 
       <aside className="edu-rail">
@@ -232,7 +230,7 @@ function Rail({ learner, signedIn, stats, onStreak }) {
     { key: "today", to: "/profile", color: "#58cc02", value: today ? Math.min(1, today.done / today.goal) : 0, text: today ? `${Math.min(today.done, today.goal)}/${today.goal}` : "—" },
     { key: "stage", to: "/learn", color: "#1cb0f6", value: current?.total ? current.finished / current.total : 0, text: current ? `${current.finished}/${current.total}` : "—", label: current?.code },
     { key: "streak", to: "/streak", color: "#ff9600", value: streak?.next?.day ? Math.min(1, streak.count / streak.next.day) : 0, text: streak ? `${streak.count}/${streak.next.day}` : "0" },
-    { key: "score", to: "/progress", color: "#ce82ff", value: (stats.average || 0) / 100, text: stats.average === null ? "—" : `${stats.average}%` },
+    { key: "score", to: "/learn", color: "#ce82ff", value: (stats.average || 0) / 100, text: stats.average === null ? "—" : `${stats.average}%` },
   ];
   return (
     <>

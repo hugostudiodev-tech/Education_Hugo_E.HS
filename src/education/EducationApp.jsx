@@ -4,7 +4,6 @@ import { useEduCourse } from "./useEduCourse";
 import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { clearMemberSession, getMemberSession, logoutAuth, restoreMemberSession } from "../services/api/core/authSession";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
-import { useCoderLessons } from "../hooks/useCoderLessons";
 import { useEduHead } from "./eduHead";
 import { needsWelcome, rememberAccount, takePendingGoal } from "./eduAccounts";
 import EduShell, { EduInstallGate, EduProfile, EduSettingsPage, EduStore } from "./EduShell";
@@ -51,7 +50,6 @@ const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
 const EduDeveloperTeam = lazy(PAGES.devTeam);
 const EduPublicProfile = lazy(() => PAGES.friends().then((mod) => ({ default: mod.EduPublicProfile })));
-const CoderProgress = lazy(() => PAGES.hub().then((mod) => ({ default: mod.ManageTab })));
 
 const hasSavedAccounts = () => { try { return JSON.parse(localStorage.getItem("edu.accounts") || "[]").length > 0; } catch { return false; } };
 /** Sau đăng nhập: về ?next= nếu là đường dẫn nội bộ, không thì /learn. */
@@ -72,7 +70,7 @@ function prefetchPages(signedIn) {
 // Khung chính (thanh trên, menu, cột phải, hộp thông báo) dựng MỘT lần cho mọi trang trong nó;
 // chuyển trang chỉ đổi phần nội dung, chờ tải thì quay nhỏ ngay trong vùng nội dung.
 const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile)/, "profile"],
-  [/^\/(friends|u\/)/, "friends"], [/^\/community/, "community"], [/^\/progress/, "progress"], [/^\/store/, "store"]];
+  [/^\/(friends|u\/)/, "friends"], [/^\/community/, "community"], [/^\/store/, "store"]];
 function ShellLayout({ learner, signedIn, onLearnerUpdate }) {
   const { pathname } = useLocation();
   const view = VIEW_OF.find(([re]) => re.test(pathname))?.[1] || "learn";
@@ -99,7 +97,7 @@ function LangLanding({ lang, signedIn }) {
  *   /            khách: trang giới thiệu · đã đăng nhập: vào /learn
  *   /learn       bản đồ 26 step (khách vẫn xem và học thử được)
  *   /learn/:id   trình học toàn màn
- *   /progress /store /profile /settings /community   cần đăng nhập
+ *   /store /profile /settings /community   cần đăng nhập
  */
 export default function EducationApp() {
   useEduHead();
@@ -237,13 +235,12 @@ export default function EducationApp() {
           <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />
           <Route path="/community" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/community/:postKey" element={signedIn ? <EduCommunity /> : needsLogin} />
-          <Route path="/progress" element={signedIn ? <ProgressView learner={me} /> : needsLogin} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} /> : needsLogin} />
         </Route>
         {/* PWA cài lúc manifest của www còn hiệu lực sẽ mở /member/today — ở Edu không có trang đó.
             Đường dẫn kiểu www về /learn (giữ query, vd. ?source=pwa); trong app đã cài, đường lạ cũng về /learn thay vì 404. */}
-        {["/member/*", "/study/*", "/today", "/utilities/*"].map((path) => (
+        {["/member/*", "/study/*", "/today", "/utilities/*", "/progress"].map((path) => (
           <Route key={path} path={path} element={<Navigate to={`/learn${location.search}`} replace />} />
         ))}
         <Route path="*" element={standalone ? <Navigate to="/learn" replace /> : <EduStatus kind="notFound" />} />
@@ -298,18 +295,5 @@ function LessonView({ learner, onLearnerUpdate }) {
         onLessonChange={(id) => navigate(id ? `/learn/${id}` : "/learn")}
       />
     </Suspense>
-  );
-}
-
-function ProgressView({ learner }) {
-  const { t } = useEduText();
-  const { courses, stages } = useCoderLessons(null, { course: useEduCourse() });
-  return (
-    <section className="edu-page">
-      <h1 className="edu-page-title">{t("progress.title")}</h1>
-      <Suspense fallback={<EduStatus kind="loading" compact />}>
-        <CoderProgress bio={learner} courses={courses} stages={stages} />
-      </Suspense>
-    </section>
   );
 }
