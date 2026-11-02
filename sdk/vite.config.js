@@ -17,7 +17,7 @@ export default defineConfig({
       { find: /^motion\/react$/, replacement: "framer-motion" },
     ],
   },
-  define: { "import.meta.env.VITE_API_URL": JSON.stringify("https://api.hugowishpax.studio/api") },
+  define: { "import.meta.env.VITE_API_URL": JSON.stringify("https://education.hugowishpax.studio/api") },
   plugins: [react()],
   build: {
     outDir: `${root}sdk/dist`,

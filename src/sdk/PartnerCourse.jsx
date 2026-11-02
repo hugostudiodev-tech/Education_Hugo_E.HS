@@ -10,7 +10,7 @@ import { nextLesson, stepLessons } from "../../packages/courses/coding/lessons.j
 import { themeVars } from "./theme";
 import "../education/education.css";
 
-export const DEFAULT_API = "https://api.hugowishpax.studio/api";
+export const DEFAULT_API = "https://education.hugowishpax.studio/api";
 export const ASSET_ORIGIN = "https://education.hugowishpax.studio";
 
 // Tiến độ của học viên bên đối tác nằm trong máy của họ (localStorage), tách theo khoá.

@@ -15,7 +15,7 @@ const SqlPlayground = lazy(() => import("../components/member/hugoCoder/SqlPlayg
  * không tải được gói và không đọc được bài nào.
  */
 const SITE = "https://education.hugowishpax.studio";
-const API = "https://api.hugowishpax.studio/api";
+const API = "https://education.hugowishpax.studio/api";
 const KEY_STORE = "edu.partner.key";
 
 const COMPONENTS = [

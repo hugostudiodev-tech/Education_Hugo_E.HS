@@ -6,7 +6,7 @@
 //    Studio → trả gói ở đường dẫn bí mật dist/_sdk/<SDK_SECRET>.tgz (scripts/publish-sdk.mjs).
 export const config = { matcher: ["/", "/en", "/zh", "/courses/:id", "/sdk/:path*", "/_sdk/:path*"] };
 
-const API = "https://api.hugowishpax.studio/api";
+const API = "https://education.hugowishpax.studio/api";
 const deny = (status, message) => new Response(message, { status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
 const rewrite = (path, url, extra = {}) => new Response(null, { headers: { "x-middleware-rewrite": new URL(path, url).href, ...extra } });
 

@@ -13,7 +13,7 @@ Sửa khoá học xong: push repo này, rồi ở Hugo Studio chạy `npm run sy
 ```bash
 npm install
 npm run dev            # http://localhost:3002, API → backend Hugo Studio cục bộ (8099)
-VITE_DEV_BACKEND_URL=https://api.hugowishpax.studio npm run dev   # API production
+VITE_DEV_BACKEND_URL=https://education-hugo-api.onrender.com npm run dev   # API production
 npm run check:all      # lint + kiểm nội dung khoá học + build + SEO
 ```
 
