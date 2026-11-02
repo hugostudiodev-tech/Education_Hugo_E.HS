@@ -318,6 +318,55 @@ function Table({ list, head, row }) {
   );
 }
 
+/** Bài chia sẻ kinh nghiệm ở Cộng đồng: chỉ admin đăng, chọn mascot đại diện cho từng bài. */
+function Articles() {
+  const list = useList("/admin/articles");
+  const [mascots, setMascots] = useState([]);
+  const empty = { _id: null, title: "", text: "", mascot: "cast-1" };
+  const [form, setForm] = useState(empty);
+  const [msg, setMsg] = useState("");
+  useEffect(() => { call("/admin/articles").then((d) => setMascots(d.mascots || [])).catch(() => {}); }, []);
+  const save = async () => {
+    try {
+      await call(form._id ? `/admin/articles/${form._id}` : "/admin/articles", { method: form._id ? "PUT" : "POST", body: form });
+      setForm(empty); setMsg(form._id ? "Đã sửa bài." : "Đã đăng bài."); list.reload();
+    } catch (e) { setMsg(e.message); }
+  };
+  const remove = (a) => act(async () => { if (window.confirm(`Xoá bài "${a.title || a.text.slice(0, 40)}" và mọi bình luận?`)) await call(`/admin/articles/${a._id}`, { method: "DELETE" }); }, list.reload);
+  return (
+    <div className="space-y-4">
+      <Card className="space-y-3">
+        <b className="block text-[16px]">{form._id ? "Sửa bài" : "Viết bài mới"}</b>
+        <div>
+          <p className="mb-2 text-[14px] text-muted-foreground">Mascot đại diện</p>
+          <div className="flex flex-wrap gap-2">
+            {mascots.map((m) => (
+              <button key={m} type="button" onClick={() => setForm({ ...form, mascot: m })} aria-pressed={form.mascot === m}
+                className={`grid h-[60px] w-[60px] place-items-center rounded-xl border-2 ${form.mascot === m ? "border-sky-500 bg-sky-50" : "border-border"}`}>
+                <img src={`/edu/${m}.svg`} alt={m} className="h-11 w-11 object-contain" />
+              </button>
+            ))}
+          </div>
+        </div>
+        <Input placeholder="Tiêu đề (không bắt buộc)" maxLength={120} value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <textarea placeholder="Nội dung chia sẻ… (dán link YouTube/GitHub/ảnh sẽ tự có xem trước)" rows={8} value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })}
+          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Btn onClick={save} disabled={!form.text.trim()}>{form._id ? "Lưu thay đổi" : "Đăng bài"}</Btn>
+          {form._id && <Btn tone="ghost" onClick={() => setForm(empty)}>Huỷ sửa</Btn>}
+          {msg && <span className="text-[14px] text-muted-foreground">{msg}</span>}
+        </div>
+      </Card>
+      <Table list={list} head={["", "Bài", "Tim", "Bình luận", "Lúc đăng", ""]} row={(a) => [
+        <img key="m" src={`/edu/${a.mascot || "cast-1"}.svg`} alt="" className="h-9 w-9" />,
+        <span key="t"><b>{a.title || "(không tiêu đề)"}</b><br /><span className="text-muted-foreground">{a.text.slice(0, 90)}{a.text.length > 90 ? "…" : ""}</span></span>,
+        a.likeCount || 0, a.replyCount || 0, fmt(a.createdAt),
+        <div key="a" className="flex gap-2"><Btn tone="ghost" onClick={() => { setForm({ _id: a._id, title: a.title || "", text: a.text, mascot: a.mascot || "cast-1" }); window.scrollTo(0, 0); }}>Sửa</Btn><Btn tone="danger" onClick={remove(a)}>Xoá</Btn></div>,
+      ]} />
+    </div>
+  );
+}
+
 const LANGS = [["vi", "Tiếng Việt"], ["en", "English"], ["zh", "中文"]];
 const PROMO_FIELDS = [["badge", "Nhãn", 30], ["title", "Tiêu đề", 80], ["body", "Nội dung", 240], ["cta", "Nút", 30]];
 
@@ -391,6 +440,7 @@ const TABS = [
   ["partners", "Đối tác", "key", Partners],
   ["developers", "Hugo Developer", "code", Developers],
   ["promos", "Quảng cáo", "campaign", Promos],
+  ["articles", "Bài viết", "article", Articles],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],

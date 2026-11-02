@@ -1,4 +1,5 @@
-// /api/community — Cộng đồng Education Hugo kiểu Threads: bài + hồi đáp cùng một model,
+// /api/community — Cộng đồng Education Hugo: ADMIN đăng bài chia sẻ kinh nghiệm (kèm mascot, soạn ở /admin),
+// thành viên chỉ thích và bình luận. Bài + bình luận cùng một model,
 // tác giả hiện bằng persona (không tên thật), thăm dò ý kiến, thích, dịch bài.
 import express from 'express';
 import mongoose from 'mongoose';
@@ -24,7 +25,7 @@ function cleanPoll(poll) {
   return { options: options.map((text) => ({ text, votes: [] })), endsAt: new Date(Date.now() + hours * 3600000) };
 }
 
-const view = (me) => ({ authorEmail: 1, audience: 1, text: 1, poll: 1, parentKey: 1, ancestors: 1, likeCount: 1, replyCount: 1, editedAt: 1, createdAt: 1, removed: 1, likes: { $elemMatch: { $eq: me } } });
+const view = (me) => ({ byAdmin: 1, title: 1, mascot: 1, authorEmail: 1, audience: 1, text: 1, poll: 1, parentKey: 1, ancestors: 1, likeCount: 1, replyCount: 1, editedAt: 1, createdAt: 1, removed: 1, likes: { $elemMatch: { $eq: me } } });
 
 /** Gửi xuống client: không lộ email của ai, kể cả người bỏ phiếu. */
 async function present(posts, me) {
@@ -34,7 +35,10 @@ async function present(posts, me) {
     const author = people.get(p.authorEmail);
     return {
       key: String(p._id),
-      author: { name: author?.nickname || 'Hugo learner', persona: author?.avatar || null, badge: author?.badge || null },
+      author: p.byAdmin
+        ? { name: 'Education Hugo', mascot: p.mascot || 'cast-1', admin: true }
+        : { name: author?.nickname || 'Hugo learner', persona: author?.avatar || null, badge: author?.badge || null },
+      title: p.title || undefined,
       text: p.text,
       poll: p.poll && {
         options: p.poll.options.map((o) => ({ text: o.text, count: o.votes.length })),
@@ -51,7 +55,7 @@ async function present(posts, me) {
       editedAt: p.editedAt,
       private: p.audience === 'private' || undefined,
       removed: (p.removed && p.authorEmail === me && p.removed.category) || undefined,
-      mine: p.authorEmail === me,
+      mine: !p.byAdmin && p.authorEmail === me,
     };
   });
 }
@@ -67,7 +71,8 @@ const visibleTo = (me) => ({ $or: [{ removed: null }, { authorEmail: me }] });
 
 router.get('/posts', limit(60), handle(async (req) => {
   const me = req.email;
-  const filter = { parentKey: null, $or: [{ audience: { $ne: 'private' }, removed: null }, { authorEmail: me }] };
+  // Bảng tin chỉ gồm bài của admin; bài gốc thành viên đăng trước đây không còn hiện.
+  const filter = { parentKey: null, byAdmin: true, $or: [{ audience: { $ne: 'private' }, removed: null }, { authorEmail: me }] };
   const before = new Date(req.query.before);
   if (!Number.isNaN(before.getTime())) filter.createdAt = { $lt: before };
   const posts = await Post.find(filter, view(me)).sort({ createdAt: -1 }).limit(PAGE).lean();
@@ -93,6 +98,8 @@ router.post('/posts', limit(10), handle(async (req, res) => {
   const text = cleanText(req.body?.text);
   const poll = cleanPoll(req.body?.poll);
   const parentKey = req.body?.parentKey ? String(req.body.parentKey) : null;
+  // Thành viên chỉ bình luận: bài gốc do admin đăng ở /admin.
+  if (!parentKey) throw fail(403, 'ADMIN_ONLY', 'Chỉ admin đăng bài; bạn có thể thả tim và bình luận.');
   if (poll === null) throw fail(400, 'BAD_POLL', 'Thăm dò cần 2 đến 4 lựa chọn.');
   if (!text && !poll) throw fail(400, 'EMPTY', 'Viết gì đó trước đã.');
   if (text.length > MAX_TEXT) throw fail(400, 'TOO_LONG', `Bài tối đa ${MAX_TEXT} ký tự.`);
@@ -105,7 +112,7 @@ router.post('/posts', limit(10), handle(async (req, res) => {
   // Mạng chập chờn gửi lại: cùng người, cùng nội dung, cùng chỗ trong 30 giây → trả bài vừa đăng.
   const twin = text && await Post.findOne({ authorEmail: me, parentKey, text, createdAt: { $gt: new Date(Date.now() - 30_000) } }).lean();
   if (twin) return { post: (await present([twin], me))[0] };
-  const post = await Post.create({ authorEmail: me, text, poll, audience: parentKey ? undefined : cleanAudience(req.body?.audience), parentKey, ancestors: ancestors.length ? ancestors : undefined });
+  const post = await Post.create({ authorEmail: me, text, poll: undefined, parentKey, ancestors: ancestors.length ? ancestors : undefined });
   if (parentKey) await Post.updateOne({ _id: parentKey }, { $inc: { replyCount: 1 } });
   res.status(201);
   return { post: (await present([post.toObject()], me))[0] };

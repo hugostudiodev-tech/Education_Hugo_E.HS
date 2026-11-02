@@ -133,6 +133,10 @@ const postSchema = new Schema({
   likeCount: { type: Number, default: 0 },
   replyCount: { type: Number, default: 0 },
   editedAt: Date,
+  // Bài của admin (chia sẻ kinh nghiệm): chỉ admin đăng bài gốc; thành viên chỉ thích + bình luận.
+  byAdmin: { type: Boolean, default: undefined },
+  title: { type: String, default: undefined },
+  mascot: { type: String, default: undefined },
   // Admin ẩn bài: chỉ tác giả còn thấy, kèm nhãn; không xoá để khôi phục được.
   removed: { type: new Schema({ category: String, at: Date, by: String }, { _id: false }), default: undefined },
 }, { timestamps: true });

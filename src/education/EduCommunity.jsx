@@ -147,14 +147,18 @@ function Post({ post, onChange, onRemove, open }) {
   };
   return (
     <article className={`comm-post${post.removed ? " is-removed" : ""}`}>
-      <PersonaAvatar avatar={post.author?.persona} name={post.author?.name} size={44} />
+      {post.author?.mascot
+        ? <img className="comm-mascot" src={`/edu/${post.author.mascot}.svg`} alt="" width="44" height="44" />
+        : <PersonaAvatar avatar={post.author?.persona} name={post.author?.name} size={44} />}
       <div className="comm-post-main">
         <header>
           <b className="nick-font">{post.author?.name}</b>
+          {post.author?.admin && <span className="comm-admin">Admin</span>}
           <time dateTime={post.createdAt} title={new Date(post.createdAt).toLocaleString(lang)}>{ago(post.createdAt, lang)}</time>
           {tr.from && <span className="comm-lang" title={t("community.detected")}>{langName(tr.from)}</span>}
         </header>
         {post.removed && <small className="comm-removed">{t("community.removed")}</small>}
+        {post.title && <h2 className="comm-title">{post.title}</h2>}
         <RichText text={shown} />
         {tr.busy && <small className="comm-tr is-busy">{t("community.translating")}</small>}
         {tr.text && (
@@ -244,7 +248,6 @@ function Feed() {
           {[2, 5, 7].map((n, i) => <img key={n} src={`/edu/cast-${n}.svg`} alt="" width="56" height="56" style={{ "--i": i }} />)}
         </div>
       </header>
-      <Composer onPosted={(post) => setPosts((all) => [post, ...(all || [])])} placeholder={t("community.placeholder")} />
       {posts === null ? <EduStatus kind="loading" compact />
         : posts.length === 0 ? <div className="comm-empty is-art"><img src="/edu/buddy-learn.svg" alt="" width="120" height="120" /><p>{t("community.empty")}</p></div>
           : posts.map((post) => <Post key={post.key} post={post} onChange={update} onRemove={remove} open />)}

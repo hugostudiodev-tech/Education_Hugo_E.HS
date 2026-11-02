@@ -207,6 +207,37 @@ router.put('/promo/:key', handle(async (req) => {
   await log(req, 'promo_update', key, { enabled: promo.enabled });
   return { promo };
 }));
+// ── Bài viết Cộng đồng (chỉ admin đăng) ─────────────────────────────────────
+const MASCOTS = ['cast-1', 'cast-2', 'cast-3', 'cast-4', 'cast-5', 'cast-6', 'cast-7', 'cast-8', 'buddy-learn', 'buddy-done', 'buddy-exam', 'buddy-practice', 'buddy-correct', 'buddy-wrong'];
+function cleanArticle(b = {}) {
+  const title = String(b.title || '').trim().slice(0, 120);
+  const text = String(b.text || '').replace(/\r\n/g, '\n').trim();
+  if (!text) throw fail(400, 'EMPTY', 'Bài cần có nội dung.');
+  if (text.length > 20000) throw fail(400, 'TOO_LONG', 'Bài tối đa 20.000 ký tự.');
+  return { title: title || undefined, text, mascot: MASCOTS.includes(b.mascot) ? b.mascot : 'cast-1' };
+}
+router.get('/articles', handle(async () => ({
+  items: await Post.find({ byAdmin: true, parentKey: null }).select('title text mascot likeCount replyCount createdAt editedAt authorEmail').sort({ createdAt: -1 }).limit(200).lean(),
+  mascots: MASCOTS,
+})));
+router.post('/articles', handle(async (req) => {
+  const post = await Post.create({ ...cleanArticle(req.body), byAdmin: true, authorEmail: `admin:${req.admin}` });
+  await log(req, 'article_create', post._id, { title: post.title });
+  return { item: post.toObject() };
+}));
+router.put('/articles/:id', handle(async (req) => {
+  const post = await Post.findOneAndUpdate({ _id: oid(req.params.id), byAdmin: true }, { $set: { ...cleanArticle(req.body), editedAt: new Date() }, $unset: { translations: 1 } }, { new: true }).lean();
+  if (!post) throw fail(404, 'NOT_FOUND');
+  await log(req, 'article_update', req.params.id);
+  return { item: post };
+}));
+router.delete('/articles/:id', handle(async (req) => {
+  const post = await Post.findOneAndDelete({ _id: oid(req.params.id), byAdmin: true });
+  if (!post) throw fail(404, 'NOT_FOUND');
+  await Post.deleteMany({ ancestors: String(post._id) });
+  await log(req, 'article_delete', req.params.id, { title: post.title });
+  return { success: true };
+}));
 router.get('/log', handle(async () => ({ items: await AdminLog.find().sort({ createdAt: -1 }).limit(300).lean() })));
 
 export default router;
