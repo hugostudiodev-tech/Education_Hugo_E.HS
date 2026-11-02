@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 10 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">random · Tìm kiếm và sắp xếp · Đệ quy · Dự án Sổ Lớp</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 37–40. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn class: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+class A:
+    def __init__(self):
+        self.x = 1
+a = A(); b = A()
+a.x = 5
+print(b.x)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. Mỗi object có dữ liệu riêng.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 37 · random</p>
+  <h2>Trò chơi đố vui ôn bài</h2>
+  <p class="muted"><code>random.choice</code>, <code>random.randint</code>, <code>random.shuffle</code>. Lưu ý: shuffle xáo trộn ngay trên list và trả về None.</p>
+  <pre class="lab" data-input="32
+2">
+import random
+cau_hoi = {&quot;2 ** 5&quot;: &quot;32&quot;, &quot;17 % 5&quot;: &quot;2&quot;, &quot;len(&#x27;Hugo&#x27;)&quot;: &quot;4&quot;}
+ds = list(cau_hoi)
+random.shuffle(ds)
+for q in ds[:2]:
+    tl = input(f&quot;{q} = &quot;)
+    print(&quot;Đúng!&quot; if tl == cau_hoi[q] else f&quot;Sai, đáp án {cau_hoi[q]}&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 38 · Tìm kiếm và sắp xếp</p>
+  <h2>Tìm nhị phân</h2>
+  <p class="muted">Trên list <b>đã sắp xếp</b>, mỗi lần đoán loại được một nửa số ứng viên. Với 1–100, tối đa 7 lần là tìm ra.</p>
+  <pre class="lab">
+ds = list(range(1, 101))
+muc_tieu = 73
+trai, phai, lan = 0, len(ds) - 1, 0
+while trai &lt;= phai:
+    giua = (trai + phai) // 2
+    lan += 1
+    print(f&quot;Lần {lan}: đoán {ds[giua]}&quot;)
+    if ds[giua] == muc_tieu: break
+    if ds[giua] &lt; muc_tieu: trai = giua + 1
+    else: phai = giua - 1</pre>
+  <p>Tìm 1 triệu số thì cần tối đa bao nhiêu lần? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Khoảng 20 lần, vì 2 mũ 20 ≈ 1 triệu.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 39 · Đệ quy</p>
+  <h2>Hàm tự gọi chính nó</h2>
+  <p class="muted">Hàm đệ quy cần có <b>trường hợp cơ sở</b> để dừng lại, nếu không sẽ gặp lỗi RecursionError.</p>
+  <pre class="lab">
+def giai_thua(n):
+    if n &lt;= 1:
+        return 1
+    return n * giai_thua(n - 1)
+
+for i in range(1, 8):
+    print(i, giai_thua(i))</pre>
+  <p>Bỏ dòng <code>if n &lt;= 1</code> thì sao? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Hàm gọi mãi không dừng và gặp lỗi RecursionError.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 40 · Cài Python và dự án tốt nghiệp</p>
+  <h2>Sổ Lớp</h2>
+  <p class="muted">Cài Python từ python.org (nhớ tích Add to PATH) và dùng VS Code. Dự án Sổ Lớp ghép mọi thứ đã học.</p>
+  <pre class="lab">
+class SoLop:
+    def __init__(self):
+        self.hs = {}
+    def them(self, ten, *diem):
+        self.hs[ten] = list(diem)
+    def bao_cao(self):
+        for ten, ds in sorted(self.hs.items()):
+            tb = sum(ds) / len(ds)
+            print(f&quot;{ten:&lt;6}{tb:5.2f}&quot;)
+
+s = SoLop()
+s.them(&quot;An&quot;, 8, 9)
+s.them(&quot;Bình&quot;, 6, 7.5)
+s.bao_cao()</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Nâng cấp Sổ Lớp</h2>
+  <p class="muted">Thêm phương thức top(k) trả về k bạn có điểm trung bình cao nhất. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab">
+class SoLop:
+    def __init__(self):
+        self.hs = {}
+    def them(self, ten, *diem):
+        self.hs[ten] = list(diem)
+    # def top(self, k): ...
+
+s = SoLop()
+s.them(&quot;An&quot;, 8, 9); s.them(&quot;Bình&quot;, 6, 7); s.them(&quot;Chi&quot;, 9, 10)
+print(s.top(2))</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Tìm 2 lỗi</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab">
+import random
+ds = [1, 2, 3]
+ds = random.shuffle(ds)
+print(ds)
+def dem(n):
+    print(n)
+    dem(n - 1)
+dem(3)</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. shuffle trả về None, chỉ cần viết <code>random.shuffle(ds)</code>. 2. Hàm đệ quy thiếu điều kiện dừng: thêm <code>if n == 0: return</code>.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Chúc mừng các bạn đã học xong!</h2>
+  <ul><li>Hoàn thiện dự án Sổ Lớp và gửi code vào kênh chat.</li><li>Bạn nào chưa có máy: viết thiết kế các hàm ra giấy rồi chạy thử trên máy của bạn cùng cặp.</li><li>Tiếp theo: khoá Python nâng cao trên Education Hugo.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+/* Slide dạy trực tiếp: mỗi slide một màn hình, khung code chạy Python ngay trên slide */
+:root{
+  --bg:#14213D; --panel:#1C2C50; --paper:#FBFBF8; --muted:#BFD0E8;
+  --accent:#F2A541; --ok:#7BD389; --err:#FF8A80; --code:#0E1730; --line:#26365C;
+  --display:'Be Vietnam Pro',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--paper);font-family:var(--display);font-size:clamp(15px,1.4vw,22px);overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:1em;
+  padding:3em max(16px,6vw) 4.5em;overflow-y:auto;opacity:0;visibility:hidden;transition:opacity .25s}
+.slide.on{opacity:1;visibility:visible}
+.eyebrow{color:var(--accent);font-weight:600;letter-spacing:.15em;text-transform:uppercase;font-size:.8em;margin:0}
+h1{font-size:3.6em;font-weight:800;line-height:1.05;text-wrap:balance;margin:0}
+h2{font-size:2.1em;font-weight:800;margin:0;text-wrap:balance}
+p,li{line-height:1.55;max-width:62ch;margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+p code,li code,span code{font-family:var(--mono);background:var(--panel);padding:.05em .35em;border-radius:4px;color:var(--accent)}
+.row{display:flex;gap:1.2em;flex-wrap:wrap}
+.row>*{flex:1 1 14em;min-width:0}
+.box{background:var(--panel);border-radius:12px;padding:1em 1.2em;display:flex;flex-direction:column;gap:.4em}
+.box b{color:var(--accent)}
+ul,ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:.4em}
+.lab{display:grid;grid-template-columns:1.3fr 1fr;gap:1em}
+@media (max-width:760px){.lab{grid-template-columns:1fr}}
+.ed,.out{min-width:0;border-radius:12px;background:var(--code);display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:.6em;padding:.45em .8em;font-size:.75em;color:var(--muted);border-bottom:1px solid var(--line)}
+.bar span{flex:1}
+.lab textarea{font:inherit;font-family:var(--mono);font-size:.95em;line-height:1.5;color:var(--paper);background:transparent;border:0;resize:vertical;
+  padding:.8em 1em;outline:none;tab-size:4;white-space:pre;overflow:auto}
+.lab .stdin{border-top:1px solid var(--line);min-height:0;font-size:.85em;color:var(--ok)}
+.out pre{margin:0;padding:.8em 1em;font-family:var(--mono);font-size:.95em;line-height:1.5;white-space:pre-wrap;word-break:break-word;flex:1;min-height:5em}
+.out .e{color:var(--err)} .out .i{color:var(--ok)}
+button{font:inherit;font-size:.85em;font-weight:600;border:0;border-radius:8px;padding:.35em .9em;cursor:pointer}
+.run{background:var(--accent);color:var(--bg)}
+.ghost{background:transparent;color:var(--muted);border:1px solid #33456F}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.reveal{display:none;color:var(--ok)} .reveal.on{display:block}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:.8em;font-size:.75em;color:var(--muted);padding:.7em max(16px,2vw);background:var(--bg)}
+.nav .phase{color:var(--accent);font-weight:600}
+.nav .grow{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.nav .grow i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.clock,#count{font-family:var(--mono);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.slide,.nav .grow i{transition:none}}

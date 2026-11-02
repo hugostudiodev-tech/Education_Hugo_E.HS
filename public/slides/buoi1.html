@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 1 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">print() · Biến · Kiểu dữ liệu · input()</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 1–4. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Gõ tên, lớp và bạn dùng máy tính hay điện thoại vào chat.</span></div>
+  </div>
+  <pre class="lab">
+print(&quot;Chào cả lớp! Mình là Education Hugo&quot;)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Máy in đúng dòng chữ trong ngoặc kép.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>10 buổi, mỗi buổi 60 phút</h2>
+  <div class="row"><div class="box"><b>Buổi 1–3</b><span class="muted">Biến, phép tính, f-string, if/else</span></div><div class="box"><b>Buổi 4–5</b><span class="muted">Vòng lặp for, while</span></div><div class="box"><b>Buổi 6–8</b><span class="muted">list, dict, hàm, xử lý lỗi, tệp</span></div><div class="box"><b>Buổi 9–10</b><span class="muted">CSV, class, thuật toán, dự án Sổ Lớp</span></div></div>
+  <p class="muted">Cuối khoá, mỗi bạn tự viết được một chương trình quản lý điểm của lớp.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Học trên Discord thế nào</h2>
+  <ul><li>Mình chia sẻ màn hình và gõ code trực tiếp trên slide này.</li><li>Khi mình hỏi "đoán xem in ra gì?", các bạn gõ vào chat <b>trước</b> khi mình bấm Chạy.</li><li>Không có máy tính cũng không sao: đoán kết quả trong chat cũng là học. Phần thực hành làm trên điện thoại hoặc ghép cặp với bạn có máy.</li><li>Gặp lỗi đỏ đừng sợ: đọc dòng cuối là biết sai ở đâu.</li></ul>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 1 · print()</p>
+  <h2>Ra lệnh cho máy in chữ</h2>
+  <p class="muted">Chữ đặt trong dấu ngoặc kép, số thì không cần. Dấu phẩy để ngăn các phần, Python tự chèn dấu cách.</p>
+  <pre class="lab">
+print(&quot;Xin chào Python&quot;)
+print(2026)
+print(&quot;Năm nay là&quot;, 2026)
+print(&quot;3 + 4 =&quot;, 3 + 4)</pre>
+  <p>Dòng cuối in ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">3 + 4 = 7. Phần trong ngoặc kép được in nguyên văn, còn 3 + 4 thì được tính ra.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 2 · Biến</p>
+  <h2>Biến là chiếc hộp có dán nhãn</h2>
+  <p class="muted"><code>diem = 8</code> nghĩa là bỏ số 8 vào hộp tên <code>diem</code>. Gán lại thì giá trị cũ bị thay.</p>
+  <pre class="lab">
+diem = 8
+print(diem)
+diem = diem + 1
+print(diem)</pre>
+  <p>Dòng thứ hai in ra số mấy? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">In 8 rồi 9. Dòng 3 lấy giá trị cũ là 8, cộng 1, rồi bỏ lại vào hộp.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 3 · Kiểu dữ liệu</p>
+  <h2>Mỗi giá trị có một kiểu</h2>
+  <p class="muted"><code>int</code> là số nguyên, <code>float</code> là số thực, <code>str</code> là xâu chữ, <code>bool</code> là True/False.</p>
+  <pre class="lab">
+print(type(17))
+print(type(8.5))
+print(type(&quot;10&quot;))
+print(&quot;10&quot; + &quot;5&quot;)
+print(10 + 5)</pre>
+  <p>Vì sao <code>"10" + "5"</code> ra 105? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Cộng hai xâu là nối chúng lại với nhau, còn cộng hai số mới là phép cộng.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 4 · input()</p>
+  <h2>Hỏi người dùng</h2>
+  <p class="muted"><code>input()</code> luôn trả về <b>xâu</b>. Muốn tính toán thì phải đổi bằng <code>int()</code> hoặc <code>float()</code>. Ô màu xanh là dữ liệu nhập: mỗi dòng dùng cho một lần gọi input(). Mình sẽ lấy tên và tuổi của một bạn trong chat để điền vào.</p>
+  <pre class="lab" data-input="Lan
+16">
+ten = input(&quot;Bạn tên gì? &quot;)
+tuoi = int(input(&quot;Bạn bao nhiêu tuổi? &quot;))
+print(&quot;Chào&quot;, ten)
+print(&quot;Năm sau bạn&quot;, tuoi + 1, &quot;tuổi&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Thẻ giới thiệu</h2>
+  <p class="muted">Hỏi tên, lớp và môn thích nhất, rồi in ra một tấm thẻ. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="Lan
+10A1
+Tin học">
+ten = input(&quot;Tên: &quot;)
+lop = input(&quot;Lớp: &quot;)
+mon = input(&quot;Môn thích nhất: &quot;)
+print(&quot;==================&quot;)
+print(&quot;Tên :&quot;, ten)
+# viết tiếp 2 dòng nữa
+print(&quot;==================&quot;)</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Đoạn này có 3 lỗi</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab" data-input="16">
+print(&quot;Xin chào)
+ho ten = &quot;Lan&quot;
+tuoi = input(&quot;Tuổi? &quot;)
+print(tuoi + 1)</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. Thiếu dấu " đóng. 2. Tên biến không được có dấu cách: <code>ho_ten</code>. 3. input() trả về xâu nên phải viết <code>int(input(...))</code>.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 2</h2>
+  <ul><li>Làm hết step 1–5 trong khoá Python cơ bản trên Education Hugo.</li><li>Chụp thẻ giới thiệu của bạn và gửi vào kênh chat.</li><li>Buổi sau: phép chia <code>//</code>, <code>%</code> và f-string.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

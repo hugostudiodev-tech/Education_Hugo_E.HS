@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 4</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 4 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">elif · and / or / not · Xét học bổng · for và range()</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 13–16. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn if/else: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+x = 0
+if x:
+    print(&quot;có&quot;)
+else:
+    print(&quot;không&quot;)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">không. Số 0 được coi là False.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 13 · elif</p>
+  <h2>Xếp loại học lực</h2>
+  <p class="muted">Python kiểm tra từ trên xuống và dừng ở nhánh đúng <b>đầu tiên</b>.</p>
+  <pre class="lab" data-input="7">
+tb = float(input(&quot;Điểm TB: &quot;))
+if tb &gt;= 8:
+    print(&quot;Giỏi&quot;)
+elif tb &gt;= 6.5:
+    print(&quot;Khá&quot;)
+elif tb &gt;= 5:
+    print(&quot;Trung bình&quot;)
+else:
+    print(&quot;Yếu&quot;)</pre>
+  <p>Nếu đổi chỗ nhánh <code>tb &gt;= 5</code> lên đầu thì nhập 9 sẽ ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Ra Trung bình, vì 9 >= 5 đúng ngay ở nhánh đầu nên các nhánh sau không được xét.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 14 · and, or, not</p>
+  <h2>Ghép nhiều điều kiện</h2>
+  <p class="muted"><code>and</code> chỉ đúng khi cả hai vế đúng, <code>or</code> đúng khi có ít nhất một vế đúng, <code>not</code> đảo ngược.</p>
+  <pre class="lab">
+tuoi = 16
+co_ve = False
+print(tuoi &gt;= 13 and co_ve)
+print(tuoi &gt;= 13 or co_ve)
+print(not co_ve)</pre>
+  <p>Ba dòng in ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">False, True, True.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 15 · Dự án nhỏ</p>
+  <h2>Xét học bổng</h2>
+  <p class="muted">Học bổng: điểm TB từ 8.0 trở lên <b>và</b> hạnh kiểm Tốt, <b>hoặc</b> có giải học sinh giỏi.</p>
+  <pre class="lab" data-input="7.5
+Khá
+c">
+tb = float(input(&quot;Điểm TB: &quot;))
+hk = input(&quot;Hạnh kiểm: &quot;)
+giai = input(&quot;Có giải HSG (c/k)? &quot;)
+if (tb &gt;= 8 and hk == &quot;Tốt&quot;) or giai == &quot;c&quot;:
+    print(&quot;Được học bổng&quot;)
+else:
+    print(&quot;Chưa đủ điều kiện&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 16 · for và range()</p>
+  <h2>Lặp đúng số lần</h2>
+  <p class="muted"><code>range(a, b)</code> chạy từ a tới <b>b − 1</b>. Còn <code>range(a, b, k)</code> thì mỗi bước tăng k.</p>
+  <pre class="lab">
+for i in range(1, 6):
+    print(&quot;Lần&quot;, i)
+for i in range(10, 0, -3):
+    print(i, end=&quot; &quot;)</pre>
+  <p>Vòng lặp thứ hai in ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">10 7 4 1</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Bảng nhân</h2>
+  <p class="muted">Nhập n rồi in bảng nhân n từ 1 đến 10, mỗi dòng có dạng 7 x 3 = 21. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="7">
+n = int(input(&quot;n = &quot;))
+for i in range(1, 11):
+    # in một dòng</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Vì sao 9.5 lại ra Trung bình?</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab">
+tb = 9.5
+if tb &gt;= 5:
+    print(&quot;Trung bình&quot;)
+elif tb &gt;= 8:
+    print(&quot;Giỏi&quot;)
+for i in range(1, 10):
+print(i)</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. Nhánh có điều kiện rộng hơn phải đặt sau: xét >= 8 trước rồi mới tới >= 5. 2. Lệnh print trong vòng for phải thụt vào (IndentationError).</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 5</h2>
+  <ul><li>Làm step 13–16.</li><li>In tất cả các số chia hết cho 3 từ 1 đến 50.</li><li>Buổi sau: while, break/continue, vòng lặp lồng nhau.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

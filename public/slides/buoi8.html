@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 8</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 8 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">import · Thư viện tính điểm · try/except · Đọc ghi tệp</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 29–32. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn hàm: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+def f(x):
+    return x * 2
+print(f(f(3)))</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">12, vì f(3) = 6 rồi f(6) = 12.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 29 · Module và import</p>
+  <h2>Dùng code của người khác</h2>
+  <p class="muted"><code>import x</code>, <code>from x import y</code>, <code>import x as z</code>. Python có sẵn rất nhiều module.</p>
+  <pre class="lab">
+from math import sqrt
+import statistics as st
+import datetime
+diem = [7, 9, 6.5, 8]
+print(sqrt(2))
+print(st.mean(diem), st.median(diem))
+print(datetime.date.today())</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 30 · Dự án nhỏ</p>
+  <h2>Thư viện tính điểm</h2>
+  <p class="muted">Gom các hàm dùng nhiều lần thành một bộ để dùng lại.</p>
+  <pre class="lab">
+def trung_binh(ds): return sum(ds) / len(ds)
+def xep_loai(tb): return &quot;Giỏi&quot; if tb &gt;= 8 else &quot;Khá&quot; if tb &gt;= 6.5 else &quot;TB&quot; if tb &gt;= 5 else &quot;Yếu&quot;
+
+lop = {&quot;An&quot;: [8, 9], &quot;Bình&quot;: [6, 7], &quot;Chi&quot;: [4, 5.5]}
+for ten, ds in lop.items():
+    tb = trung_binh(ds)
+    print(f&quot;{ten:&lt;6}{tb:5.2f}  {xep_loai(tb)}&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 31 · try và except</p>
+  <h2>Chương trình không sập</h2>
+  <p class="muted">Đặt đoạn có thể lỗi vào <code>try</code>, rồi bắt <b>đúng loại lỗi</b> trong <code>except</code>.</p>
+  <pre class="lab" data-input="tám
+
+8.5">
+while True:
+    try:
+        d = float(input(&quot;Điểm: &quot;))
+        break
+    except ValueError:
+        print(&quot;Phải nhập số, thử lại!&quot;)
+print(&quot;OK:&quot;, d)</pre>
+  <p>Nhập chữ tám thì lỗi gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">ValueError, vì float() không đổi được chữ thành số.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 32 · Đọc và ghi tệp</p>
+  <h2>Lưu lại cho lần sau</h2>
+  <p class="muted"><code>"w"</code> ghi mới (xoá nội dung cũ), <code>"a"</code> ghi nối thêm, <code>"r"</code> để đọc. Nên dùng <code>with</code> để tệp tự đóng.</p>
+  <pre class="lab">
+with open(&quot;lop.txt&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(&quot;An\nBình\n&quot;)
+with open(&quot;lop.txt&quot;, &quot;a&quot;, encoding=&quot;utf-8&quot;) as f:
+    f.write(&quot;Chi\n&quot;)
+with open(&quot;lop.txt&quot;, encoding=&quot;utf-8&quot;) as f:
+    for dong in f:
+        print(dong.strip())</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Máy tính an toàn</h2>
+  <p class="muted">Nhập a và b rồi in a / b. Bắt cả hai lỗi ValueError và ZeroDivisionError. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="5
+0">
+try:
+    a = float(input(&quot;a = &quot;))
+    b = float(input(&quot;b = &quot;))
+    print(a / b)
+# except ...</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Vì sao mất dữ liệu?</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab">
+with open(&quot;nhatky.txt&quot;, &quot;w&quot;) as f:
+    f.write(&quot;Ngày 1\n&quot;)
+with open(&quot;nhatky.txt&quot;, &quot;w&quot;) as f:
+    f.write(&quot;Ngày 2\n&quot;)
+print(open(&quot;nhatky.txt&quot;).read())
+try:
+    x = 1 / 0
+except:
+    pass</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Chế độ "w" xoá sạch tệp cũ, muốn ghi thêm thì dùng "a". Còn <code>except: pass</code> nuốt mất mọi lỗi nên không biết sai ở đâu.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 9</h2>
+  <ul><li>Làm step 29–32.</li><li>Viết chương trình nhật ký: mỗi lần chạy ghi thêm một dòng vào tệp, rồi in toàn bộ nội dung.</li><li>Buổi sau: tệp CSV, comprehension, class.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

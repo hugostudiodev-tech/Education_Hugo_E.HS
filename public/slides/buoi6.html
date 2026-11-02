@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 6 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">list · Sắp xếp và top 3 · Xâu ký tự · dict</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 21–24. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn vòng lặp: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+for c in &quot;Hugo&quot;:
+    print(c, end=&quot;-&quot;)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">H-u-g-o- : vòng for đi qua từng ký tự của xâu.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 21 · list</p>
+  <h2>Danh sách điểm</h2>
+  <p class="muted">Danh sách viết trong <code>[]</code>, chỉ số bắt đầu từ <b>0</b>, còn <code>-1</code> là phần tử cuối.</p>
+  <pre class="lab">
+diem = [7, 9, 6.5, 8]
+print(diem[0], diem[-1])
+diem.append(10)
+print(len(diem), sum(diem))
+print(max(diem), min(diem))</pre>
+  <p>diem[0] và diem[-1] là gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">7 và 8. Lệnh append chạy sau dòng in này.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 22 · Duyệt và sắp xếp</p>
+  <h2>Tìm top 3</h2>
+  <p class="muted"><code>sorted()</code> trả về một list mới. Còn <code>.sort()</code> sắp xếp ngay trên list cũ và trả về None.</p>
+  <pre class="lab">
+diem = [7, 9, 6.5, 8, 10, 5]
+top = sorted(diem, reverse=True)[:3]
+print(&quot;Top 3:&quot;, top)
+for i, d in enumerate(top, 1):
+    print(f&quot;Hạng {i}: {d}&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 23 · Xâu ký tự</p>
+  <h2>Cắt lát và phương thức</h2>
+  <p class="muted"><code>s[a:b]</code> lấy từ vị trí a tới b − 1. Xâu không sửa trực tiếp được: các phương thức đều trả về một xâu mới.</p>
+  <pre class="lab">
+s = &quot;  nguyễn văn an  &quot;
+ten = s.strip().title()
+print(ten)
+print(ten[:6], &quot;|&quot;, ten[-2:])
+print(ten.split())
+print(ten.upper().count(&quot;N&quot;))</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 24 · dict</p>
+  <h2>Tra điểm theo tên</h2>
+  <p class="muted"><code>{key: value}</code>. Dùng <code>.get()</code> để không bị lỗi khi tên chưa có trong dict.</p>
+  <pre class="lab">
+diem = {&quot;An&quot;: 8, &quot;Bình&quot;: 6.5}
+diem[&quot;Chi&quot;] = 9
+print(diem[&quot;An&quot;])
+print(diem.get(&quot;Dũng&quot;, &quot;chưa có&quot;))
+for ten, d in diem.items():
+    print(ten, d)</pre>
+  <p>Nếu viết <code>diem["Dũng"]</code> thì sao? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">KeyError, vì chưa có key Dũng. Dùng .get() sẽ an toàn hơn.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Đếm từ</h2>
+  <p class="muted">Nhập một câu rồi đếm mỗi từ xuất hiện bao nhiêu lần, dùng dict. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="học học nữa học mãi">
+cau = input(&quot;Câu: &quot;).lower().split()
+dem = {}
+for tu in cau:
+    # cập nhật dem
+print(dem)</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Tìm 2 lỗi</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab">
+ds = [3, 1, 2]
+ds = ds.sort()
+print(ds)
+ten = &quot;lan&quot;
+ten[0] = &quot;L&quot;</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. <code>.sort()</code> trả về None. Chỉ cần viết <code>ds.sort()</code>, hoặc dùng <code>ds = sorted(ds)</code>. 2. Không sửa được xâu tại chỗ, hãy dùng <code>ten.capitalize()</code>.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 7</h2>
+  <ul><li>Làm step 21–24.</li><li>Nhập danh sách điểm cách nhau bởi dấu cách, rồi in điểm trung bình và các điểm trên trung bình.</li><li>Buổi sau: tuple, set, sổ quỹ lớp, và hàm.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

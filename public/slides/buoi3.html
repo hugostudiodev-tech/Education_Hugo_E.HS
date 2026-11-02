@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 3 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">math · Điểm trung bình · So sánh · if/else</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 9–12. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn f-string: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+x = 2 / 3
+print(f&quot;{x:.3f}&quot;)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">0.667, vì được làm tròn tới 3 chữ số thập phân.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 9 · Module math</p>
+  <h2>Mượn đồ nghề có sẵn</h2>
+  <p class="muted"><code>import math</code> rồi dùng <code>math.sqrt</code>, <code>math.ceil</code> (làm tròn lên), <code>math.floor</code> (làm tròn xuống), <code>math.pi</code>.</p>
+  <pre class="lab">
+import math
+print(math.sqrt(16))
+print(math.ceil(4.1))
+print(math.floor(4.9))
+hs = 43
+print(&quot;Cần&quot;, math.ceil(hs / 4), &quot;xe 4 chỗ&quot;)</pre>
+  <p>43 bạn đi xe 4 chỗ thì cần mấy xe? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">11 xe. Ra 10.75 thì vẫn phải thuê thêm xe, nên dùng ceil để làm tròn lên.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 10 · Dự án nhỏ</p>
+  <h2>Điểm trung bình môn theo hệ số</h2>
+  <p class="muted">Điểm thường xuyên hệ số 1, giữa kỳ hệ số 2, cuối kỳ hệ số 3.</p>
+  <pre class="lab" data-input="8
+7.5
+9">
+tx = float(input(&quot;Thường xuyên: &quot;))
+gk = float(input(&quot;Giữa kỳ: &quot;))
+ck = float(input(&quot;Cuối kỳ: &quot;))
+tb = (tx + gk * 2 + ck * 3) / 6
+print(f&quot;Điểm trung bình: {tb:.1f}&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 11 · So sánh và bool</p>
+  <h2>Câu hỏi có/không</h2>
+  <p class="muted"><code>== != &lt; &gt; &lt;= &gt;=</code> đều trả về <code>True</code> hoặc <code>False</code>. Chú ý: <code>=</code> là gán, <code>==</code> là so sánh.</p>
+  <pre class="lab">
+print(8 &gt;= 6.5)
+print(&quot;lan&quot; == &quot;Lan&quot;)
+diem = 5
+print(diem != 5)
+print(3 &lt; diem &lt;= 10)</pre>
+  <p>"lan" == "Lan" ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">False, vì chữ hoa và chữ thường là khác nhau.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 12 · if và else</p>
+  <h2>Hai ngả đường</h2>
+  <p class="muted">Sau <code>if</code> và <code>else</code> phải có dấu <code>:</code>. Các dòng bên trong thụt vào 4 dấu cách.</p>
+  <pre class="lab" data-input="4.5">
+diem = float(input(&quot;Điểm: &quot;))
+if diem &gt;= 5:
+    print(&quot;Đạt&quot;)
+    print(&quot;Chúc mừng!&quot;)
+else:
+    print(&quot;Chưa đạt&quot;)
+print(&quot;Hết&quot;)</pre>
+  <p>Nhập 4.5 thì in ra mấy dòng? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Hai dòng: Chưa đạt và Hết. Dòng Hết không thụt vào nên luôn chạy.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Số chẵn hay lẻ</h2>
+  <p class="muted">Nhập một số nguyên, in ra Chẵn hoặc Lẻ. Gợi ý: dùng %. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="7">
+n = int(input(&quot;n = &quot;))
+# viết if/else ở đây</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Tìm 3 lỗi</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab" data-input="10">
+diem = input(&quot;Điểm: &quot;)
+if diem = 10
+    print(&quot;Tuyệt đối!&quot;)</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1. Phải đổi kiểu: <code>float(input(...))</code>. 2. So sánh dùng <code>==</code>. 3. Thiếu dấu <code>:</code> sau điều kiện.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 4</h2>
+  <ul><li>Làm step 9–12.</li><li>Viết chương trình nhập 3 điểm, in điểm trung bình, rồi in Đạt nếu từ 5 trở lên.</li><li>Buổi sau: elif, and/or/not, dự án xét học bổng.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

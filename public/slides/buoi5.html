@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python cơ bản · Buổi 5</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <p class="eyebrow">Education Hugo · Buổi 5 / 10</p>
+  <h1>Python cơ bản</h1>
+  <p class="muted" style="font-size:1.3em">while · break / continue · Lặp lồng nhau · Mẫu tích luỹ</p>
+  <p class="muted">60 phút: 15' giới thiệu · 30' học · 15' vấn đáp. Phím → hoặc phím cách để chuyển slide.</p>
+</section>
+
+<section class="slide" data-phase="Chờ & giới thiệu · 0–15'">
+  <h2>Trong lúc chờ</h2>
+  <div class="row">
+    <div class="box"><b>Vào kênh voice</b><span class="muted">Tắt mic khi không nói, bật lại khi muốn hỏi.</span></div>
+    <div class="box"><b>Mở Education Hugo</b><span class="muted">Khoá Python cơ bản, step 17–20. Điện thoại cũng được.</span></div>
+    <div class="box"><b>Khởi động</b><span class="muted">Ôn for: đoán kết quả.</span></div>
+  </div>
+  <pre class="lab">
+s = 0
+for i in range(1, 5):
+    s = s + i
+print(s)</pre>
+  <p>Gõ đáp án vào chat trước khi bấm Chạy. <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">10 = 1 + 2 + 3 + 4. Nhớ rằng range(1, 5) dừng ở 4.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 17 · while</p>
+  <h2>Lặp tới khi đạt điều kiện</h2>
+  <p class="muted">Dùng <code>while</code> khi không biết trước phải lặp bao nhiêu lần. Nhớ thay đổi biến trong điều kiện, nếu không vòng lặp sẽ chạy mãi.</p>
+  <pre class="lab">
+tien = 100
+nam = 0
+while tien &lt; 200:
+    tien = tien * 1.07
+    nam += 1
+print(f&quot;Sau {nam} năm có {tien:.0f} nghìn&quot;)</pre>
+  <p>Gửi 100 nghìn với lãi 7% mỗi năm thì bao lâu được gấp đôi? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">11 năm.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 18 · break và continue</p>
+  <h2>Thoát sớm và bỏ qua</h2>
+  <p class="muted"><code>break</code> thoát hẳn khỏi vòng lặp. <code>continue</code> bỏ qua phần còn lại của lượt này rồi sang lượt tiếp theo.</p>
+  <pre class="lab" data-input="abc
+123
+python">
+while True:
+    mk = input(&quot;Mật khẩu: &quot;)
+    if mk == &quot;python&quot;:
+        print(&quot;Mở khoá!&quot;)
+        break
+    print(&quot;Sai, thử lại&quot;)
+for i in range(1, 8):
+    if i % 3 == 0:
+        continue
+    print(i, end=&quot; &quot;)</pre>
+  <p>Vòng for in ra gì? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">1 2 4 5 7, vì các số chia hết cho 3 bị bỏ qua.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 19 · Vòng lặp lồng nhau</p>
+  <h2>Bảng cửu chương</h2>
+  <p class="muted">Vòng trong chạy hết một lượt cho mỗi lượt của vòng ngoài.</p>
+  <pre class="lab">
+for i in range(1, 4):
+    for j in range(1, 4):
+        print(f&quot;{i}x{j}={i*j:&lt;3}&quot;, end=&quot; &quot;)
+    print()</pre>
+  <p>Lệnh print bên trong chạy tất cả bao nhiêu lần? <button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">3 × 3 = 9 lần.</p>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Step 20 · Mẫu tích luỹ</p>
+  <h2>Tổng, đếm, lớn nhất</h2>
+  <p class="muted">Khởi tạo biến <b>trước</b> vòng lặp, cập nhật nó <b>trong</b> vòng lặp, rồi in <b>sau</b> vòng lặp.</p>
+  <pre class="lab" data-input="4
+7
+9.5
+6
+8">
+n = int(input(&quot;Số bạn: &quot;))
+tong = 0
+cao_nhat = 0
+for i in range(n):
+    d = float(input(f&quot;Điểm bạn {i+1}: &quot;))
+    tong += d
+    if d &gt; cao_nhat:
+        cao_nhat = d
+print(f&quot;TB {tong/n:.2f}, cao nhất {cao_nhat}&quot;)</pre>
+  
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Thử thách · 5 phút</p>
+  <h2>Đoán số</h2>
+  <p class="muted">Máy giữ một số bí mật. Lặp lại cho tới khi đoán đúng, mỗi lần báo Lớn quá hoặc Nhỏ quá. Bạn nào xong trước thì dán code vào chat, mình chạy cho cả lớp xem.</p>
+  <pre class="lab" data-input="50
+25
+37">
+bi_mat = 37
+while True:
+    d = int(input(&quot;Đoán: &quot;))
+    # so sánh và break khi đúng</pre>
+</section>
+
+<section class="slide" data-phase="Học · 15–45'">
+  <p class="eyebrow">Lỗi hay gặp</p>
+  <h2>Vì sao tổng sai?</h2>
+  <p class="muted">Bấm Chạy, đọc dòng lỗi cuối cùng, sửa từng lỗi rồi chạy lại.</p>
+  <pre class="lab">
+for i in range(1, 4):
+    tong = 0
+    tong += i
+print(tong)
+k = 1
+while k &lt; 5:
+    print(k)
+    k += 1</pre>
+  <p><button class="ghost" data-reveal>Xem đáp án</button></p>
+  <p class="reveal">Biến tổng bị khởi tạo lại bên trong vòng lặp nên cuối cùng chỉ còn 3. Phải đưa <code>tong = 0</code> ra trước vòng lặp.</p>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Vấn đáp</p>
+  <h2>Hỏi gì cũng được</h2>
+  <ul><li>Bật mic hoặc gõ câu hỏi vào chat.</li><li>Dán code đang lỗi vào chat, mình chạy ngay ở khung dưới.</li></ul>
+  <pre class="lab" data-input="">
+# dán code của bạn vào đây</pre>
+</section>
+
+<section class="slide" data-phase="Vấn đáp · 45–60'">
+  <p class="eyebrow">Bài về nhà</p>
+  <h2>Hẹn buổi 6</h2>
+  <ul><li>Làm step 17–20.</li><li>Bài sổ tiết kiệm: gửi 1 triệu, lãi 0.5% mỗi tháng. Sau bao nhiêu tháng thì được 1.2 triệu?</li><li>Buổi sau: list, xâu và dict.</li></ul>
+  <p class="muted">Cảm ơn các bạn đã tham gia!</p>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>

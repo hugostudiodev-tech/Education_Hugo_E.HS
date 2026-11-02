@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "../../config/apiBase";
+import { OUTLINE } from "../../../packages/courses/python/stages.js";
 
 /**
  * /admin — quản trị Education Hugo. Đăng nhập kiểu Hugo Studio: nhập email, nhận mã 6 số
@@ -479,9 +480,26 @@ function Promos() {
   );
 }
 
+/** Slide dạy 10 buổi Python cơ bản (public/slides): mở tab mới để chia sẻ màn hình, code chạy ngay trên slide. */
+function Slides() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: 10 }, (_, i) => (
+        <a key={i} href={`/slides/buoi${i + 1}.html`} target="_blank" rel="noreferrer">
+          <Card className="space-y-1 text-[14px] text-foreground hover:border-primary">
+            <h2 className="text-[16px] font-bold">Buổi {i + 1} · step {i * 4 + 1}–{i * 4 + 4}</h2>
+            <ol className="list-decimal pl-5 text-muted-foreground" start={i * 4 + 1}>{OUTLINE.slice(i * 4, i * 4 + 4).map(([, title]) => <li key={title}>{title}</li>)}</ol>
+          </Card>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 const TABS = [
   ["overview", "Tổng quan", "space_dashboard", Overview],
   ["learners", "Người học", "group", Learners],
+  ["slides", "Slide dạy", "slideshow", Slides],
   ["store", "Cửa hàng", "storefront", Store],
   ["partners", "Đối tác", "key", Partners],
   ["developers", "Hugo Developer", "code", Developers],
