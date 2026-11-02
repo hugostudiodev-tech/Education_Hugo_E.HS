@@ -1411,3 +1411,7 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu-dev-hero > .edu-dev-art { margin-bottom: calc(19% * 1 + 8px); }
 .edu-dev-hero h1 { color: var(--edu-ink); }
 .edu-dev-hero p { color: var(--edu-muted); opacity: 1; }
+/* Ảnh phi hành gia: nền dừng ở 600/856, phần dưới chỉ còn mũi tên lửa → (856-600)/800 = 32% bề rộng đè xuống thẻ. */
+.edu-dev-art img { margin-bottom: -32%; }
+.edu-dev-promo .edu-dev-promo-body { padding-top: calc(32% + 6px); }
+.edu-dev-hero > .edu-dev-art { margin-bottom: calc(32% + 8px); }
