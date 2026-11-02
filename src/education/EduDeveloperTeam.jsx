@@ -92,7 +92,7 @@ export function DeveloperPromo() {
   return (
     <Link to="/developer-team" className="edu-dev-promo">
       <div className="edu-dev-art">
-        <img src="/edu/dev-rocket.svg" alt="" width="800" height="520" />
+        <img src="/edu/dev-rocket.svg" alt="" width="420" height="440" />
         <span className="edu-dev-badge">{c.badge}</span>
       </div>
       <div className="edu-dev-promo-body">
@@ -132,7 +132,7 @@ export default function EduDeveloperTeam() {
       </button>
       <div className="edu-dev-hero">
         <div className="edu-dev-art">
-          <img src="/edu/dev-rocket.svg" alt="" width="800" height="520" />
+          <img src="/edu/dev-rocket.svg" alt="" width="420" height="440" />
           <span className="edu-dev-badge">{c.badge}</span>
         </div>
         <Dancers ids={[3, 6, 1, 8, 5]} size={84} />
