@@ -67,6 +67,9 @@ export function eduEmail({ lang = 'vi', cast = 'cast-1', title, body, cta }) {
 }
 
 /** Gửi thư qua Resend (gói miễn phí 3.000 thư/tháng). Chưa cấu hình thì chỉ ghi log. */
+// Lỗi gửi thư gần nhất (không kèm địa chỉ người nhận) — /api/health hiện ra để chẩn đoán nhanh.
+export const mailStatus = { lastError: null, lastOkAt: null };
+
 export async function sendMail(to, subject, html) {
   if (!process.env.RESEND_API_KEY) { console.log(`[mail mô phỏng] ${to} · ${subject}`); return { simulated: true }; }
   const res = await fetch('https://api.resend.com/emails', {
@@ -74,7 +77,12 @@ export async function sendMail(to, subject, html) {
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: process.env.EMAIL_FROM || 'Education Hugo <no-reply@education.hugowishpax.studio>', to, subject: String(subject).replace(/[\r\n]+/g, ' '), html }),
   });
-  if (!res.ok) throw new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) {
+    const error = new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    mailStatus.lastError = { at: new Date().toISOString(), message: error.message.replaceAll(to, '<người nhận>') };
+    throw error;
+  }
+  mailStatus.lastOkAt = new Date().toISOString();
   return res.json();
 }
 

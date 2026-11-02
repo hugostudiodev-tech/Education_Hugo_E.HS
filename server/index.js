@@ -1,12 +1,13 @@
 // Máy chủ Education Hugo — Express + MongoDB + Better Auth. Một process (Render free).
 import express from 'express';
+import { mailStatus } from './lib/notify.js';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cron from 'node-cron';
 import { toNodeHandler } from 'better-auth/node';
-import { getAdminAuth, initAuth } from './lib/auth.js';
+import { ADMIN_EMAILS, getAdminAuth, initAuth } from './lib/auth.js';
 import { isProd, ORIGINS } from './lib/config.js';
 import lessons from './routes/lessons.js';
 import me from './routes/me.js';
@@ -49,7 +50,7 @@ app.post('/api/admin-auth/email-otp/send-verification-otp', (req, res, next) => 
 app.all('/api/admin-auth/*', toNodeHandler(getAdminAuth()));
 app.use(express.json({ limit: '200kb' }));
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down', uptime: Math.round(process.uptime()), mail: Boolean(process.env.RESEND_API_KEY) }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down', uptime: Math.round(process.uptime()), mail: Boolean(process.env.RESEND_API_KEY), mailFrom: (process.env.EMAIL_FROM || 'no-reply@education.hugowishpax.studio').replace(/.*</, '').replace('>', ''), mailLastError: mailStatus.lastError, mailLastOkAt: mailStatus.lastOkAt, admins: ADMIN_EMAILS.size }));
 app.use('/api/lessons', lessons);
 app.use('/api/partner', partner);
 app.use('/api/push', push);
