@@ -1415,3 +1415,4 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu-dev-art img { margin-bottom: -32%; }
 .edu-dev-promo .edu-dev-promo-body { padding-top: calc(32% + 6px); }
 .edu-dev-hero > .edu-dev-art { margin-bottom: calc(32% + 8px); }
+.fr-rows li.is-idle { opacity: .6; }

@@ -29,7 +29,7 @@ async function call(path, init) {
 function useSocial() {
   const [data, setData] = useState(null);
   // Thiếu trường (máy chủ cũ đang chạy, lỗi giữa chừng) thì coi là rỗng — trang không được sập.
-  const take = (d) => setData({ ...d, me: d.me || {}, league: d.league || [], friends: d.friends || [], requestsIn: d.requestsIn || [], requestsOut: d.requestsOut || [] });
+  const take = (d) => setData({ ...d, me: d.me || {}, league: d.league || [], classmates: d.classmates || [], friends: d.friends || [], requestsIn: d.requestsIn || [], requestsOut: d.requestsOut || [] });
   const load = useCallback(() => call("").then(take).catch(() => setData((cur) => cur || { failed: true })), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     load();
@@ -45,14 +45,14 @@ function useSocial() {
 }
 
 /** Bảng tuần: bục 3 người đầu + danh sách có thanh XP so với người dẫn đầu. */
-function League({ rows }) {
+function League({ rows, idle = [] }) {
   const { t } = useEduText();
-  if (!rows.length) return <p className="fr-empty">{t("friends.leagueEmpty")}</p>;
-  const top = Math.max(1, rows[0].xp);
+  if (!rows.length && !idle.length) return <p className="fr-empty">{t("friends.leagueEmpty")}</p>;
+  const top = Math.max(1, rows[0]?.xp || 0);
   const podium = rows.slice(0, 3);
   return (
     <>
-      <div className="fr-podium">
+      {podium.length > 0 && <div className="fr-podium">
         {[podium[1], podium[0], podium[2]].map((row, i) => row && (
           <Link key={row.code || i} to={row.code ? `/u/${row.code}` : "#"} className={`fr-podium-spot is-${[2, 1, 3][i]}${row.me ? " is-me" : ""}`}>
             <PersonaAvatar avatar={row.avatar} name={row.name} size={[2, 1, 3][i] === 1 ? 72 : 56} />
@@ -61,7 +61,7 @@ function League({ rows }) {
             <span className="fr-podium-block">{[2, 1, 3][i]}</span>
           </Link>
         ))}
-      </div>
+      </div>}
       <ol className="fr-rows">
         {rows.map((row, index) => (
           <li key={`${row.code}-${index}`} className={row.me ? "is-me" : ""}>
@@ -73,6 +73,17 @@ function League({ rows }) {
                 <i className="fr-xpbar"><i style={{ width: `${(row.xp / top) * 100}%` }} /></i>
               </span>
               <b className="fr-xp">{t("friends.xp", { n: row.xp })}</b>
+            </Link>
+          </li>
+        ))}
+        {/* Bạn học chưa có XP tuần này: chưa có hạng, học một bài là nhảy lên trên. */}
+        {idle.map((row, index) => (
+          <li key={`idle-${row.code}-${index}`} className={`is-idle${row.me ? " is-me" : ""}`}>
+            <Link to={row.code ? `/u/${row.code}` : "#"}>
+              <span className="fr-rank">–</span>
+              <PersonaAvatar avatar={row.avatar} name={row.name} size={44} />
+              <span className="fr-who"><b className="nick-font">{row.name}{row.me ? ` · ${t("friends.you")}` : ""}</b></span>
+              <b className="fr-xp">{t("friends.xp", { n: 0 })}</b>
             </Link>
           </li>
         ))}
@@ -218,7 +229,7 @@ export default function EduFriends({ embedded = false }) {
         <section className="fr-col fr-col-league">
           <header className="fr-head"><h2>{t("friends.league")}</h2><span className="fr-live"><i />{t("friends.live")}</span></header>
           <p className="fr-sub">{t("friends.leagueHint")}</p>
-          <League rows={data.league} />
+          <League rows={data.league} idle={data.classmates} />
         </section>
         <section className="fr-col fr-col-friends">
           {pending > 0 && (

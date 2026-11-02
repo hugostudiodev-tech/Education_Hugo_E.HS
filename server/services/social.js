@@ -3,7 +3,7 @@
 //    gửi lời mời (bằng mã, QR, hoặc tìm theo biệt danh / đúng email) → người kia đồng ý mới thành bạn.
 //  - XP tuần chỉ cộng ở máy chủ sau khi chấm bài đạt (award-learning) — client không gửi điểm.
 //  - Bảng xếp hạng chỉ lộ PERSONA (biệt danh + nhân vật pixel, modules/persona) + chuỗi + XP:
-//    không tên thật, không ảnh thật, không email. Chưa có biệt danh thì không có tên trên bảng tuần.
+//    không tên thật, không ảnh thật, không email. Chưa có biệt danh thì hiện "Hugo learner".
 import { randomInt } from 'node:crypto';
 import { Learner as EduLearner, Report } from '../models.js';
 import { notify } from '../lib/notify.js';
@@ -25,7 +25,8 @@ export const XP_PER_LESSON = 10;   // xong một bài nhỏ lần đầu
 export const XP_REVIEW = 5;        // ôn lại được tính giữ lửa: 5 XP
 const MAX_FRIENDS = 100;
 const MAX_PENDING = 50;
-const LEAGUE_SIZE = 30;
+const LEAGUE_SIZE = 50;
+const CLASSMATES = 50;
 const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // bỏ 0/O/1/I/L cho dễ đọc
 
 /** Tuần ISO theo giờ VN, dạng "2026-W45" — thi đua reset 00:00 thứ Hai giờ VN. */
@@ -72,7 +73,7 @@ function row(doc, week, day, personas, myEmail) {
   const persona = personas.get(doc.email);
   return {
     code: doc.friendCode || '',
-    name: persona?.nickname || '',
+    name: persona?.nickname || 'Hugo learner',
     avatar: persona?.avatar || null,
     streak: streakView(doc.streak, day).count,
     xp: doc.xpWeek === week ? doc.xpWeekly || 0 : 0,
@@ -92,21 +93,24 @@ export async function socialView(email) {
   const week = weekOf(day);
   const me = await meDoc(email);
   const codes = [...new Set([...(me.friends || []), ...(me.requestsIn || []), ...(me.requestsOut || [])])];
-  const [people, topDocs] = await Promise.all([
+  const [people, topDocs, idleDocs] = await Promise.all([
     codes.length ? EduLearner.find({ friendCode: { $in: codes } }).select(FIELDS).lean() : [],
-    // ponytail: lấy dư 4 lần rồi lọc ai có biệt danh — đủ khi đa số người học đã qua màn Persona bắt buộc.
-    EduLearner.find({ xpWeek: week, xpWeekly: { $gt: 0 } }).sort({ xpWeekly: -1 }).limit(LEAGUE_SIZE * 4).select(FIELDS).lean(),
+    EduLearner.find({ xpWeek: week, xpWeekly: { $gt: 0 } }).sort({ xpWeekly: -1 }).limit(LEAGUE_SIZE).select(FIELDS).lean(),
+    // Bạn học chưa có XP tuần này: vẫn hiện dưới bảng (chưa xếp hạng), ai học gần đây lên trước.
+    // ponytail: giới hạn CLASSMATES người, phân trang khi lớp đông hơn.
+    EduLearner.find({ $or: [{ xpWeek: { $ne: week } }, { xpWeekly: { $not: { $gt: 0 } } }] }).sort({ updatedAt: -1 }).limit(CLASSMATES).select(FIELDS).lean(),
   ]);
-  const personas = await PersonaService.forEmails([...new Set([email, ...people, ...topDocs].map((d) => d.email || d))]);
+  const personas = await PersonaService.forEmails([...new Set([email, ...people, ...topDocs, ...idleDocs].map((d) => d.email || d))]);
   const byCode = new Map(people.map((d) => [d.friendCode, d]));
   const list = (arr) => (arr || []).map((c) => byCode.get(c)).filter(Boolean).map((d) => row(d, week, day, personas, email));
   const mine = row(me, week, day, personas, email);
-  const leagueDocs = topDocs.filter((d) => personas.get(d.email)?.nickname).slice(0, LEAGUE_SIZE);
-  const league = leagueDocs.map((d) => row(d, week, day, personas, email));
-  if (mine.name && !league.some((r) => r.me)) league.push(mine);
+  // Học là lên bảng ngay: có XP tuần này là được xếp hạng, không cần đặt biệt danh trước.
+  const league = topDocs.map((d) => row(d, week, day, personas, email));
+  if (mine.xp > 0 && !league.some((r) => r.me)) league.push(mine);
   league.sort((a, b) => b.xp - a.xp || b.streak - a.streak);
+  const classmates = idleDocs.map((d) => row(d, week, day, personas, email));
   const friends = [mine, ...list(me.friends)].sort((a, b) => b.xp - a.xp || b.streak - a.streak);
-  return { code: me.friendCode, week, me: mine, league, friends, requestsIn: list(me.requestsIn), requestsOut: list(me.requestsOut) };
+  return { code: me.friendCode, week, me: mine, league, classmates, friends, requestsIn: list(me.requestsIn), requestsOut: list(me.requestsOut) };
 }
 
 /** Tìm người học theo đúng mã, đúng email, hoặc tiền tố biệt danh. Trả hàng công khai (không email). */
