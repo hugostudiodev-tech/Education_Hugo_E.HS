@@ -40,6 +40,8 @@ import step38 from "./steps/step38.js";
 import step39 from "./steps/step39.js";
 import step40 from "./steps/step40.js";
 
+import { shuffleQuiz } from "../shuffleQuiz.js";
+
 export { STAGES, STEP_IDS, STEP_PASS_PERCENT, MAX_SLIDES } from "./stages.js";
 
 const WRITTEN = new Map([
@@ -47,7 +49,7 @@ const WRITTEN = new Map([
   step11, step12, step13, step14, step15, step16, step17, step18, step19, step20,
   step21, step22, step23, step24, step25, step26, step27, step28, step29, step30,
   step31, step32, step33, step34, step35, step36, step37, step38, step39, step40,
-].map((step) => [step.id, step]));
+].map(shuffleQuiz).map((step) => [step.id, step]));
 
 export const WEB_COURSES = OUTLINE.map(([stage, title], index) => ({
   lang: "python",

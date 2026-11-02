@@ -42,10 +42,11 @@ import py39 from "./steps/py39.js";
 import py40 from "./steps/py40.js";
 
 import { STAGES as ALL_STAGES } from "./stages.js";
+import { shuffleQuiz } from "../shuffleQuiz.js";
 
 export { STEP_IDS, STEP_PASS_PERCENT, MAX_SLIDES } from "./stages.js";
 
-const WRITTEN = new Map([py1, py2, py3, py4, py5, py6, py7, py8, py9, py10, py11, py12, py13, py14, py15, py16, py17, py18, py19, py20, py21, py22, py23, py24, py25, py26, py27, py28, py29, py30, py31, py32, py33, py34, py35, py36, py37, py38, py39, py40].map((step) => [step.id, step]));
+const WRITTEN = new Map([py1, py2, py3, py4, py5, py6, py7, py8, py9, py10, py11, py12, py13, py14, py15, py16, py17, py18, py19, py20, py21, py22, py23, py24, py25, py26, py27, py28, py29, py30, py31, py32, py33, py34, py35, py36, py37, py38, py39, py40].map(shuffleQuiz).map((step) => [step.id, step]));
 
 /** Cả 40 step theo đề cương; step chưa soạn mang `draft: true`. */
 const OUTLINED = OUTLINE.map(([stage, title], index) => {

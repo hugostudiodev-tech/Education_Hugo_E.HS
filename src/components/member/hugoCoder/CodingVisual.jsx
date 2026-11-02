@@ -1306,6 +1306,282 @@ const VISUALS = {
       <Label x={290} y={102} size={8.5} muted>FK → PK</Label>
     </>
   ),
+
+  // ——— Python cơ bản, chặng 6–8 (py26–py40) ———
+  "py-function-machine": () => (
+    <>
+      <Box x={8} y={62} w={62} h={44} label="8.5" sub="đối số" mono />
+      <Arrow x1={70} y1={84} x2={98} y2={84} />
+      <rect x={100} y={40} width={120} height={88} rx={12} fill={ACCENT} fillOpacity="0.14" stroke={ACCENT} strokeWidth="1.6" />
+      <Label x={160} y={58} mono bold size={10}>def xep_loai(diem):</Label>
+      <Label x={112} y={78} anchor="start" mono size={8.5} muted>if diem &gt;= 8:</Label>
+      <Label x={124} y={92} anchor="start" mono size={8.5} muted>return "Giỏi"</Label>
+      <Label x={112} y={112} anchor="start" mono size={8.5} muted>return "Khá" …</Label>
+      <Arrow x1={220} y1={84} x2={248} y2={84} label="return" />
+      <Box x={250} y={62} w={62} h={44} label={'"Giỏi"'} sub="giá trị trả về" mono accent />
+      <Label x={160} y={152} muted>Tham số nhận dữ liệu vào · return trao kết quả về nơi gọi</Label>
+      <Label x={160} y={168} muted size={9}>print chỉ hiện lên màn hình, nơi gọi không nhận được gì</Label>
+    </>
+  ),
+  "py-scope": () => (
+    <>
+      <rect x={8} y={8} width={304} height={150} rx={10} fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeOpacity="0.35" />
+      <Label x={18} y={24} anchor="start" bold size={10}>Toàn cục (cả tệp)</Label>
+      <Label x={18} y={40} anchor="start" mono size={9}>diem_lop = 9.8</Label>
+      <rect x={120} y={32} width={180} height={112} rx={10} fill={ACCENT} fillOpacity="0.12" stroke={ACCENT} strokeWidth="1.5" />
+      <Label x={210} y={48} bold size={10}>Cục bộ: cong_thuong()</Label>
+      <Label x={210} y={70} mono size={9}>diem = 9.8  (tham số)</Label>
+      <Label x={210} y={86} mono size={9}>thuong = 0.5  (mặc định)</Label>
+      <Label x={210} y={102} mono size={9}>ket_qua = 10</Label>
+      <Label x={210} y={130} size={8.5} muted>biến mất khi hàm kết thúc</Label>
+      <Arrow x1={60} y1={60} x2={118} y2={70} label="truyền vào" />
+      <Arrow x1={130} y1={110} x2={70} y2={128} label="return" />
+      <Label x={60} y={140} mono size={9} bold>10</Label>
+      <Label x={160} y={174} muted size={9}>Bên ngoài không thấy được biến cục bộ của hàm</Label>
+    </>
+  ),
+  "py-call-tree": () => (
+    <>
+      <Box x={120} y={6} w={80} h={26} label="main()" mono />
+      <Arrow x1={160} y1={32} x2={160} y2={50} />
+      <Box x={110} y={52} w={100} h={26} label="bao_cao(ds)" mono accent />
+      <Arrow x1={140} y1={78} x2={70} y2={104} label="1" />
+      <Arrow x1={180} y1={78} x2={250} y2={104} label="2" />
+      <Box x={14} y={106} w={112} h={34} label="trung_binh(ds)" sub="trả 7.0" mono />
+      <Box x={194} y={106} w={112} h={34} label="xep_loai(7.0)" sub={'trả "Đạt"'} mono />
+      <Label x={160} y={162} muted>Hàm lớn gọi hàm nhỏ · mỗi hàm một việc, thử riêng được</Label>
+    </>
+  ),
+  "py-module-import": () => (
+    <>
+      <Box x={8} y={12} w={120} h={58} label="statistics" sub="mean · median · …" mono />
+      <Box x={8} y={94} w={120} h={58} label="math" sub="sqrt · ceil · pi · …" mono />
+      <rect x={180} y={26} width={132} height={112} rx={10} fill={ACCENT} fillOpacity="0.12" stroke={ACCENT} strokeWidth="1.5" />
+      <Label x={246} y={44} bold mono size={10}>so_lop.py</Label>
+      <Label x={190} y={66} anchor="start" mono size={8.5}>import statistics</Label>
+      <Label x={190} y={82} anchor="start" mono size={8.5}>from math import sqrt</Label>
+      <Label x={190} y={106} anchor="start" mono size={8.5}>statistics.mean(ds)</Label>
+      <Label x={190} y={122} anchor="start" mono size={8.5}>sqrt(81)</Label>
+      <Arrow x1={128} y1={41} x2={178} y2={62} label="import" />
+      <Arrow x1={128} y1={123} x2={178} y2={80} label="from…import" />
+      <Label x={160} y={172} muted size={9}>Module = tệp .py chứa hàm dùng lại · không cần chép code</Label>
+    </>
+  ),
+  "py-grade-pipeline": () => (
+    <>
+      <Box x={4} y={50} w={68} h={40} label="Nhập" sub="điểm, hệ số" />
+      <Arrow x1={72} y1={70} x2={84} y2={70} />
+      <polygon points="122,46 160,70 122,94 84,70" fill={ACCENT} fillOpacity="0.16" stroke={ACCENT} />
+      <Label x={122} y={73} size={8.5} bold>hợp lệ?</Label>
+      <Arrow x1={122} y1={94} x2={122} y2={128} label="không" />
+      <Box x={82} y={130} w={80} h={26} label="Dữ liệu sai" />
+      <Arrow x1={160} y1={70} x2={172} y2={70} />
+      <Box x={174} y={50} w={64} h={40} label="trung_binh" sub="có trọng số" mono />
+      <Arrow x1={238} y1={70} x2={250} y2={70} />
+      <Box x={252} y={50} w={64} h={40} label="xep_loai" sub="Giỏi/Khá/…" mono accent />
+      <Arrow x1={284} y1={90} x2={284} y2={128} />
+      <Box x={234} y={130} w={82} h={26} label="bao_cao" mono />
+      <Label x={160} y={22} muted>Mỗi quy tắc nằm ở đúng một hàm — một nguồn sự thật</Label>
+    </>
+  ),
+  "py-try-flow": () => (
+    <>
+      <Box x={110} y={4} w={100} h={26} label="try: float(s)" mono accent />
+      <Arrow x1={160} y1={30} x2={160} y2={44} />
+      <polygon points="160,46 206,66 160,86 114,66" fill={ACCENT} fillOpacity="0.16" stroke={ACCENT} />
+      <Label x={160} y={69} size={9} bold>có lỗi?</Label>
+      <Arrow x1={114} y1={66} x2={78} y2={66} label="có" />
+      <Box x={4} y={52} w={72} h={30} label="except" sub="ValueError" mono />
+      <Arrow x1={206} y1={66} x2={242} y2={66} label="không" />
+      <Box x={244} y={52} w={72} h={30} label="else" sub="dùng kết quả" mono />
+      <Arrow x1={40} y1={82} x2={130} y2={124} />
+      <Arrow x1={280} y1={82} x2={190} y2={124} />
+      <Box x={110} y={124} w={100} h={28} label="finally" sub="luôn chạy" mono />
+      <Label x={160} y={172} muted size={9}>Chương trình không sập — lỗi được giải thích rồi đi tiếp</Label>
+    </>
+  ),
+  "py-file-modes": () => (
+    <>
+      {[["r", "đọc", ["An: 8.5", "Bình: 7.0"], null], ["w", "ghi mới", ["Chi: 9"], "nội dung cũ bị xoá!"], ["a", "nối thêm", ["An: 8.5", "Bình: 7.0", "Chi: 9"], null]].map(([mode, name, lines, warn], i) => (
+        <g key={mode}>
+          <rect x={10 + i * 104} y={30} width="92" height="100" rx="6" fill="currentColor" fillOpacity="0.05" stroke={i === 1 ? ACCENT : "currentColor"} strokeOpacity={i === 1 ? 1 : 0.35} />
+          <Label x={56 + i * 104} y={20} bold mono size={11}>{`"${mode}" · ${name}`}</Label>
+          {lines.map((line, j) => (
+            <Label key={line} x={18 + i * 104} y={52 + j * 16} anchor="start" mono size={8.5}
+              bold={(i === 2 && j === 2) || i === 1}>{line}</Label>
+          ))}
+          {warn && <Label x={56 + i * 104} y={122} size={8} muted>{warn}</Label>}
+          {i === 2 && <Label x={56 + i * 104} y={122} size={8} muted>dòng mới ở cuối</Label>}
+          {i === 0 && <Label x={56 + i * 104} y={122} size={8} muted>tệp phải tồn tại</Label>}
+        </g>
+      ))}
+      <Label x={160} y={152} mono size={9}>with open(path, "a", encoding="utf-8") as f:</Label>
+      <Label x={160} y={170} muted size={9}>with tự đóng tệp, kể cả khi có lỗi</Label>
+    </>
+  ),
+  "py-csv-table": () => (
+    <>
+      <rect x={6} y={22} width={118} height={92} rx={6} fill="currentColor" fillOpacity="0.05" stroke="currentColor" strokeOpacity="0.35" />
+      <Label x={65} y={14} bold size={9}>Tệp diem.csv (văn bản)</Label>
+      {["ma,ten,diem", "HS01,An,8.5", "HS02,Bình,7", "HS03,Chi,9"].map((line, i) => (
+        <Label key={line} x={14} y={42 + i * 18} anchor="start" mono size={9} bold={i === 0}>{line}</Label>
+      ))}
+      <Arrow x1={126} y1={68} x2={150} y2={68} label="DictReader" />
+      {["ma", "ten", "diem"].map((h, c) => (
+        <g key={h}>
+          <rect x={154 + c * 54} y={22} width="54" height="20" fill={ACCENT} fillOpacity="0.22" stroke={ACCENT} />
+          <Label x={181 + c * 54} y={36} bold mono size={9}>{h}</Label>
+          {[["HS01", "An", "8.5"], ["HS02", "Bình", "7"], ["HS03", "Chi", "9"]].map((row, r) => (
+            <g key={row[0]}>
+              <rect x={154 + c * 54} y={42 + r * 20} width="54" height="20" fill="none" stroke="currentColor" strokeOpacity="0.3" />
+              <Label x={181 + c * 54} y={56 + r * 20} mono size={9}>{row[c]}</Label>
+            </g>
+          ))}
+        </g>
+      ))}
+      <Label x={235} y={120} mono size={8.5}>{'row["diem"] == "8.5"'}</Label>
+      <Label x={160} y={148} muted size={9}>Hàng đầu thành tên cột · mỗi dòng sau là một dict</Label>
+      <Label x={160} y={166} muted size={9}>Mọi ô đều là xâu — nhớ float(row["diem"]) trước khi tính</Label>
+    </>
+  ),
+  "py-comprehension": () => (
+    <>
+      <Label x={160} y={22} bold size={10}>Một dòng comprehension…</Label>
+      {[["min(d+0.5, 10)", "biểu thức: giữ gì", 18], ["for d in diem", "dãy: lấy từ đâu", 122], ["if d >= 5", "lọc: điều kiện", 222]].map(([code, note, x], i) => (
+        <g key={code}>
+          <rect x={x} y={32} width={i === 0 ? 100 : 96} height="26" rx="5" fill={ACCENT} fillOpacity={0.1 + i * 0.08} stroke={ACCENT} />
+          <Label x={x + (i === 0 ? 50 : 48)} y={49} mono bold size={9}>{code}</Label>
+          <Label x={x + (i === 0 ? 50 : 48)} y={72} muted size={8.5}>{note}</Label>
+        </g>
+      ))}
+      <Label x={10} y={38} anchor="start" mono bold size={12}>[</Label>
+      <Label x={312} y={38} anchor="end" mono bold size={12}>]</Label>
+      <Label x={160} y={98} bold size={10}>…bằng vòng lặp này:</Label>
+      <Label x={80} y={118} anchor="start" mono size={9}>kq = []</Label>
+      <Label x={80} y={132} anchor="start" mono size={9}>for d in diem:</Label>
+      <Label x={98} y={146} anchor="start" mono size={9}>if d &gt;= 5:</Label>
+      <Label x={116} y={160} anchor="start" mono size={9}>kq.append(min(d+0.5, 10))</Label>
+    </>
+  ),
+  "py-data-pipeline": () => (
+    <>
+      {[["CSV thô", "văn bản"], ["parse", "csv.reader"], ["kiểm tra", "kiểu · miền · trùng"], ["dữ liệu sạch", "list tuple"], ["thống kê", "TB · đếm"], ["báo cáo", "+ giới hạn"]].map(([label, sub], i) => {
+        const x = 6 + (i % 3) * 106;
+        const y = i < 3 ? 22 : 104;
+        return <Box key={label} x={x} y={y} w={94} h={40} label={label} sub={sub} accent={i === 2} />;
+      })}
+      <Arrow x1={100} y1={42} x2={110} y2={42} />
+      <Arrow x1={206} y1={42} x2={216} y2={42} />
+      <Arrow x1={260} y1={62} x2={60} y2={102} />
+      <Arrow x1={100} y1={124} x2={110} y2={124} />
+      <Arrow x1={206} y1={124} x2={216} y2={124} />
+      <Label x={314} y={78} anchor="end" size={8.5} muted>dòng lỗi → đếm, ghi lại</Label>
+      <Label x={160} y={170} muted size={9}>Kiểm ngay tại ranh giới · phần sau chỉ làm việc với dữ liệu sạch</Label>
+    </>
+  ),
+  "py-class-objects": () => (
+    <>
+      <rect x={8} y={18} width={120} height={120} rx={8} fill={ACCENT} fillOpacity="0.12" stroke={ACCENT} strokeWidth="1.5" strokeDasharray="5 3" />
+      <Label x={68} y={36} bold mono size={10}>class HocSinh</Label>
+      <Label x={68} y={50} muted size={8.5}>bản thiết kế</Label>
+      <Label x={16} y={72} anchor="start" mono size={8.5}>ten</Label>
+      <Label x={16} y={86} anchor="start" mono size={8.5}>diem</Label>
+      <line x1={16} y1={94} x2={120} y2={94} stroke="currentColor" strokeOpacity="0.3" />
+      <Label x={16} y={110} anchor="start" mono size={8.5}>trung_binh()</Label>
+      <Label x={16} y={124} anchor="start" mono size={8.5}>xep_loai()</Label>
+      {[["an", "An", "[8, 9, 7]", "8.0"], ["binh", "Bình", "[6, 7, 8]", "7.0"]].map(([name, ten, diem, tb], i) => (
+        <g key={name}>
+          <Arrow x1={128} y1={60 + i * 36} x2={178} y2={38 + i * 72} label={i ? "" : "tạo"} />
+          <rect x={180} y={14 + i * 72} width={132} height={60} rx={8} fill="currentColor" fillOpacity="0.05" stroke="currentColor" strokeOpacity="0.4" />
+          <Label x={246} y={30 + i * 72} bold mono size={9.5}>{`${name} (object)`}</Label>
+          <Label x={188} y={46 + i * 72} anchor="start" mono size={8.5}>{`ten = "${ten}"`}</Label>
+          <Label x={188} y={60 + i * 72} anchor="start" mono size={7.5}>{`diem = ${diem} → TB ${tb}`}</Label>
+        </g>
+      ))}
+      <Label x={160} y={166} muted size={9}>Một class · nhiều object · mỗi object giữ dữ liệu riêng</Label>
+    </>
+  ),
+  "py-random-seed": () => (
+    <>
+      {[0, 1].map((run) => (
+        <g key={run}>
+          <Box x={6} y={22 + run * 62} w={76} h={40} label="seed(7)" sub={`lần chạy ${run + 1}`} mono accent />
+          <Arrow x1={82} y1={42 + run * 62} x2={104} y2={42 + run * 62} />
+          <Box x={106} y={22 + run * 62} w={70} h={40} label="bộ sinh" sub="giả ngẫu nhiên" />
+          <Arrow x1={176} y1={42 + run * 62} x2={196} y2={42 + run * 62} />
+          {[6, 2, 9, 4].map((n, i) => (
+            <g key={i}>
+              <rect x={198 + i * 29} y={28 + run * 62} width="25" height="28" rx="4" fill={ACCENT} fillOpacity="0.14" stroke={ACCENT} />
+              <Label x={210.5 + i * 29} y={47 + run * 62} mono bold size={11}>{n}</Label>
+            </g>
+          ))}
+        </g>
+      ))}
+      <Label x={160} y={150} muted size={9}>Cùng seed → cùng dãy số: dễ kiểm thử, dễ tái hiện lỗi</Label>
+      <Label x={160} y={168} muted size={9}>Vì đoán trước được, mật khẩu/token phải dùng module secrets</Label>
+    </>
+  ),
+  "py-binary-search": () => {
+    const ds = [3, 7, 12, 18, 23, 31, 42];
+    const rows = [[0, 6, 3], [4, 6, 5], [4, 4, 4]];
+    return (
+      <>
+        <Label x={160} y={12} bold size={9.5}>Tìm 23 trong list đã sắp</Label>
+        {rows.map(([l, r, m], row) => (
+          <g key={row}>
+            <Label x={14} y={40 + row * 46} anchor="start" size={8.5} muted>{`lượt ${row + 1}`}</Label>
+            {ds.map((v, i) => {
+              const out = i < l || i > r;
+              return (
+                <g key={i} opacity={out ? 0.25 : 1}>
+                  <rect x={56 + i * 36} y={24 + row * 46} width="32" height="24" rx="4"
+                    fill={i === m ? ACCENT : "currentColor"} fillOpacity={i === m ? 0.3 : 0.06}
+                    stroke={i === m ? ACCENT : "currentColor"} strokeOpacity={i === m ? 1 : 0.35} />
+                  <Label x={72 + i * 36} y={40 + row * 46} mono bold={i === m} size={10}>{v}</Label>
+                </g>
+              );
+            })}
+            <Label x={72 + m * 36} y={60 + row * 46} size={7.5} muted>{row === 2 ? "giữa = 23 ✓" : `giữa = ${ds[m]} < 23`}</Label>
+          </g>
+        ))}
+        <Label x={160} y={170} muted size={9}>Mỗi lượt bỏ một nửa · 7 phần tử chỉ cần 3 lần so sánh</Label>
+      </>
+    );
+  },
+  "py-call-stack": () => (
+    <>
+      <Label x={90} y={14} bold size={9.5}>Gọi xuống ↓</Label>
+      <Label x={250} y={14} bold size={9.5}>Trả lên ↑</Label>
+      {[4, 3, 2, 1].map((n, i) => (
+        <g key={n}>
+          <rect x={14 + i * 4} y={22 + i * 32} width={162 - i * 8} height="26" rx="5"
+            fill={ACCENT} fillOpacity={0.08 + i * 0.07} stroke={ACCENT} />
+          <Label x={95} y={39 + i * 32} mono size={9} bold={n === 1}>{n === 1 ? "giai_thua(1) → 1 (cơ sở)" : `giai_thua(${n}) = ${n} × …`}</Label>
+          <Label x={250} y={39 + i * 32} mono size={9}>{["4 × 6 = 24", "3 × 2 = 6", "2 × 1 = 2", "1"][i]}</Label>
+          {i < 3 && <Arrow x1={250} y1={44 + (i + 1) * 32 - 18} x2={250} y2={44 + i * 32} />}
+        </g>
+      ))}
+      <Label x={160} y={162} muted size={9}>Mỗi lời gọi là một khung trên ngăn xếp, chờ lời gọi con trả về</Label>
+      <Label x={160} y={176} muted size={8.5}>Không có trường hợp cơ sở → RecursionError</Label>
+    </>
+  ),
+  "py-solop-arch": () => (
+    <>
+      <Box x={4} y={24} w={70} h={40} label="input()" sub="HS01|8,9,7" mono />
+      <Arrow x1={74} y1={44} x2={86} y2={44} />
+      <Box x={88} y={24} w={70} h={40} label="doc_dong" sub="kiểm + parse" mono accent />
+      <Arrow x1={158} y1={44} x2={170} y2={44} />
+      <Box x={172} y={24} w={70} h={40} label="HocSinh" sub="list object" mono />
+      <Arrow x1={242} y1={44} x2={254} y2={44} />
+      <Box x={256} y={24} w={60} h={40} label="sort" sub="(-tb, ma)" mono />
+      <Arrow x1={286} y1={64} x2={286} y2={92} />
+      <Box x={226} y={94} w={90} h={40} label="in_bao_cao" sub="bảng + giới hạn" mono />
+      <Arrow x1={123} y1={64} x2={123} y2={92} label="dòng lỗi" />
+      <Box x={78} y={94} w={90} h={40} label="đếm lỗi" sub="mã trùng, ngoài 0..10" />
+      <rect x={4} y={146} width={312} height={26} rx={6} fill="currentColor" fillOpacity="0.05" stroke="currentColor" strokeOpacity="0.35" strokeDasharray="4 3" />
+      <Label x={160} y={163} mono size={7.5}>assert: list rỗng · điểm 0/10 · dòng sai · mã trùng · bằng điểm</Label>
+    </>
+  ),
 };
 
 export default function CodingVisual({ name, label }) {
