@@ -4,16 +4,18 @@
  *   - Hugo Studio: OAuth 2 + PKCE với máy chủ Hugo Studio (www.hugowishpax.studio)
  *   - Passkey: Face ID / vân tay. rpID = tên miền gốc nên passkey tạo ở Hugo Studio vẫn dùng được.
  * Cùng email = cùng một tài khoản, đăng nhập đường nào cũng vào đúng người học đó.
- * Admin không có hệ đăng nhập riêng: là người học có email trong ADMIN_EMAILS.
+ * Admin: hệ riêng /api/admin-auth (cookie edu-admin.*, collection admin_*), mã 6 số gửi
+ * vào email — chỉ email trong ADMIN_EMAILS nhận được mã. Đăng nhập học không mở được admin.
  */
 import mongoose from 'mongoose';
 import { betterAuth, APIError } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { fromNodeHeaders } from 'better-auth/node';
-import { bearer, genericOAuth } from 'better-auth/plugins';
+import { bearer, emailOTP, genericOAuth } from 'better-auth/plugins';
 import { passkey } from '@better-auth/passkey';
 import { Learner } from '../models.js';
 import { EDU_ORIGIN, isProd, ORIGINS } from './config.js';
+import { sendMail } from './notify.js';
 
 const DAY = 24 * 60 * 60;
 const HUGO = process.env.HUGO_STUDIO_ORIGIN || 'https://www.hugowishpax.studio';
@@ -21,12 +23,12 @@ const HUGO = process.env.HUGO_STUDIO_ORIGIN || 'https://www.hugowishpax.studio';
 export const ADMIN_EMAILS = new Set(String(process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean));
 
 let auth = null;
+let adminAuth = null;
 
 export function initAuth() {
   const db = mongoose.connection.db;
   const local = (origin) => !isProd && /^https?:\/\/((?:[a-z0-9-]+\.)?localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || '');
-  auth = betterAuth({
-    appName: 'Education Hugo',
+  const shared = {
     basePath: '/api/auth',
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL || (isProd ? EDU_ORIGIN : 'http://localhost:3002'),
@@ -35,13 +37,41 @@ export function initAuth() {
       const origin = request?.headers?.get?.('origin') || '';
       return local(origin) ? [...ORIGINS, origin] : ORIGINS;
     },
-    session: { expiresIn: 30 * DAY, updateAge: DAY, cookieCache: { enabled: true, maxAge: 5 * 60 } },
     rateLimit: { enabled: true, window: 60, max: 30, storage: 'memory' },
-    advanced: {
-      cookiePrefix: 'edu',
-      ipAddress: { ipAddressHeaders: ['cf-connecting-ip', 'x-forwarded-for'] },
-      defaultCookieAttributes: { sameSite: 'lax', secure: isProd, httpOnly: true },
-    },
+  };
+  const advanced = (cookiePrefix) => ({
+    cookiePrefix,
+    ipAddress: { ipAddressHeaders: ['cf-connecting-ip', 'x-forwarded-for'] },
+    defaultCookieAttributes: { sameSite: 'lax', secure: isProd, httpOnly: true },
+  });
+
+  adminAuth = betterAuth({
+    ...shared,
+    appName: 'Education Hugo Admin',
+    basePath: '/api/admin-auth',
+    advanced: advanced('edu-admin'),
+    session: { expiresIn: 7 * DAY, updateAge: DAY, modelName: 'admin_session' },
+    user: { modelName: 'admin_user' },
+    account: { modelName: 'admin_account' },
+    verification: { modelName: 'admin_verification' },
+    plugins: [emailOTP({
+      otpLength: 6, expiresIn: 300, allowedAttempts: 5,
+      // Email lạ: im lặng (không lộ ai là admin), không gửi mã.
+      sendVerificationOTP: async ({ email, otp }) => {
+        if (!ADMIN_EMAILS.has(email.toLowerCase())) return;
+        await sendMail(email, `Mã đăng nhập quản trị: ${otp}`, `<p>Mã đăng nhập trang quản trị Education Hugo:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${otp}</p><p>Mã hết hạn sau 5 phút. Không phải bạn yêu cầu thì bỏ qua thư này.</p>`);
+      },
+    })],
+    databaseHooks: { user: { create: { before: async (user) => {
+      if (!ADMIN_EMAILS.has(String(user.email).toLowerCase())) throw new APIError('FORBIDDEN', { message: 'Không phải quản trị viên.' });
+    } } } },
+  });
+
+  auth = betterAuth({
+    ...shared,
+    appName: 'Education Hugo',
+    session: { expiresIn: 30 * DAY, updateAge: DAY, cookieCache: { enabled: true, maxAge: 5 * 60 } },
+    advanced: advanced('edu'),
     socialProviders: {
       google: { clientId: process.env.GOOGLE_CLIENT_ID || '', clientSecret: process.env.GOOGLE_CLIENT_SECRET || '' },
     },
@@ -84,6 +114,7 @@ export function initAuth() {
 }
 
 export const getAuth = () => auth;
+export const getAdminAuth = () => adminAuth;
 
 async function sessionOf(req) {
   const data = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) }).catch(() => null);
@@ -107,7 +138,7 @@ export async function optionalUser(req, _res, next) {
 }
 
 export async function requireAdmin(req, res, next) {
-  const data = await sessionOf(req);
+  const data = await adminAuth.api.getSession({ headers: fromNodeHeaders(req.headers) }).catch(() => null);
   const email = data?.user?.email?.toLowerCase();
   if (!email) return res.status(401).json({ code: 'LOGIN_REQUIRED', error: 'Đăng nhập để tiếp tục.' });
   if (!ADMIN_EMAILS.has(email)) return res.status(403).json({ code: 'NOT_ADMIN', error: 'Tài khoản này không phải quản trị viên.' });

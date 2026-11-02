@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cron from 'node-cron';
 import { toNodeHandler } from 'better-auth/node';
-import { initAuth } from './lib/auth.js';
+import { getAdminAuth, initAuth } from './lib/auth.js';
 import { isProd, ORIGINS } from './lib/config.js';
 import lessons from './routes/lessons.js';
 import me from './routes/me.js';
@@ -41,6 +41,7 @@ app.use(cors({ origin: (origin, cb) => cb(null, !origin || ORIGINS.includes(orig
 
 // Better Auth đọc body thô — gắn TRƯỚC express.json.
 app.all('/api/auth/*', toNodeHandler(auth));
+app.all('/api/admin-auth/*', toNodeHandler(getAdminAuth()));
 app.use(express.json({ limit: '200kb' }));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down', uptime: Math.round(process.uptime()) }));

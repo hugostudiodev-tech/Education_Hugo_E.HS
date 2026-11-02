@@ -16,6 +16,9 @@ import ServerStatusBanner from "./components/system/ServerStatusBanner";
 import PWAUpdatePrompt from "./components/ui/PWAUpdatePrompt";
 
 const EducationApp = lazy(() => import("./education/EducationApp"));
+// /admin: trang quản trị riêng, không đi qua vỏ người học (cổng cài app, hồ sơ, chuỗi ngày).
+const EduAdmin = lazy(() => import("./education/admin/EduAdmin"));
+const IS_ADMIN = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const loadMotionFeatures = () => import("./config/motionFeatures").then((mod) => mod.default);
 const IOS_SPRING = { type: "spring", visualDuration: 0.42, bounce: 0.18 };
 
@@ -49,7 +52,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <LazyMotion features={loadMotionFeatures}>
           <MotionConfig reducedMotion="user" transition={IOS_SPRING}>
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Suspense fallback={<StatusScreen kind="loading" />}><EducationApp /></Suspense>
+              <Suspense fallback={<StatusScreen kind="loading" />}>{IS_ADMIN ? <EduAdmin /> : <EducationApp />}</Suspense>
               <PWAUpdatePrompt />
               <ServerStatusBanner />
               <Toaster
