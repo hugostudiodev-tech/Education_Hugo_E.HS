@@ -20,7 +20,8 @@ import { sendMail } from './notify.js';
 const DAY = 24 * 60 * 60;
 const HUGO = process.env.HUGO_STUDIO_ORIGIN || 'https://www.hugowishpax.studio';
 
-export const ADMIN_EMAILS = new Set(String(process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean));
+// Chịu được giá trị dán vội trên Render: "a@b.com", <a@b.com>, cách nhau dấu phẩy / chấm phẩy / khoảng trắng.
+export const ADMIN_EMAILS = new Set(String(process.env.ADMIN_EMAILS || '').split(/[\s,;]+/).map((e) => e.replace(/["'<>]/g, '').trim().toLowerCase()).filter((e) => e.includes('@')));
 
 let auth = null;
 let adminAuth = null;
