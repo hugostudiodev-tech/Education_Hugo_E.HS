@@ -1,0 +1,53 @@
+{
+  "navbar": {
+    "home": "Home",
+    "services": "Services",
+    "templates": "Templates",
+    "faq": "FAQ",
+    "booking": "Booking",
+    "account": "Account",
+    "pricing": "Pricing",
+    "benefits": "Student Benefits",
+    "portal": "Access Client Portal",
+    "loginAdmin": "Admin Login",
+    "hello": "Hello",
+    "mainMenu": "Main Menu",
+    "login": "Log In",
+    "language": "Language",
+    "chooseLanguage": "Choose language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "footer": {
+    "tagline": "A considered digital space for learners, individuals and small enterprises seeking a distinctive online presence.",
+    "services": "Services",
+    "landingPage": "Landing Page",
+    "portfolio": "Personal Portfolio",
+    "bioLink": "Bio Link (edu)",
+    "customUIUX": "Custom UI/UX",
+    "links": "Explore",
+    "home": "Home",
+    "introduction": "Introduction",
+    "pricing": "Pricing",
+    "booking": "Start a Conversation",
+    "connect": "Connect",
+    "partner": "Partners",
+    "privacyPolicy": "Privacy Policy",
+    "supportServer": "Support the Server",
+    "userGuide": "User Guide"
+  },
+  "os": {
+    "home": "Home",
+    "tools": "Tools",
+    "recent": "Recent",
+    "all": "All",
+    "seeAll": "See all",
+    "continue": "Continue",
+    "quickActions": "Quick actions",
+    "allFeatures": "All features",
+    "noRecent": "Nothing recent yet",
+    "noRecentBody": "What you open shows up here for quick access.",
+    "activity": "Activity",
+    "overview": "Overview"
+  }
+}

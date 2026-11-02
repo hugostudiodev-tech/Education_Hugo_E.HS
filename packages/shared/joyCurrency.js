@@ -1,0 +1,148 @@
+// Đơn vị hiển thị của JOY — người dùng chọn một bậc số cho quen mắt.
+//
+// ── NGUYÊN TẮC QUAN TRỌNG NHẤT ─────────────────────────────────────
+// JOY LƯU TRONG VÍ CHỈ CÓ MỘT ĐƠN VỊ DUY NHẤT (gọi là JOY gốc). Mọi giá, mọi
+// trần thưởng, mọi bản ghi sổ ví, mọi phép tính ở server đều bằng JOY gốc. Đơn
+// vị dưới đây là LỚP HIỂN THỊ: nó đổi con số cho quen mắt, không đổi giá trị.
+//
+// Vì sao phải như vậy: nếu mỗi ngôn ngữ có giá riêng thì đổi ngôn ngữ là đổi
+// giá — người dùng chỉ cần chuyển sang tiếng có giá rẻ nhất để mua. Giữ một đơn
+// vị gốc thì không có kẽ hở đó, và toàn bộ bảng giá hiện có vẫn đúng.
+//
+// ── TÊN VÀ HỆ SỐ ĐỀU LÀ CỦA HUGO STUDIO ────────────────────────────
+// Không đơn vị nào mang tên, ký hiệu HAY TỶ GIÁ của một đồng tiền có thật:
+// không "JOY$", không "JOYyen", không "Đô la Mỹ", và cũng không neo theo USD/VND
+// nữa. JOY không phải tiền và không quy đổi ra tiền, nên mượn tên hay tỷ giá
+// tiền thật vừa sai bản chất vừa là mượn nhận diện của ngân hàng trung ương
+// nước người ta. Người dùng nhận ra đơn vị hợp với mình qua ĐỘ LỚN con số.
+//
+// HỆ SỐ LÀ SỐ NGUYÊN, KHÔNG CÓ SỐ LẺ — cố ý. Hệ số cũ neo theo tỷ giá thật có
+// cái nhỏ hơn 1 (1 JOY = 0,001), nên mọi số nhỏ hiển thị thành "0,00" và cả app
+// thành không đọc được với người chọn đơn vị đó. Số nguyên thì đơn vị nhỏ nhất
+// (Kavo) vẫn còn 1 JOY = 1, và không có phép làm tròn nào rơi mất giá trị.
+
+/**
+ * `code`   — mã ngắn viết cạnh số
+ * `name`   — tên riêng của đơn vị, KHÔNG dịch (danh từ riêng, như mọi tên tiền)
+ * `factor` — 1 JOY gốc bằng bao nhiêu đơn vị hiển thị (luôn là số nguyên ≥ 1)
+ */
+export const JOY_DENOMS = {
+  en: { code: "JOY", name: "JOY", factor: 1 },
+  es: { code: "JOY", name: "JOY", factor: 1 },
+  fr: { code: "JOY", name: "JOY", factor: 1 },
+  zh: { code: "JOY", name: "JOY", factor: 1 },
+  id: { code: "JOY", name: "JOY", factor: 1 },
+  vi: { code: "JOY", name: "JOY", factor: 1 },
+  th: { code: "JOY", name: "JOY", factor: 1 },
+  ja: { code: "JOY", name: "JOY", factor: 1 },
+  ko: { code: "JOY", name: "JOY", factor: 1 },
+};
+
+export const DEFAULT_DENOM = "vi";
+
+/**
+ * ĐƠN VỊ CHUẨN DUY NHẤT: JOY của Hugo Studio.
+ * Giá trị siêu lớn, là vé thông hành quyền lực nhất của toàn hệ sinh thái.
+ * 1 JOY = 1 JOY duy nhất, không quy đổi sang bất kỳ đơn vị tương đương nào.
+ */
+export const BASE_DENOM = "vi";
+
+/** Không có phí đổi đơn vị vì chỉ có 1 đơn vị JOY duy nhất. */
+export const CROSS_DENOM_FEE = 0;
+
+/** Mã ngôn ngữ (vi-VN, en_US…) → khoá đơn vị. Lạ thì về đơn vị mặc định. */
+export function denomKey(language) {
+  const base = String(language || "").toLowerCase().replace("_", "-").split("-")[0];
+  return JOY_DENOMS[base] ? base : DEFAULT_DENOM;
+}
+
+const denomOf = (language) => JOY_DENOMS[denomKey(language)];
+
+/** Hệ số luôn bằng 1 — 1 JOY duy nhất, không nhân chia quy đổi. */
+export function factorOf() {
+  return 1;
+}
+
+/** JOY gốc → số hiển thị theo đơn vị của người đó (luôn là số nguyên). */
+export function toDenom(joy, language) {
+  const parsed = Number(joy);
+  const safeJoy = Number.isFinite(parsed) ? parsed : 0;
+  return {
+    amount: Math.round(safeJoy * factorOf(language)),
+    code: denomOf(language).code,
+  };
+}
+
+/** Số người dùng nhập theo đơn vị của họ → JOY gốc (làm tròn về số nguyên). */
+export function fromDenom(amount, language) {
+  const factor = factorOf(language);
+  if (!factor) return 0;
+  return Math.round(Number(amount || 0) / factor);
+}
+
+/** Chuỗi hiển thị đầy đủ, theo cách viết số của đúng ngôn ngữ đó. */
+export function formatDenom(joy, language, locale) {
+  const { amount, code } = toDenom(joy, language);
+  return `${amount.toLocaleString(locale || language || "vi")} ${code}`;
+}
+
+/**
+ * Tỷ giá của một đơn vị so với ĐƠN VỊ CHUẨN: "1 Kavo = ? đơn vị này".
+ * Đây là con số bảng biến động hiển thị, và cũng là con số dùng để quy đổi khi
+ * gửi JOY cho người dùng đơn vị khác — một nguồn duy nhất cho cả hai việc.
+ */
+export function rateAgainstBase(language) {
+  const base = factorOf(BASE_DENOM) || 1;
+  return factorOf(language) / base;
+}
+
+/**
+ * Đổi một số tiền ĐANG HIỂN THỊ ở đơn vị này sang số hiển thị ở đơn vị kia,
+ * theo đúng tỷ giá đang chạy. Đi vòng qua JOY gốc chứ không nhân chéo hai hệ
+ * số đã làm tròn.
+ */
+export function convertDenom(amount, fromLanguage, toLanguage) {
+  return toDenom(fromDenom(amount, fromLanguage), toLanguage).amount;
+}
+
+/** Hai đơn vị này có phải đổi tiền không (es/fr cùng JOY€ nên KHÔNG tính). */
+const isCrossDenom = (a, b) => denomOf(a).code !== denomOf(b).code;
+
+/**
+ * Bảng số của một lần gửi JOY. Phí CỘNG THÊM vào phần người gửi trả — người nhận
+ * luôn nhận đủ số đã gửi, giống phí sáng tạo 5% đang chạy.
+ *
+ * Tính bằng JOY GỐC, không tính trên số hiển thị: quy đổi hai lần trên số đã làm
+ * tròn là cách chắc chắn làm lệch vài đơn vị mỗi giao dịch.
+ *
+ * Dùng CHUNG cho client và server: màn xác nhận và lệnh trừ ví phải ra cùng con
+ * số, nếu không sẽ có ngày "màn hình nói 105, ví trừ 120".
+ */
+export function transferBreakdown(joy, fromDenomLang, toDenomLang, creativeFeeRate = 0) {
+  const sent = Math.max(0, Math.round(Number(joy) || 0));
+  const crossDenom = isCrossDenom(fromDenomLang, toDenomLang);
+  const creativeFee = Math.floor(sent * creativeFeeRate);
+  const conversionFee = crossDenom ? Math.floor(sent * CROSS_DENOM_FEE) : 0;
+  return {
+    sent,
+    received: sent,
+    creativeFee,
+    conversionFee,
+    totalDeducted: sent + creativeFee + conversionFee,
+    crossDenom,
+    conversionFeeRate: crossDenom ? CROSS_DENOM_FEE : 0,
+    fromCode: denomOf(fromDenomLang).code,
+    toCode: denomOf(toDenomLang).code,
+    // Tỷ giá ĐANG CHẠY tại thời điểm lập hoá đơn, kèm số tiền mỗi bên nhìn thấy
+    // bằng đơn vị của mình. Thiếu ba con số này thì màn xác nhận phải tự tính
+    // lại bằng hệ số nền, và đó là lúc "màn hình nói một đằng, ví trừ một nẻo".
+    rate: {
+      base: denomOf(BASE_DENOM).code,
+      fromPerBase: Math.round(rateAgainstBase(fromDenomLang) * 1e4) / 1e4,
+      toPerBase: Math.round(rateAgainstBase(toDenomLang) * 1e4) / 1e4,
+    },
+    sentDisplay: toDenom(sent, fromDenomLang).amount,
+    receivedDisplay: toDenom(sent, toDenomLang).amount,
+    totalDeductedDisplay: toDenom(sent + creativeFee + conversionFee, fromDenomLang).amount,
+  };
+}
