@@ -1,0 +1,49 @@
+# Render Blueprint — máy chủ Education Hugo (workspace riêng, gói Free).
+services:
+  - type: web
+    name: education-hugo-api
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: npm ci --prefix server
+    startCommand: node server/index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: EDU_ORIGIN
+        value: https://education.hugowishpax.studio
+      - key: BETTER_AUTH_URL
+        value: https://education.hugowishpax.studio
+      - key: PASSKEY_RP_ID
+        value: hugowishpax.studio
+      - key: HUGO_STUDIO_ORIGIN
+        value: https://www.hugowishpax.studio
+      - key: MONGODB_URI
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: HUGO_OAUTH_CLIENT_ID
+        sync: false
+      - key: HUGO_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:contact@hugowishpax.studio
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

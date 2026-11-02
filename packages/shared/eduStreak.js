@@ -4,23 +4,23 @@
 // Luật (yêu cầu của chủ dự án, 31/10/2026):
 //  - Ngày tính chuỗi = ngày (giờ VN) có qua ít nhất một bài trắc nghiệm step.
 //  - Lỡ một ngày: ngày đó ĐÓNG BĂNG, chuỗi chưa mất nhưng không tăng.
-//  - "Lửa phá băng" THAW_PRICE JOY: phá băng một ngày đã đóng → ngày đó tính như đã học.
+//  - "Lửa phá băng" THAW_PRICE Ngọc: phá băng một ngày đã đóng → ngày đó tính như đã học.
 //  - Một tháng có quá MAX_FREEZES ngày đóng băng (chưa phá) → mất chuỗi, đếm lại từ 0.
-//  - Thưởng JOY ở các mốc STREAK_MILESTONES; sau 150 cứ mỗi 25 ngày thêm một mốc.
+//  - Thưởng Ngọc ở các mốc STREAK_MILESTONES; sau 150 cứ mỗi 25 ngày thêm một mốc.
 
 export const THAW_PRICE = 250;
 export const MAX_FREEZES = 3;
 const KEEP_DAYS = 400; // lịch giữ ~13 tháng gần nhất
 
-// Thưởng tăng dần nhưng mỗi ngày giữ lửa vẫn chỉ "đáng" 10–20 JOY, để chuỗi là
-// niềm vui chứ không thành chỗ cày JOY: 1.000 JOY = 10 ngày duy trì tài khoản.
+// Thưởng tăng dần nhưng mỗi ngày giữ lửa vẫn chỉ "đáng" 10–20 Ngọc, để chuỗi là
+// niềm vui chứ không thành chỗ cày Ngọc.
 export const STREAK_MILESTONES = [
   [3, 30], [7, 70], [14, 150], [21, 220], [30, 350],
   [50, 600], [75, 900], [100, 1300], [125, 1600], [150, 2000],
 ];
 const AFTER_150 = 2000;
 
-export function milestoneJoy(count) {
+export function milestoneGems(count) {
   const hit = STREAK_MILESTONES.find(([day]) => day === count);
   if (hit) return hit[1];
   return count > 150 && (count - 150) % 25 === 0 ? AFTER_150 : 0;
@@ -28,9 +28,9 @@ export function milestoneJoy(count) {
 
 export function nextMilestone(count) {
   const hit = STREAK_MILESTONES.find(([day]) => day > count);
-  if (hit) return { day: hit[0], joy: hit[1] };
+  if (hit) return { day: hit[0], gems: hit[1] };
   const day = 150 + Math.ceil((count - 149) / 25) * 25;
-  return { day, joy: AFTER_150 };
+  return { day, gems: AFTER_150 };
 }
 
 // ── Ngày dạng "YYYY-MM-DD" (lịch VN, không giờ) ─────────────────────────────
@@ -91,9 +91,9 @@ export function settleStreak(raw, today) {
 function bump(s) {
   s.count += 1;
   s.best = Math.max(s.best, s.count);
-  const joy = s.paid.includes(s.count) ? 0 : milestoneJoy(s.count);
-  if (joy) s.paid = [...s.paid, s.count];
-  return joy ? { day: s.count, joy } : null;
+  const gems = s.paid.includes(s.count) ? 0 : milestoneGems(s.count);
+  if (gems) s.paid = [...s.paid, s.count];
+  return gems ? { day: s.count, gems } : null;
 }
 
 /** Qua một bài hôm nay. Trả { state, milestone } — milestone khi vừa chạm mốc thưởng. */
@@ -163,16 +163,15 @@ export const STREAK_PUSH = {
       ['Bắt đầu nhỏ thôi', 'Một bài nhỏ hôm nay, một chuỗi dài ngày mai.'],
       ['Hugo nhớ bạn đó', 'Code không tự viết được đâu nha. Mở một bài nhỏ nhé!'],
     ],
-    nearMilestone: [['Sắp tới mốc {m} ngày!', 'Học một bài nhỏ hôm nay để nhận {joy} JOY ở mốc {m} ngày.']],
+    nearMilestone: [['Sắp tới mốc {m} ngày!', 'Học một bài nhỏ hôm nay để nhận {gems} Ngọc ở mốc {m} ngày.']],
     lastCall: [
       ['Còn vài giờ thôi!', 'Lửa Nhỏ sắp đóng băng — một bài ngắn là giữ được chuỗi {n} ngày.'],
       ['Hugo đang lo đó', 'Chuỗi {n} ngày sắp tắt. 5 phút thôi, cứu lửa nào!'],
     ],
-    purchase: [['Hoá đơn {code} · -{price} JOY', 'Vật phẩm: {name}. Đã trừ: {price} JOY. Số dư: {before} → {balance} JOY. Thời gian: {at}.']],
+    purchase: [['Hoá đơn {code} · -{price} Ngọc', 'Vật phẩm: {name}. Đã trừ: {price} Ngọc. Số dư: {before} → {balance} Ngọc. Thời gian: {at}.']],
     shield: [['Khiên lửa đã cứu chuỗi!', 'Hôm qua bạn lỡ học, Khiên lửa tự phá băng giúp bạn. Chuỗi {n} ngày vẫn cháy — còn {s} khiên.']],
-    frozen: [['Lửa Nhỏ bị đóng băng rồi', 'Hôm qua bạn lỡ học. Học hôm nay để sưởi ấm, hoặc phá băng bằng 250 JOY. Đã đóng băng {f}/3 lần tháng này.']],
-    milestone: [['Mốc {n} ngày!', 'Lửa Nhỏ lớn thêm rồi — bạn nhận {joy} JOY. Mở lịch lửa để xem chương mới.']],
-    account: [['Tài khoản còn {d} ngày', 'Gia hạn bằng JOY trong Cửa hàng (hoặc xác minh học sinh – sinh viên để được 1 năm) để giữ tiến độ học.']],
+    frozen: [['Lửa Nhỏ bị đóng băng rồi', 'Hôm qua bạn lỡ học. Học hôm nay để sưởi ấm, hoặc phá băng bằng 250 Ngọc. Đã đóng băng {f}/3 lần tháng này.']],
+    milestone: [['Mốc {n} ngày!', 'Lửa Nhỏ lớn thêm rồi — bạn nhận {gems} Ngọc. Mở lịch lửa để xem chương mới.']],
     security: [['Có đăng nhập mới', 'Tài khoản vừa đăng nhập trên {device}. Không phải bạn? Mở Hồ sơ Hugo Studio để đăng xuất máy lạ.']],
     friendRequest: [['Lời mời kết bạn', '{name} muốn làm bạn học với bạn. Mở Bạn bè để đồng ý.']],
     friendAccepted: [['Đã thành bạn học', '{name} đã đồng ý kết bạn. Cùng thi đua tuần này nhé!']],
@@ -190,16 +189,15 @@ export const STREAK_PUSH = {
       ['Start small', 'One small lesson today, a long streak tomorrow.'],
       ['Hugo misses you', "Code won't write itself. Open a quick lesson!"],
     ],
-    nearMilestone: [['Almost at {m} days!', 'Take one lesson today to earn {joy} JOY at {m} days.']],
+    nearMilestone: [['Almost at {m} days!', 'Take one lesson today to earn {gems} gems at {m} days.']],
     lastCall: [
       ['Only a few hours left!', 'Little Flame is about to freeze — one short lesson keeps your {n}-day streak.'],
       ["Hugo's getting worried", 'Your {n}-day streak is about to go out. 5 minutes to save it!'],
     ],
-    purchase: [['Receipt {code} · -{price} JOY', 'Item: {name}. Charged: {price} JOY. Balance: {before} → {balance} JOY. Date: {at}.']],
+    purchase: [['Receipt {code} · -{price} gems', 'Item: {name}. Charged: {price} gems. Balance: {before} → {balance} gems. Date: {at}.']],
     shield: [['Streak Shield saved you!', 'You missed yesterday, so a Streak Shield thawed it. Your {n}-day streak lives on — {s} shield(s) left.']],
-    frozen: [['Little Flame got frozen', 'You missed yesterday. Learn today to warm it up, or thaw it for 250 JOY. Frozen {f}/3 times this month.']],
-    milestone: [['{n}-day milestone!', 'Little Flame grew — you earned {joy} JOY. Open the flame calendar for a new chapter.']],
-    account: [['{d} days left on your account', 'Extend with JOY in the Shop (or verify as a student for a full year) to keep your progress.']],
+    frozen: [['Little Flame got frozen', 'You missed yesterday. Learn today to warm it up, or thaw it for 250 gems. Frozen {f}/3 times this month.']],
+    milestone: [['{n}-day milestone!', 'Little Flame grew — you earned {gems} gems. Open the flame calendar for a new chapter.']],
     security: [['New sign-in', "Your account just signed in on {device}. Not you? Open Profile Hugo Studio to sign out unknown devices."]],
     friendRequest: [['Friend request', '{name} wants to be your study buddy. Open Friends to accept.']],
     friendAccepted: [['You are now friends', '{name} accepted your request. Race each other this week!']],
@@ -217,16 +215,15 @@ export const STREAK_PUSH = {
       ['从小处开始', '今天一节小课，明天一段长长的连续记录。'],
       ['Hugo 想你了', '代码可不会自己写出来。打开一节小课吧！'],
     ],
-    nearMilestone: [['快到 {m} 天里程碑了！', '今天学一节小课，即可在第 {m} 天获得 {joy} JOY。']],
+    nearMilestone: [['快到 {m} 天里程碑了！', '今天学一节小课，即可在第 {m} 天获得 {gems} 宝石。']],
     lastCall: [
       ['只剩几个小时！', '小火苗快要结冰了——一节短课就能保住 {n} 天连续记录。'],
       ['Hugo 有点担心', '{n} 天连续记录快熄灭了。5 分钟救救火苗！'],
     ],
-    purchase: [['收据 {code} · -{price} JOY', '道具：{name}。扣除：{price} JOY。余额：{before} → {balance} JOY。时间：{at}。']],
+    purchase: [['收据 {code} · -{price} 宝石', '道具：{name}。扣除：{price} 宝石。余额：{before} → {balance} 宝石。时间：{at}。']],
     shield: [['火焰护盾救了你的连胜！', '你昨天没学习，护盾自动为你破冰。{n} 天连胜继续燃烧——剩余 {s} 个护盾。']],
-    frozen: [['小火苗被冻住了', '你昨天没学习。今天学习来温暖它，或花 250 JOY 破冰。本月已结冰 {f}/3 次。']],
-    milestone: [['{n} 天里程碑！', '小火苗长大了——你获得 {joy} JOY。打开火焰日历看新的章节。']],
-    account: [['账户还剩 {d} 天', '在商店用 JOY 续期（或验证学生身份获得 1 年），以保留学习进度。']],
+    frozen: [['小火苗被冻住了', '你昨天没学习。今天学习来温暖它，或花 250 宝石 破冰。本月已结冰 {f}/3 次。']],
+    milestone: [['{n} 天里程碑！', '小火苗长大了——你获得 {gems} 宝石。打开火焰日历看新的章节。']],
     security: [['新的登录', '你的账户刚在 {device} 上登录。不是你？打开 个人资料 Hugo Studio 退出陌生设备。']],
     friendRequest: [['好友请求', '{name} 想和你成为学习伙伴。打开好友页面同意。']],
     friendAccepted: [['已成为好友', '{name} 同意了你的请求。本周一起比拼吧！']],
@@ -244,4 +241,4 @@ export function streakPush(lang, key, vars = {}) {
 }
 
 /** Nhân vật đi kèm từng loại thông báo Edu — hộp thông báo và thư (apps/web/public/edu/<tên>.svg, bản PNG cho thư ở edu/mail/). */
-export const EDU_CAST = { welcome: "cast-1", remind: "cast-1", remindNew: "buddy-learn", nearMilestone: "cast-3", lastCall: "cast-2", frozen: "buddy-wrong", shield: "cast-2", purchase: "cast-5", milestone: "buddy-done", account: "cast-5", security: "buddy-exam", friendRequest: "cast-6", friendAccepted: "cast-7" };
+export const EDU_CAST = { welcome: "cast-1", remind: "cast-1", remindNew: "buddy-learn", nearMilestone: "cast-3", lastCall: "cast-2", frozen: "buddy-wrong", shield: "cast-2", purchase: "cast-5", milestone: "buddy-done", security: "buddy-exam", friendRequest: "cast-6", friendAccepted: "cast-7" };
