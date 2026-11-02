@@ -10,4 +10,4 @@ if (!/^[A-Za-z0-9]{24,}$/.test(secret)) throw new Error("SDK_SECRET phải là c
 const { version } = JSON.parse(fs.readFileSync(path.join(root, "sdk/package.json"), "utf8"));
 fs.mkdirSync(path.join(root, "dist/_sdk"), { recursive: true });
 fs.copyFileSync(path.join(root, `dist-sdk/education-hugo-react-${version}.tgz`), path.join(root, `dist/_sdk/${secret}.tgz`));
-console.log(`Gói @education-hugo/react ${version} đã đặt vào dist/_sdk.`);
+console.log(`Gói education-hugo-react ${version} đã đặt vào dist/_sdk.`);

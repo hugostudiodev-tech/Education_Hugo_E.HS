@@ -1,5 +1,5 @@
 {
-  "name": "@education-hugo/react",
+  "name": "education-hugo-react",
   "version": "1.0.0",
   "description": "Khoá học Education Hugo cho website đối tác — cần key do Hugo Studio cấp.",
   "type": "module",

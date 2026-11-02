@@ -1,4 +1,4 @@
-# Giấy phép sử dụng — @education-hugo/react
+# Giấy phép sử dụng — education-hugo-react
 
 Bản quyền © Hugo Studio. Gói này chỉ dùng được khi có **key đối tác còn hiệu lực** do Hugo Studio cấp.
 

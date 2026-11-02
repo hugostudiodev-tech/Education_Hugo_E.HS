@@ -1,4 +1,4 @@
-// Cấu hình thư viện đối tác (@education-hugo/react). App Education Hugo không đặt gì
+// Cấu hình thư viện đối tác (education-hugo-react). App Education Hugo không đặt gì
 // ở đây; thư viện gọi configurePartner() để trỏ API và gắn key do admin cấp.
 export const partner = { apiBase: null, key: null, lang: null, assetBase: "" };
 

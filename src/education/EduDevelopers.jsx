@@ -8,7 +8,7 @@ import { HAT_SEED } from "../../packages/courses/sql/seed.js";
 const SqlPlayground = lazy(() => import("../components/member/hugoCoder/SqlPlayground"));
 
 /**
- * /developers — tài liệu thư viện @education-hugo/react và REST API cho đối tác.
+ * /developers — tài liệu thư viện education-hugo-react và REST API cho đối tác.
  * Phần công khai: tổng quan, component, quy tắc tuỳ biến, bản quyền. Phần đối tác
  * (lệnh cài, mã khởi động, REST API) bị làm mờ tới khi nhập key admin cấp.
  * Làm mờ chỉ là lớp trình bày: thứ thật sự khoá là máy chủ — không có key thì
@@ -144,7 +144,7 @@ export default function EduDevelopers() {
     <article className="edu-page dev">
       <header>
         <p className="dev-eyebrow">Education Hugo · Nhà phát triển</p>
-        <h1 className="edu-page-title">Thư viện @education-hugo/react</h1>
+        <h1 className="edu-page-title">Thư viện education-hugo-react</h1>
         <p className="dev-lead">Đưa khoá học Education Hugo vào website của trường hoặc tổ chức bạn: bản đồ chặng, bài học, ô SQL và chấm bài giống hệt <Link to="/learn">bản gốc</Link>. Bài học tải từ máy chủ Hugo Studio, chỉ đọc được bằng <b>key đối tác</b> do admin cấp.</p>
       </header>
 
@@ -175,8 +175,8 @@ export default function EduDevelopers() {
           <h3>2. Lưu key vào biến môi trường</h3>
           <Code>{`# .env (Vite)\nVITE_EDU_KEY=${shown}\n\n# .env (Next.js)\nNEXT_PUBLIC_EDU_KEY=${shown}`}</Code>
           <h3>3. Gắn vào trang</h3>
-          <Code>{`import { EducationHugo } from "@education-hugo/react";
-import "@education-hugo/react/style.css";
+          <Code>{`import { EducationHugo } from "education-hugo-react";
+import "education-hugo-react/style.css";
 
 export default function HocSQL() {
   return (
@@ -201,7 +201,7 @@ export default function HocSQL() {
 
       <section id="components" className="dev-card">
         <h2>Component</h2>
-        <p>Mọi component đều xuất ra từ <code>@education-hugo/react</code>. <code>EducationHugo</code> đã ghép sẵn tất cả; các component lẻ dành cho bố cục tự dựng, và vẫn cần <code>configurePartner({"{ key }"})</code> trước khi gọi API.</p>
+        <p>Mọi component đều xuất ra từ <code>education-hugo-react</code>. <code>EducationHugo</code> đã ghép sẵn tất cả; các component lẻ dành cho bố cục tự dựng, và vẫn cần <code>configurePartner({"{ key }"})</code> trước khi gọi API.</p>
         {COMPONENTS.map(([name, desc, props]) => (
           <div key={name} className="dev-comp">
             <h3><code>{name}</code></h3>

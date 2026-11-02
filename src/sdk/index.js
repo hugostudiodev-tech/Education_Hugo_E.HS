@@ -1,4 +1,4 @@
-// @education-hugo/react — thư viện đối tác. Mọi nội dung bài tải từ API Hugo Studio
+// education-hugo-react — thư viện đối tác. Mọi nội dung bài tải từ API Hugo Studio
 // bằng key do admin cấp; thư viện không chứa bài học nào.
 import "../index.css";
 

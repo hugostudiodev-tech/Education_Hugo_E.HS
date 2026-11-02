@@ -1,5 +1,5 @@
 // Key đối tác Education Hugo: admin cấp (32 ký tự ngẫu nhiên, gửi thẳng vào mail đối
-// tác, có hạn), thư viện @education-hugo/react gửi kèm mỗi yêu cầu qua header
+// tác, có hạn), thư viện education-hugo-react gửi kèm mỗi yêu cầu qua header
 // X-Edu-Partner-Key. Key hợp lệ = mở toàn bộ nội dung bài, không cần tài khoản.
 import crypto from 'crypto';
 import { PartnerKey as EduPartnerKey } from '../models.js';
