@@ -1,0 +1,80 @@
+{
+  "_note": "Kịch bản hai video 'Khởi đầu' (vscode: khoá Coding, sql: khoá SQL). Mỗi cảnh: `say` là lời thoại cho ElevenLabs, `lines` là phụ đề hiện lần lượt. Lấy lời liền một đoạn: node scripts/video/setup/render.mjs --script <video>. Xuất một tệp voice/<video>-<lang>.mp3 rồi render lại.",
+  "voiceCredit": { "vi": "Giọng đọc: ElevenLabs", "en": "Voice: ElevenLabs", "zh": "配音：ElevenLabs" },
+  "vscode": {
+    "vi": {
+      "ui": { "download": "Tải về", "windows": "Windows", "mac": "macOS", "installer": "Cài đặt Visual Studio Code", "chk1": "Thêm \"Open with Code\" vào menu chuột phải", "chk2": "Thêm vào PATH", "install": "Cài đặt", "finish": "Hoàn tất", "apps": "Ứng dụng", "open": "Mở", "openFolder": "File › Open Folder…", "desktop": "Màn hình nền", "newFolder": "Thư mục mới", "explorer": "EXPLORER", "save": "Đã lưu", "ready": "Sẵn sàng cho Step 1!", "free": "Miễn phí · Windows · macOS · Linux" },
+      "scenes": [
+        { "id": "intro", "say": "Chào bạn! Trước khi vào Step một, mình cùng cài Visual Studio Code nhé. Đây là trình soạn mã miễn phí mà bạn sẽ dùng suốt khoá học.", "lines": ["Chào bạn! Trước Step 1, mình cài VS Code nhé.", "Trình soạn mã miễn phí, dùng suốt khoá học."] },
+        { "id": "site", "say": "Mở trình duyệt, gõ địa chỉ code chấm visual studio chấm com. Đây là trang chính thức, tải từ đây là an toàn nhất.", "lines": ["Mở trình duyệt, vào code.visualstudio.com", "Trang chính thức, tải ở đây là an toàn nhất."] },
+        { "id": "pick", "say": "Bấm nút tải về đúng với máy của bạn. Máy Windows thì chọn Windows, máy Mac thì chọn macOS.", "lines": ["Bấm Tải về đúng loại máy của bạn.", "Windows chọn Windows, Mac chọn macOS."] },
+        { "id": "win", "say": "Với Windows: mở tệp vừa tải, đồng ý điều khoản, rồi nhớ tick hai ô: Open with Code, và Add to PATH. Bấm Cài đặt, xong thì bấm Hoàn tất.", "lines": ["Windows: mở tệp vừa tải, đồng ý điều khoản.", "Tick \"Open with Code\" và \"Add to PATH\".", "Bấm Cài đặt, rồi Hoàn tất."] },
+        { "id": "mac", "say": "Với Mac: mở tệp vừa tải, kéo biểu tượng Visual Studio Code vào thư mục Ứng dụng. Lần đầu mở, máy hỏi thì bấm Mở.", "lines": ["Mac: kéo Visual Studio Code vào thư mục Ứng dụng.", "Lần đầu mở, máy hỏi thì bấm Mở."] },
+        { "id": "folder", "say": "Giờ tạo một thư mục tên nhip trên màn hình nền. Trong VS Code, chọn File, Open Folder, rồi mở thư mục nhip. Mọi tệp của dự án sẽ nằm ở đây.", "lines": ["Tạo thư mục \"nhip\" trên màn hình nền.", "VS Code: File › Open Folder… chọn \"nhip\".", "Mọi tệp của dự án nằm ở đây."] },
+        { "id": "file", "say": "Tạo tệp mới tên hello chấm html, gõ thử một dòng, rồi bấm Control S trên Windows, hoặc Command S trên Mac để lưu.", "lines": ["Tạo tệp mới: hello.html", "Gõ thử một dòng.", "Lưu: Ctrl + S (Windows) · ⌘ + S (Mac)."] },
+        { "id": "done", "say": "Xong rồi! Quay lại Education Hugo, đánh dấu đã cài xong, và mình gặp nhau ở Step một nhé!", "lines": ["Xong rồi!", "Đánh dấu \"Đã cài xong\" và vào Step 1 nhé!"] }
+      ]
+    },
+    "en": {
+      "ui": { "download": "Download", "windows": "Windows", "mac": "macOS", "installer": "Setup – Visual Studio Code", "chk1": "Add \"Open with Code\" to the context menu", "chk2": "Add to PATH", "install": "Install", "finish": "Finish", "apps": "Applications", "open": "Open", "openFolder": "File › Open Folder…", "desktop": "Desktop", "newFolder": "New folder", "explorer": "EXPLORER", "save": "Saved", "ready": "Ready for Step 1!", "free": "Free · Windows · macOS · Linux" },
+      "scenes": [
+        { "id": "intro", "say": "Hi! Before Step one, let's install Visual Studio Code. It's the free code editor you'll use for the whole course.", "lines": ["Hi! Before Step 1, let's install VS Code.", "A free code editor you'll use all course long."] },
+        { "id": "site", "say": "Open your browser and go to code dot visual studio dot com. That's the official site, the safest place to download it.", "lines": ["Open your browser: code.visualstudio.com", "The official site — the safest place to download."] },
+        { "id": "pick", "say": "Click the download button for your computer. Windows users pick Windows, Mac users pick macOS.", "lines": ["Click Download for your computer.", "Windows → Windows, Mac → macOS."] },
+        { "id": "win", "say": "On Windows: open the file you downloaded and accept the agreement. Make sure to tick two boxes: Open with Code, and Add to PATH. Click Install, then Finish.", "lines": ["Windows: open the file, accept the agreement.", "Tick \"Open with Code\" and \"Add to PATH\".", "Click Install, then Finish."] },
+        { "id": "mac", "say": "On a Mac: open the downloaded file and drag Visual Studio Code into your Applications folder. The first time you open it, click Open when asked.", "lines": ["Mac: drag Visual Studio Code into Applications.", "First launch: click Open when asked."] },
+        { "id": "folder", "say": "Now create a folder called nhip on your desktop. In VS Code, choose File, Open Folder, and open nhip. Every project file will live here.", "lines": ["Create a folder named \"nhip\" on your desktop.", "VS Code: File › Open Folder… pick \"nhip\".", "Every project file lives here."] },
+        { "id": "file", "say": "Create a new file called hello dot html, type a line, then press Control S on Windows or Command S on Mac to save.", "lines": ["New file: hello.html", "Type a line.", "Save: Ctrl + S (Windows) · ⌘ + S (Mac)."] },
+        { "id": "done", "say": "All done! Head back to Education Hugo, mark the setup as finished, and see you in Step one!", "lines": ["All done!", "Mark \"Setup finished\" and jump into Step 1!"] }
+      ]
+    },
+    "zh": {
+      "ui": { "download": "下载", "windows": "Windows", "mac": "macOS", "installer": "安装 Visual Studio Code", "chk1": "将“通过 Code 打开”添加到右键菜单", "chk2": "添加到 PATH", "install": "安装", "finish": "完成", "apps": "应用程序", "open": "打开", "openFolder": "File › Open Folder…", "desktop": "桌面", "newFolder": "新建文件夹", "explorer": "EXPLORER", "save": "已保存", "ready": "准备好进入第 1 步！", "free": "免费 · Windows · macOS · Linux" },
+      "scenes": [
+        { "id": "intro", "say": "你好！进入第一步之前，我们先安装 Visual Studio Code。它是免费的代码编辑器，整个课程都会用到。", "lines": ["你好！第 1 步之前，先安装 VS Code。", "免费的代码编辑器，整个课程都会用到。"] },
+        { "id": "site", "say": "打开浏览器，输入 code 点 visualstudio 点 com。这是官方网站，从这里下载最安全。", "lines": ["打开浏览器，访问 code.visualstudio.com", "官方网站，在这里下载最安全。"] },
+        { "id": "pick", "say": "点击适合你电脑的下载按钮。Windows 电脑选 Windows，Mac 电脑选 macOS。", "lines": ["点击适合你电脑的“下载”。", "Windows 选 Windows，Mac 选 macOS。"] },
+        { "id": "win", "say": "Windows：打开下载的文件，接受协议，记得勾选两个选项：通过 Code 打开，和添加到 PATH。点击安装，然后点击完成。", "lines": ["Windows：打开文件，接受协议。", "勾选“通过 Code 打开”和“添加到 PATH”。", "点击安装，然后完成。"] },
+        { "id": "mac", "say": "Mac：打开下载的文件，把 Visual Studio Code 拖进应用程序文件夹。第一次打开时，如果系统询问，点击打开。", "lines": ["Mac：把 Visual Studio Code 拖进“应用程序”。", "第一次打开时，点击“打开”。"] },
+        { "id": "folder", "say": "现在在桌面上新建一个名为 nhip 的文件夹。在 VS Code 里选择 File，Open Folder，打开 nhip。项目的所有文件都放在这里。", "lines": ["在桌面新建文件夹“nhip”。", "VS Code：File › Open Folder… 选择“nhip”。", "项目的所有文件都放在这里。"] },
+        { "id": "file", "say": "新建一个名为 hello 点 html 的文件，输入一行内容，然后在 Windows 按 Control S，在 Mac 按 Command S 保存。", "lines": ["新建文件：hello.html", "输入一行内容。", "保存：Ctrl + S（Windows）· ⌘ + S（Mac）。"] },
+        { "id": "done", "say": "完成啦！回到 Education Hugo，标记安装完成，我们第一步见！", "lines": ["完成啦！", "标记“已安装完成”，进入第 1 步！"] }
+      ]
+    }
+  },
+  "sql": {
+    "vi": {
+      "ui": { "editor": "Ô SQL · SQLite", "run": "Chạy", "shortcut": "Ctrl / ⌘ + Enter", "rows": "3 dòng", "tables": "Cơ sở dữ liệu quán Hạt", "hint": "Gợi ý", "error": "Lỗi: no such column: prise", "stages": "8 chặng · 40 step", "pass": "Qua step: trắc nghiệm từ 60%", "ready": "Sẵn sàng cho bài 1!", "noInstall": "Không cần cài đặt gì", "browser": "Chỉ cần trình duyệt" },
+      "scenes": [
+        { "id": "intro", "say": "Chào bạn! Tin vui đây: khoá SQL không cần cài phần mềm nào cả. Mọi thứ bạn cần đã có sẵn ngay trong trình duyệt.", "lines": ["Chào bạn! Khoá SQL không cần cài gì cả.", "Mọi thứ đã có sẵn trong trình duyệt."] },
+        { "id": "editor", "say": "Công cụ chính là ô SQL. Nó chạy SQLite ngay trên máy bạn. Gõ câu lệnh, bấm Chạy, hoặc Control Enter, kết quả hiện ngay bên dưới.", "lines": ["Công cụ chính: ô SQL, chạy SQLite ngay trên máy bạn.", "Gõ lệnh, bấm Chạy hoặc Ctrl / ⌘ + Enter.", "Kết quả hiện ngay bên dưới."] },
+        { "id": "data", "say": "Suốt khoá học, bạn làm việc với cơ sở dữ liệu của quán cà phê Hạt: thực đơn, khách hàng, đơn hàng và chi tiết đơn.", "lines": ["Cả khoá xoay quanh quán cà phê Hạt:", "thực đơn, khách hàng, đơn hàng, chi tiết đơn."] },
+        { "id": "mistake", "say": "Gõ sai cũng không sao. Ô SQL báo lỗi rõ ràng, và gợi ý sẽ mở dần nếu bạn cần.", "lines": ["Gõ sai cũng không sao.", "Ô SQL báo lỗi rõ ràng, gợi ý mở dần khi cần."] },
+        { "id": "path", "say": "Khoá có tám chặng, bốn mươi step. Mỗi step kết thúc bằng trắc nghiệm, đạt từ sáu mươi phần trăm là qua.", "lines": ["8 chặng, 40 step.", "Mỗi step có trắc nghiệm, đạt từ 60% là qua."] },
+        { "id": "done", "say": "Vậy là bạn đã sẵn sàng! Đánh dấu đã xem xong, và mình bắt đầu bài một nhé!", "lines": ["Bạn đã sẵn sàng!", "Đánh dấu \"Đã xem xong\" và vào bài 1 nhé!"] }
+      ]
+    },
+    "en": {
+      "ui": { "editor": "SQL box · SQLite", "run": "Run", "shortcut": "Ctrl / ⌘ + Enter", "rows": "3 rows", "tables": "The Hạt café database", "hint": "Hint", "error": "Error: no such column: prise", "stages": "8 stages · 40 steps", "pass": "Pass a step: quiz score 60%+", "ready": "Ready for lesson 1!", "noInstall": "Nothing to install", "browser": "Just your browser" },
+      "scenes": [
+        { "id": "intro", "say": "Hi! Good news: the SQL course needs no software at all. Everything you need is already in your browser.", "lines": ["Hi! The SQL course needs nothing installed.", "Everything is already in your browser."] },
+        { "id": "editor", "say": "Your main tool is the SQL box. It runs SQLite right on your device. Type a query, click Run, or press Control Enter, and the result appears right below.", "lines": ["Main tool: the SQL box, running SQLite on your device.", "Type a query, click Run or Ctrl / ⌘ + Enter.", "The result appears right below."] },
+        { "id": "data", "say": "Throughout the course you'll work with the database of Hạt, a coffee shop: its menu, customers, orders and order items.", "lines": ["The whole course uses the Hạt café:", "menu, customers, orders, order items."] },
+        { "id": "mistake", "say": "Mistakes are fine. The SQL box shows clear errors, and hints open step by step when you need them.", "lines": ["Mistakes are fine.", "Clear errors, and hints open when you need them."] },
+        { "id": "path", "say": "The course has eight stages and forty steps. Each step ends with a quiz; score sixty percent or more to pass.", "lines": ["8 stages, 40 steps.", "Each step ends with a quiz — 60% to pass."] },
+        { "id": "done", "say": "You're all set! Mark this as watched, and let's start lesson one!", "lines": ["You're all set!", "Mark \"Watched\" and start lesson 1!"] }
+      ]
+    },
+    "zh": {
+      "ui": { "editor": "SQL 编辑框 · SQLite", "run": "运行", "shortcut": "Ctrl / ⌘ + Enter", "rows": "3 行", "tables": "Hạt 咖啡馆数据库", "hint": "提示", "error": "错误：no such column: prise", "stages": "8 个阶段 · 40 步", "pass": "通过：测验达到 60%", "ready": "准备好上第 1 课！", "noInstall": "无需安装任何软件", "browser": "只需浏览器" },
+      "scenes": [
+        { "id": "intro", "say": "你好！好消息：SQL 课程不需要安装任何软件。你需要的一切都已经在浏览器里了。", "lines": ["你好！SQL 课程无需安装任何软件。", "一切都已在浏览器中。"] },
+        { "id": "editor", "say": "主要工具是 SQL 编辑框，它直接在你的设备上运行 SQLite。输入语句，点击运行，或按 Control 回车，结果马上显示在下方。", "lines": ["主要工具：SQL 编辑框，在你的设备上运行 SQLite。", "输入语句，点击运行或按 Ctrl / ⌘ + Enter。", "结果马上显示在下方。"] },
+        { "id": "data", "say": "整个课程都使用 Hạt 咖啡馆的数据库：菜单、顾客、订单和订单明细。", "lines": ["整个课程围绕 Hạt 咖啡馆：", "菜单、顾客、订单、订单明细。"] },
+        { "id": "mistake", "say": "写错也没关系。SQL 编辑框会清楚地提示错误，需要时提示会逐步打开。", "lines": ["写错也没关系。", "错误提示清楚，需要时提示逐步打开。"] },
+        { "id": "path", "say": "课程共有八个阶段、四十步。每一步最后都有测验，达到百分之六十就能通过。", "lines": ["8 个阶段，40 步。", "每步都有测验，达到 60% 即通过。"] },
+        { "id": "done", "say": "你已经准备好了！标记已看完，我们开始第一课吧！", "lines": ["你已经准备好了！", "标记“已看完”，开始第 1 课！"] }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+// Step 38 — Tìm kiếm và sắp xếp.
+export default {
+  id: "py38", lang: "python", file: "so_lop/thuat_toan.py", duration: "50 phút",
+  summary: "Cài tìm kiếm tuyến tính, nhị phân và sắp xếp nổi bọt; so sánh điều kiện dùng và độ phức tạp.",
+  slides: [
+    { section: "intro", title: "Cùng đúng, tốc độ khác nhau", body: "Thuật toán là các bước giải bài toán. Tìm tuyến tính kiểm từng phần tử; tìm nhị phân liên tục chia đôi nhưng cần dữ liệu đã sắp." },
+    { section: "visual", title: "Chia đôi vùng tìm", body: "Tìm 23 trong list đã sắp: so với phần tử giữa rồi bỏ một nửa không thể chứa đáp án.", py: { code: 'ds = [3, 7, 12, 18, 23, 31, 42]\ntrai, phai = 0, len(ds) - 1\nwhile trai <= phai:\n    giua = (trai + phai) // 2\n    print("Kiểm:", ds[giua])\n    if ds[giua] == 23: break\n    if ds[giua] < 23: trai = giua + 1\n    else: phai = giua - 1' } },
+    { section: "research", title: "Độ phức tạp", body: `Tuyến tính cần tối đa n lần so sánh: O(n). Nhị phân cần khoảng log₂n lần: O(log n). Với một triệu phần tử, đó là khoảng một triệu so với khoảng 20 lần.
+
+> Cormen, T.H. et al. (2022) *Introduction to Algorithms*, 4th ed. Cambridge, MA: MIT Press.` },
+    { section: "ideate", title: "Chọn thuật toán", body: "List chưa sắp và chỉ tìm một lần: tuyến tính. Dữ liệu đã sắp hoặc tìm nhiều lần: nhị phân. Trong dự án thật, ưu tiên toán tử `in`, `list.index` và `sorted` trừ khi đang học thuật toán." },
+    { section: "core", title: "Tìm kiếm tuyến tính và nhị phân", body: "Cả hai hàm trả chỉ số hoặc -1 khi không thấy.", py: { code: 'def tuyen_tinh(ds, x):\n    for i, value in enumerate(ds):\n        if value == x: return i\n    return -1\n\ndef nhi_phan(ds, x):\n    l, r = 0, len(ds)-1\n    while l <= r:\n        m = (l+r)//2\n        if ds[m] == x: return m\n        if ds[m] < x: l = m+1\n        else: r = m-1\n    return -1\n\nprint(tuyen_tinh([4,1,8], 8))\nprint(nhi_phan([1,4,8], 8))' } },
+    { section: "core", title: "Sắp xếp nổi bọt", body: "Bubble sort đổi chỗ hai phần tử kề nhau khi sai thứ tự. Dễ học nhưng O(n²), không nên thay `sorted` trong sản phẩm.", py: { code: 'ds = [5, 2, 4, 1]\nfor end in range(len(ds)-1, 0, -1):\n    for i in range(end):\n        if ds[i] > ds[i+1]:\n            ds[i], ds[i+1] = ds[i+1], ds[i]\nprint(ds)' } },
+    { section: "apply", title: "Bài tập: tìm nhị phân", body: "Viết hàm tìm x trong list tăng dần, trả chỉ số hoặc -1. Nhập x và tìm trong `[2, 5, 8, 12, 16, 23, 38]`.", py: { code: "def tim(ds, x):\n    pass\n", stdin: "16", solution: 'def tim(ds, x):\n    trai, phai = 0, len(ds) - 1\n    while trai <= phai:\n        giua = (trai + phai) // 2\n        if ds[giua] == x:\n            return giua\n        if ds[giua] < x:\n            trai = giua + 1\n        else:\n            phai = giua - 1\n    return -1\n\nx = int(input())\nprint(tim([2, 5, 8, 12, 16, 23, 38], x))', hints: ["Trong while, tính giua rồi so sánh.", "Không thấy sau vòng lặp thì return -1."] } },
+    { section: "apply", title: "Bài tập: một lượt nổi bọt", body: "Có list `[5, 1, 4, 2]`. Chạy đúng một lượt từ trái sang phải, đổi hai phần tử kề nếu sai thứ tự. In list sau lượt đó.", py: { code: "ds = [5, 1, 4, 2]\n", solution: 'ds = [5, 1, 4, 2]\nfor i in range(len(ds) - 1):\n    if ds[i] > ds[i + 1]:\n        ds[i], ds[i + 1] = ds[i + 1], ds[i]\nprint(ds)', hints: ["Duyệt i từ 0 tới len(ds)-2.", "Đổi chỗ bằng gán tuple."] } },
+  ],
+  quiz: [
+    { q: "Tìm nhị phân yêu cầu dữ liệu?", o: ["Đã sắp xếp", "Ngẫu nhiên", "Chỉ có xâu", "Không trùng"], a: 0, why: "So sánh giữa chỉ loại được nửa list khi đã sắp." },
+    { q: "Độ phức tạp tìm tuyến tính?", o: ["O(n)", "O(log n)", "O(n²)", "O(1)"], a: 0, why: "Có thể kiểm mọi phần tử." },
+    { kind: "truefalse", q: "Bubble sort phù hợp hơn sorted cho code sản phẩm.", a: false, why: "Nó chậm O(n²); dùng sorted có sẵn." },
+    { kind: "output", q: "Đoán kết quả một lượt.", code: "a=[3,1,2]\nfor i in range(2):\n if a[i]>a[i+1]:a[i],a[i+1]=a[i+1],a[i]\nprint(a)", o: ["[1, 2, 3]", "[1, 3, 2]", "[3, 1, 2]", "[2, 1, 3]"], a: 0, why: "3 lần lượt đổi với 1 rồi 2." },
+    { q: "Nhị phân trên 1 triệu phần tử cần khoảng?", o: ["20 lần", "1 triệu lần", "100 nghìn lần", "1 lần"], a: 0, why: "log₂(1.000.000) xấp xỉ 20." },
+    { kind: "bug", q: "Dòng nào làm tìm nhị phân không thu hẹp vùng đúng?", lines: ["m=(l+r)//2", "if ds[m] < x:", "    l = m", "else: r=m-1"], a: 2, why: "Phải l = m + 1 để bỏ vị trí m." },
+    { kind: "blank", q: "Điền phép đổi chỗ Python.", code: "a[i], a[i+1] = ___", a: "a[i+1], a[i]", why: "Gán tuple đổi hai giá trị." },
+    { kind: "multi", q: "Thuật toán nào tìm phần tử?", o: ["Tuyến tính", "Nhị phân", "Bubble sort", "Duyệt for"], a: [0, 1, 3], why: "Bubble sort dùng để sắp xếp." },
+    { q: "O(n²) nghĩa là khi n gấp đôi, công việc xấp xỉ?", o: ["Gấp bốn", "Gấp đôi", "Không đổi", "Giảm nửa"], a: 0, why: "(2n)² = 4n²." },
+    { q: "Không tìm thấy thường trả?", o: ["-1", "0", "True", "List rỗng bắt buộc"], a: 0, why: "-1 không phải chỉ số tìm được thông thường." },
+  ],
+};

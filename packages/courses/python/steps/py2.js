@@ -140,7 +140,7 @@ Dùng một biến \`quy\` và các phép cập nhật, cuối cùng in: \`Quỹ
     { q: "n = 3, rồi n = n * 2 + 1. n bằng?", o: ["3", "6", "7", "9"], a: 2, why: "Tính vế phải trước: 3 * 2 + 1 = 7, rồi cất vào n." },
     { kind: "truefalse", q: "Trong Python, Diem và diem là cùng một biến.", a: false, why: "Python phân biệt chữ hoa và chữ thường." },
     { kind: "truefalse", q: "a += 3 có nghĩa giống a = a + 3.", a: true, why: "+= là cách viết gọn." },
-    { kind: "bug", q: "Dòng nào báo lỗi?", lines: ["si_so = 40", "40 = si_so", "si_so += 1", "print(si_so)"], a: 1, why: "Vế trái của phép gán phải là tên biến, không phải một con số." },
+    { kind: "bug", q: "Dòng gán biến nào báo lỗi?", lines: ["si_so = 40", "40 = si_so", "si_so += 1", "print(si_so)"], a: 1, why: "Vế trái của phép gán phải là tên biến, không phải một con số." },
     { q: "a, b = 1, 2 rồi a, b = b, a. Lúc này a và b là?", o: ["a = 1, b = 2", "a = 2, b = 1", "a = 2, b = 2", "Báo lỗi"], a: 1, why: "Vế phải được tính xong (2, 1) rồi mới gán lại — hai biến đổi chỗ." },
     { kind: "match", q: "Nối dòng lệnh với giá trị của q sau khi chạy (q ban đầu = 10).", pairs: [["q += 5", "15"], ["q -= 4", "6"], ["q *= 3", "30"], ["q = 0", "0"]], why: "Mỗi dòng chạy riêng từ q = 10." },
     { q: "Theo quy ước PEP 8, tên biến nên viết thế nào?", o: ["DiemTrungBinh", "diem_trung_binh", "DIEM-TRUNG-BINH", "diemtrungbinh!"], a: 1, why: "Chữ thường, nối từ bằng dấu gạch dưới." },

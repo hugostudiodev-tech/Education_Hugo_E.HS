@@ -93,7 +93,7 @@ Thiếu bước **cập nhật** → điều kiện mãi đúng → **lặp vô 
     { q: "i = 0; while i < 3: i += 1. Cuối cùng i bằng?", o: ["2", "3", "4", "0"], a: 1, why: "Dừng khi i = 3." },
     { kind: "truefalse", q: "Quên cập nhật biến trong while có thể gây lặp vô hạn.", a: true, why: "Điều kiện mãi đúng." },
     { q: "Ai chứng minh bài toán dừng không giải được?", o: ["Alan Turing", "Guido van Rossum", "George Boole", "Ada Lovelace"], a: 0, why: "Turing, 1936." },
-    { kind: "match", q: "Nối tình huống với vòng lặp.", pairs: [["In 40 số thứ tự", "for"], ["Hỏi lại tới khi nhập đúng", "while"]], why: "Biết số lần vs biết điều kiện dừng." },
+    { kind: "match", q: "Nối tình huống với cách lặp.", pairs: [["In 40 số thứ tự", "for range(40)"], ["Hỏi lại tới khi nhập đúng", "while dữ liệu sai"], ["Duyệt từng điểm trong list", "for qua list"]], why: "Biết số lần hoặc có dãy dùng for; biết điều kiện dừng dùng while." },
     { kind: "bug", q: "Dòng nào thiếu khiến vòng lặp chạy mãi?", lines: ["n = 5", "while n > 0:", "    print(n)", "print(\"xong\")"], a: 2, why: "Sau print(n) phải có n -= 1 — khối lặp thiếu bước cập nhật." },
     { q: "Tổng chữ số của 507?", o: ["12", "57", "7", "13"], a: 0, why: "5 + 0 + 7." },
     { kind: "order", q: "Xếp ba phần của vòng while.", items: ["Khởi tạo", "Kiểm tra điều kiện", "Cập nhật"], a: [0, 1, 2], why: "Khởi tạo trước vòng, kiểm tra ở đầu, cập nhật trong thân." },

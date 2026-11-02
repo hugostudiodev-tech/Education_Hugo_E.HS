@@ -94,7 +94,7 @@ Câu hỏi then chốt: **lặp mấy lần?** Biết trước số lần → d�
     { kind: "truefalse", q: "for có thể lặp qua từng ký tự của một xâu.", a: true, why: "Xâu là dãy ký tự." },
     { q: "Để in các số trên cùng một dòng dùng?", o: ["print(i, end=\" \")", "print(i, line=0)", "println(i)", "print(i); "], a: 0, why: "Tham số end thay cho ký tự xuống dòng." },
     { q: "DRY nghĩa là?", o: ["Code phải khô khan", "Đừng lặp lại chính mình", "Debug Rồi Yên tâm", "Dữ liệu Rất Yếu"], a: 1, why: "Don't Repeat Yourself." },
-    { kind: "bug", q: "Muốn in 1 đến 5, dòng nào sai?", lines: ["for i in range(1, 5):", "    print(i)"], a: 0, why: "Thiếu số 5 — phải range(1, 6)." },
+    { kind: "bug", q: "Muốn in 1 đến 5, dòng nào sai?", lines: ["for i in range(1, 5):", "    print(i)", "print(\"xong\")"], a: 0, why: "Thiếu số 5 — phải range(1, 6)." },
     { kind: "match", q: "Nối range với dãy.", pairs: [["range(3)", "0 1 2"], ["range(1, 4)", "1 2 3"], ["range(3, 0, -1)", "3 2 1"]], why: "Ba dạng range." },
     { q: "Biết trước số lần lặp thì nên dùng?", o: ["for", "while", "if", "elif"], a: 0, why: "while cho số lần chưa biết." },
     { q: "len(list(range(0, 20, 5))) bằng?", o: ["4", "5", "20", "3"], a: 0, why: "0, 5, 10, 15." },
