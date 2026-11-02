@@ -91,9 +91,9 @@ export function DeveloperPromo() {
   const c = useCopy();
   return (
     <Link to="/developer-team" className="edu-dev-promo">
-      <div className="edu-dev-promo-art">
+      <div className="edu-dev-art">
+        <img src="/edu/dev-rocket.svg" alt="" width="800" height="520" />
         <span className="edu-dev-badge">{c.badge}</span>
-        <Dancers size={64} />
       </div>
       <div className="edu-dev-promo-body">
         <b>{c.promoTitle}</b>
@@ -131,7 +131,10 @@ export default function EduDeveloperTeam() {
         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </button>
       <div className="edu-dev-hero">
-        <span className="edu-dev-badge">{c.badge}</span>
+        <div className="edu-dev-art">
+          <img src="/edu/dev-rocket.svg" alt="" width="800" height="520" />
+          <span className="edu-dev-badge">{c.badge}</span>
+        </div>
         <Dancers ids={[3, 6, 1, 8, 5]} size={84} />
         <h1>{c.heroTitle}</h1>
         <p>{c.heroBody}</p>

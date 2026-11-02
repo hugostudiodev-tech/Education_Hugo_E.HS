@@ -1392,3 +1392,13 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu-dev-signup { width: 100%; margin-top: 8px; }
 .edu-dev-signup:disabled { opacity: .7; cursor: default; }
 .edu-dev-error { margin: 0; color: #ea2b2b; text-align: center; }
+
+/* Ảnh tên lửa: nhãn nằm trên ảnh, cả cảnh rung nhẹ như đang bay. */
+.edu-dev-art { position: relative; overflow: hidden; }
+.edu-dev-art img { display: block; width: 100%; height: auto; animation: edu-dev-fly 2.4s ease-in-out infinite; transform-origin: 50% 60%; }
+.edu-dev-art .edu-dev-badge { position: absolute; top: 14px; left: 50%; translate: -50% 0; }
+@keyframes edu-dev-fly { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(3px, -4px) rotate(-.6deg); } 50% { transform: translate(-2px, 2px) rotate(.4deg); } 75% { transform: translate(2px, -2px) rotate(-.3deg); } }
+@media (prefers-reduced-motion: reduce) { .edu-dev-art img { animation: none; } }
+.edu-dev-promo .edu-dev-art { background: #1cb0f6; }
+.edu-dev-hero { padding-top: 0; overflow: hidden; }
+.edu-dev-hero > .edu-dev-art { width: calc(100% + 36px); margin: 0 -18px 4px; }
