@@ -1441,3 +1441,20 @@ button.edu-pop-course:disabled { cursor: default; }
 @media (prefers-reduced-motion: reduce) { .edu-partner-spin { animation-duration: 2.4s; } }
 .edu-partner-credit { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--edu-muted, #777); }
 .edu-partner-credit a { color: inherit; font-weight: 800; }
+
+/* ── Cộng đồng: bớt nhợt — băng màu đầu trang, thẻ có đáy 3D như phần còn lại của Edu ── */
+.comm-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 22px; border-radius: 20px; background: #1cb0f6; color: #fff; box-shadow: 0 5px 0 #1899d6; }
+.comm-hero .edu-page-title { color: #fff; }
+.comm-hero .comm-lead { margin: 6px 0 0; color: rgb(255 255 255 / .92); }
+.comm-hero-cast { display: flex; flex: none; align-items: flex-end; gap: 2px; }
+.comm-hero-cast img { animation: edu-dev-hop 1.2s ease-in-out infinite; animation-delay: calc(var(--i) * .16s); filter: drop-shadow(0 4px 4px rgb(0 0 0 / .18)); }
+@media (max-width: 560px) { .comm-hero-cast img:nth-child(n + 2) { display: none; } }
+@media (prefers-reduced-motion: reduce) { .comm-hero-cast img { animation: none; } }
+.comm-composer { box-shadow: 0 4px 0 var(--edu-line); transition: border-color .15s, box-shadow .15s; }
+.comm-composer:focus-within { border-color: #1cb0f6; box-shadow: 0 4px 0 #1cb0f6; }
+.comm-post { box-shadow: 0 4px 0 var(--edu-line); transition: transform .15s, box-shadow .15s; }
+.comm-post:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--edu-line); }
+.comm-post footer .is-on { background: color-mix(in srgb, var(--edu-red) 12%, transparent); }
+.comm-empty.is-art { display: grid; justify-items: center; gap: 8px; padding: 28px 16px; border: 2px dashed var(--edu-line); border-radius: 20px; }
+.comm-empty.is-art img { animation: edu-dev-hop 1.6s ease-in-out infinite; }
+.comm-empty.is-art p { margin: 0; font-size: 16px; font-weight: 700; color: var(--edu-ink); }

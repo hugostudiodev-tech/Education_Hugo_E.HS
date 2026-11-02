@@ -6,6 +6,7 @@ import { PersonaAvatar } from "./EduPersona";
 import { useEduText } from "./eduText";
 import AnimIcon from "../components/icons/animated/AnimIcon";
 import { detectLang, translatePost } from "./postTranslate";
+import EduStatus from "./EduStatus";
 
 /**
  * Cộng đồng học thuật Education Hugo (/community) — bảng riêng trên chính API Today
@@ -233,11 +234,19 @@ function Feed() {
 
   return (
     <>
-      <h1 className="edu-page-title">{t("community.title")}</h1>
-      <p className="comm-lead">{t("community.lead")}</p>
+      {/* Băng đầu trang có màu + mascot nhún nhảy, cùng ngôn ngữ thẻ màu ở cột phải. */}
+      <header className="comm-hero">
+        <div>
+          <h1 className="edu-page-title">{t("community.title")}</h1>
+          <p className="comm-lead">{t("community.lead")}</p>
+        </div>
+        <div className="comm-hero-cast" aria-hidden="true">
+          {[2, 5, 7].map((n, i) => <img key={n} src={`/edu/cast-${n}.svg`} alt="" width="56" height="56" style={{ "--i": i }} />)}
+        </div>
+      </header>
       <Composer onPosted={(post) => setPosts((all) => [post, ...(all || [])])} placeholder={t("community.placeholder")} />
-      {posts === null ? <p className="comm-empty">{t("common.loading")}…</p>
-        : posts.length === 0 ? <p className="comm-empty">{t("community.empty")}</p>
+      {posts === null ? <EduStatus kind="loading" compact />
+        : posts.length === 0 ? <div className="comm-empty is-art"><img src="/edu/buddy-learn.svg" alt="" width="120" height="120" /><p>{t("community.empty")}</p></div>
           : posts.map((post) => <Post key={post.key} post={post} onChange={update} onRemove={remove} open />)}
       {more && <button type="button" className="edu-btn is-ghost comm-more" onClick={() => load(posts.at(-1).createdAt)}>{t("community.more")}</button>}
     </>
@@ -254,7 +263,7 @@ function Thread({ postKey }) {
     return () => { alive = false; };
   }, [postKey]);
   const back = <button type="button" className="comm-back" onClick={() => navigate(data?.post?.parentKey ? `/community/${data.post.parentKey}` : "/community")}><AnimIcon name="back" />{t("community.back")}</button>;
-  if (!data) return <>{back}<p className="comm-empty">{t("common.loading")}…</p></>;
+  if (!data) return <>{back}<EduStatus kind="loading" compact /></>;
   if (data.gone || !data.post) return <>{back}<p className="comm-empty">{t("community.gone")}</p></>;
   const setReply = (next) => setData((d) => ({ ...d, replies: d.replies.map((r) => (r.key === next.key ? next : r)) }));
   return (

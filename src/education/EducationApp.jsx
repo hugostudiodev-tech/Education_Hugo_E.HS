@@ -69,7 +69,7 @@ function prefetchPages(signedIn) {
 
 // Khung chính (thanh trên, menu, cột phải, hộp thông báo) dựng MỘT lần cho mọi trang trong nó;
 // chuyển trang chỉ đổi phần nội dung, chờ tải thì quay nhỏ ngay trong vùng nội dung.
-const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile)/, "profile"],
+const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team)/, "profile"],
   [/^\/(friends|u\/)/, "friends"], [/^\/community/, "community"], [/^\/store/, "store"]];
 function ShellLayout({ learner, signedIn, onLearnerUpdate }) {
   const { pathname } = useLocation();
