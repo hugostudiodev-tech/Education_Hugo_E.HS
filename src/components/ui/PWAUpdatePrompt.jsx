@@ -5,7 +5,7 @@ import HugoDrop from "../system/HugoDrop";
 import StatusScreen from "../system/StatusScreen";
 import { notify } from "../../lib/notify";
 
-const POLL_MS = 2 * 60 * 1000;
+const POLL_MS = 60 * 1000;
 const BOOT_REASON = "hugo:boot-reason";
 const VERSION = import.meta.env.VITE_APP_VERSION || "";
 
@@ -38,7 +38,7 @@ export default function PWAUpdatePrompt() {
     if (import.meta.env.DEV || !("serviceWorker" in navigator)) return undefined;
     let disposed = false;
     let interval;
-    let lastCheck = Date.now(); // Registration already checks on a fresh navigation.
+    let lastCheck = 0;
     let check;
     let onVisible;
 
@@ -47,17 +47,22 @@ export default function PWAUpdatePrompt() {
       check = () => {
         if (document.hidden || !navigator.onLine || Date.now() - lastCheck < 60_000) return;
         lastCheck = Date.now();
-        registration.update().catch(() => {});
+        registration.update().catch((error) => {
+          console.warn("PWA update check failed:", error);
+        });
       };
       onVisible = () => check();
       document.addEventListener("visibilitychange", onVisible);
+      window.addEventListener("focus", check);
       window.addEventListener("online", check);
+      check();
       interval = window.setInterval(check, POLL_MS);
     }).catch(() => {});
 
     return () => {
       disposed = true;
       if (onVisible) document.removeEventListener("visibilitychange", onVisible);
+      if (check) window.removeEventListener("focus", check);
       if (check) window.removeEventListener("online", check);
       window.clearInterval(interval);
     };
