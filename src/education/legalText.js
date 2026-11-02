@@ -96,7 +96,7 @@ const EN = {
       {
         h: "1. Controller",
         p: [
-          `Hugo Studio is the controller of the personal data described here. Requests concerning your data may be sent to ${CONTACT}. We process personal data in accordance with applicable Vietnamese law on personal data protection, including Decree No. 13/2023/ND-CP and any legislation that succeeds it.`,
+          `Hugo Studio is the controller of the personal data described here. Requests concerning your data may be sent to ${CONTACT}. We process personal data in accordance with applicable Vietnamese law on personal data protection, including the Law on Personal Data Protection 2025 (effective 1 January 2026), Decree No. 13/2023/ND-CP and any legislation that succeeds them.`,
         ],
       },
       {
@@ -152,7 +152,7 @@ const EN = {
       {
         h: "7. Your rights",
         p: [
-          `You may access, correct or delete your personal data, request a copy of it in a portable format, withdraw consent to notifications, and object to or restrict certain processing. Most controls live in Profile; account deletion is available in your Hugo Studio account settings, and any other request may be sent to ${CONTACT}. We will respond within the time limits set by law and may first verify your identity.`,
+          `You may access, correct or delete your personal data, request a copy of it in a portable format, withdraw consent to notifications, and object to or restrict certain processing. Most controls live in Profile; you can delete your Education Hugo account and all its learning data under Settings → "Delete Education Hugo account" (your Hugo Studio sign-in account is deleted separately in Hugo Studio's account settings), and any other request may be sent to ${CONTACT}. We will respond within the time limits set by law and may first verify your identity.`,
         ],
       },
       {
@@ -272,7 +272,7 @@ const VI = {
     lead: "Chính sách này giải thích Education Hugo xử lý dữ liệu cá nhân nào, vì sao, chia sẻ với ai và bạn kiểm soát chúng thế nào. Chúng tôi chỉ thu thập những gì dịch vụ thật sự cần, không bao giờ bán dữ liệu cá nhân và không hiển thị quảng cáo.",
     sections: [
       { h: "1. Bên kiểm soát dữ liệu", p: [
-        `Hugo Studio là bên kiểm soát dữ liệu cá nhân được mô tả ở đây. Yêu cầu liên quan tới dữ liệu của bạn xin gửi tới ${CONTACT}. Chúng tôi xử lý dữ liệu cá nhân theo pháp luật Việt Nam về bảo vệ dữ liệu cá nhân, gồm Nghị định 13/2023/NĐ-CP và văn bản thay thế (nếu có).`,
+        `Hugo Studio là bên kiểm soát dữ liệu cá nhân được mô tả ở đây. Yêu cầu liên quan tới dữ liệu của bạn xin gửi tới ${CONTACT}. Chúng tôi xử lý dữ liệu cá nhân theo pháp luật Việt Nam về bảo vệ dữ liệu cá nhân, gồm Luật Bảo vệ dữ liệu cá nhân 2025 (hiệu lực từ 01/01/2026), Nghị định 13/2023/NĐ-CP và văn bản thay thế (nếu có).`,
       ] },
       { h: "2. Dữ liệu chúng tôi xử lý", list: [
         "Dữ liệu tài khoản — email và tên hiển thị từ đăng nhập Google; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
@@ -308,7 +308,7 @@ const VI = {
         "Khi bạn xoá tài khoản, dữ liệu cá nhân được xoá hoặc ẩn danh không thể khôi phục, trừ phần pháp luật buộc chúng tôi lưu giữ.",
       ] },
       { h: "7. Quyền của bạn", p: [
-        `Bạn có quyền truy cập, chỉnh sửa hoặc xoá dữ liệu cá nhân, yêu cầu bản sao ở định dạng có thể chuyển, rút lại sự đồng ý nhận thông báo, và phản đối hoặc hạn chế một số hoạt động xử lý. Phần lớn công cụ nằm trong Hồ sơ; xoá tài khoản ở phần cài đặt tài khoản Hugo Studio, và mọi yêu cầu khác xin gửi tới ${CONTACT}. Chúng tôi trả lời trong thời hạn luật định và có thể xác minh danh tính của bạn trước.`,
+        `Bạn có quyền truy cập, chỉnh sửa hoặc xoá dữ liệu cá nhân, yêu cầu bản sao ở định dạng có thể chuyển, rút lại sự đồng ý nhận thông báo, và phản đối hoặc hạn chế một số hoạt động xử lý. Phần lớn công cụ nằm trong Hồ sơ; bạn tự xoá tài khoản Education Hugo cùng toàn bộ dữ liệu học ở Cài đặt → "Xoá tài khoản Education Hugo" (tài khoản đăng nhập Hugo Studio xoá riêng trong phần cài đặt của Hugo Studio), và mọi yêu cầu khác xin gửi tới ${CONTACT}. Chúng tôi trả lời trong thời hạn luật định và có thể xác minh danh tính của bạn trước.`,
       ] },
       { h: "8. Người học dưới 18 tuổi", p: [
         "Education Hugo dành cho người từ 14 tuổi. Với người học dưới 18 tuổi, chúng tôi không thu thập nhiều hơn mức dịch vụ cần, không hiển thị quảng cáo và không bao giờ công khai danh tính thật. Cha mẹ hoặc người giám hộ có thể liên hệ để xem lại hoặc xoá dữ liệu của trẻ.",
@@ -402,7 +402,7 @@ const ZH = {
     lead: "本政策说明 Education Hugo 处理哪些个人数据、为何处理、与谁共享，以及你如何控制这些数据。我们只收集服务真正需要的数据，从不出售个人数据，也不展示广告。",
     sections: [
       { h: "1. 数据控制者", p: [
-        `Hugo Studio 是本文所述个人数据的控制者。有关你数据的请求请发送至 ${CONTACT}。我们依据越南有关个人数据保护的法律处理个人数据，包括第 13/2023/NĐ-CP 号法令及其后续法规。`,
+        `Hugo Studio 是本文所述个人数据的控制者。有关你数据的请求请发送至 ${CONTACT}。我们依据越南有关个人数据保护的法律处理个人数据，包括《2025 年个人数据保护法》（2026 年 1 月 1 日起施行）、第 13/2023/NĐ-CP 号法令及其后续法规。`,
       ] },
       { h: "2. 我们处理的数据", list: [
         "账户数据——来自 Google 登录的电子邮箱和显示名称；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",
@@ -438,7 +438,7 @@ const ZH = {
         "你删除账户后，个人数据将被删除或不可逆地匿名化，法律要求我们保留的除外。",
       ] },
       { h: "7. 你的权利", p: [
-        `你可以访问、更正或删除个人数据，索取可携带格式的副本，撤回对通知的同意，并反对或限制某些处理。大部分控制项位于个人资料中；账户删除位于 Hugo Studio 账户设置中，其他请求可发送至 ${CONTACT}。我们将在法定期限内答复，并可能先核实你的身份。`,
+        `你可以访问、更正或删除个人数据，索取可携带格式的副本，撤回对通知的同意，并反对或限制某些处理。大部分控制项位于个人资料中；你可以在 设置 →「删除 Education Hugo 账户」中删除 Education Hugo 账户及全部学习数据（Hugo Studio 登录账户需在 Hugo Studio 账户设置中另行删除），其他请求可发送至 ${CONTACT}。我们将在法定期限内答复，并可能先核实你的身份。`,
       ] },
       { h: "8. 未满 18 岁的学员", p: [
         "Education Hugo 面向 14 岁及以上人群。对于未满 18 岁的学员，我们不收集超出服务所需的数据，不展示广告，也绝不公开其真实身份。父母或监护人可联系我们查看或删除未成年人的数据。",

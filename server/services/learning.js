@@ -45,6 +45,7 @@ export async function snapshot(email, user) {
       completedLessons: doc.completed || [],
       scores: doc.scores || {},
       gems: doc.gems || 0,
+      consentV: doc.consent?.v || 0,
     },
   };
 }

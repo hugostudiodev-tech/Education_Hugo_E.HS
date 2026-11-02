@@ -56,7 +56,6 @@ export default defineConfig({
           if (!id.includes("node_modules")) return;
           if (id.includes("i18next")) return "i18n";
           if (id.includes("react-dom") || id.includes("react-router") || id.includes("/react/")) return "vendor";
-          if (/[\\/]node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/.test(id)) return "motion";
         },
       },
     },

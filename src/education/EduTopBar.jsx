@@ -8,7 +8,7 @@ import { useEduText } from "./eduText";
 import AnimIcon from "../components/icons/animated/AnimIcon";
 import { playEduSound } from "./eduSound";
 import { setEduCourse, useEduCourse } from "./useEduCourse";
-import { courseOfStep } from "../../packages/courses/index.js";
+import { courseOfStep } from "../../packages/courses/courseOfStep.js";
 
 /**
  * Thanh trên Education Hugo — 4 ô kiểu Duolingo: khoá học · chuỗi lửa · Ngọc · thông báo.

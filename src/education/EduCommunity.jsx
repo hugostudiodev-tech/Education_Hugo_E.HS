@@ -248,6 +248,19 @@ function Feed() {
           {[2, 5, 7].map((n, i) => <img key={n} src={`/edu/cast-${n}.svg`} alt="" width="56" height="56" style={{ "--i": i }} />)}
         </div>
       </header>
+      <div className="edu-card comm-discord">
+        <div className="comm-discord-row">
+          <svg className="comm-discord-art" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="32" fill="#5865f2" opacity=".18" />
+            <circle cx="32" cy="32" r="25" fill="#5865f2" />
+            <path d="M18 24a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v10a6 6 0 0 1-6 6h-9l-7 6v-6a6 6 0 0 1-6-6z" fill="#fff" />
+            <circle cx="25.5" cy="29" r="2.6" fill="#5865f2" /><circle cx="32" cy="29" r="2.6" fill="#5865f2" /><circle cx="38.5" cy="29" r="2.6" fill="#5865f2" />
+            <circle cx="49" cy="15" r="6" fill="#58cc02" stroke="#fff" strokeWidth="3" />
+          </svg>
+          <div><b>{t("community.discordTitle")}</b><p>{t("community.discordBody")}</p></div>
+        </div>
+        <a className="edu-btn comm-discord-btn" href="https://discord.gg/H4Xe2hvrJf" target="_blank" rel="noopener">{t("community.discordCta")}</a>
+      </div>
       {posts === null ? <EduStatus kind="loading" compact />
         : posts.length === 0 ? <div className="comm-empty is-art"><img src="/edu/buddy-learn.svg" alt="" width="120" height="120" /><p>{t("community.empty")}</p></div>
           : posts.map((post) => <Post key={post.key} post={post} onChange={update} onRemove={remove} open />)}

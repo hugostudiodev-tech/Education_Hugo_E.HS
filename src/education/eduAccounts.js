@@ -25,6 +25,9 @@ export function takePendingGoal() {
 export const KEY = "edu.consent";
 export const VERSION = 1;
 
+/** Lời đồng ý đã lưu trên máy ({ v, at, terms, age }) hoặc null. */
+export const readConsent = () => read(KEY, null);
+
 export function needsWelcome() {
   try {
     return JSON.parse(localStorage.getItem(KEY) || "null")?.v !== VERSION;

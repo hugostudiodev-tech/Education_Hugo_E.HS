@@ -11,7 +11,6 @@ import { API_BASE } from "../config/apiBase";
 import { GEMS_PER_CORRECT } from "../../packages/shared/coderProgression";
 import { canPromptInstall, promptInstall } from "./eduHead";
 import { rich, useEduText } from "./eduText";
-import { FlameBuddy } from "./EduStreak";
 import { useEduCourse } from "./useEduCourse";
 import { legalFor } from "./legalText";
 import { supportMailUrl } from "./eduSupport";
@@ -448,6 +447,20 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
     return () => window.removeEventListener("edu:installable", on);
   }, []);
   const close = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/profile", { replace: true }));
+  // Xoá tài khoản Education Hugo: hỏi hai lần, máy chủ xoá hết dữ liệu (server/services/erase.js), rồi đăng xuất.
+  const deleteAccount = async () => {
+    if (!(await notify.confirm({ title: t("profile.deleteAsk"), message: t("profile.deleteBody") }))) return;
+    if (!(await notify.confirm({ title: t("profile.deleteAsk2"), message: t("profile.deleteBody2") }))) return;
+    try {
+      const response = await fetch(`${API_BASE}/me`, { method: "DELETE", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: "DELETE" }) });
+      if (!response.ok) throw new Error();
+      try { localStorage.removeItem("edu.accounts"); } catch { /* bỏ qua */ }
+      notify.success(t("profile.deleteDone"));
+      await onSignOut();
+    } catch {
+      notify.error(t("profile.deleteFailed"));
+    }
+  };
 
   return (
     <section className="edu-page edu-me">
@@ -471,6 +484,7 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
       <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">{t("common.support")}</a>
       <FeedbackHistory />
       <button type="button" className="edu-btn edu-btn--ghost" onClick={onSignOut}>{t("profile.signOut")}</button>
+      <button type="button" className="edu-btn edu-btn--ghost" onClick={deleteAccount}>{t("profile.deleteAccount")}</button>
       <p className="edu-legal">
         <Link to="/terms">{legal.terms.title}</Link> · <Link to="/privacy">{legal.privacy.title}</Link> · <Link to="/guidelines">{legal.guidelines.title}</Link>
       </p>

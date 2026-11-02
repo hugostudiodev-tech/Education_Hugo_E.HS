@@ -18,11 +18,8 @@ export const COURSES = {
 
 export const ALL_STEPS = Object.values(COURSES).flatMap((c) => c.WEB_COURSES);
 
-export const courseOfStep = (id) => (
-  /^sql\d+$/.test(String(id)) ? "sql"
-    : /^pa\d+$/.test(String(id)) ? "python-advanced"
-      : /^py\d+$/.test(String(id)) ? "python" : "coding"
-);
+import { courseOfStep } from "./courseOfStep.js";
+export { courseOfStep };
 
 /** { key, course, step, index } hoặc null; index đếm trong khoá của nó. */
 export function findStep(id) {

@@ -49,6 +49,8 @@ const learnerSchema = new Schema({
   xpWeekly: { type: Number, default: 0 },
   // Khoá bởi admin (báo cáo vi phạm)
   bannedAt: Date,
+  // Lời đồng ý điều khoản + độ tuổi (EduWelcome): { v, at, savedAt, terms, age }
+  consent: { type: Mixed, default: undefined },
 }, { timestamps: true, minimize: false });
 learnerSchema.index({ 'prefs.reminder': 1, 'prefs.reminderHour': 1 });
 learnerSchema.index({ friendCode: 1 }, { unique: true, partialFilterExpression: { friendCode: { $type: 'string' } } });

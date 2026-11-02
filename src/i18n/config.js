@@ -21,8 +21,6 @@ import {
   languageCode,
   persistAppLanguage,
 } from './languages';
-import { MEMBER_TODAY_TRANSLATIONS } from './locales/memberTodayTranslations';
-import { MEMBER_APP_TRANSLATIONS } from './locales/memberAppTranslations';
 import { ensureLanguageFont } from './languageFont';
 
 const FULL_LOCALES = {
@@ -116,31 +114,7 @@ export function ensureTranslations(language = i18n.language) {
       .then(() => Promise.all([FULL_LOCALES[load](), load === 'nom' ? FULL_LOCALES.vi() : null]))
       .then(([mod, viMod]) => {
         const own = viMod ? fillMissing(viMod.default, mod.default) : mod.default;
-        const appCopy = MEMBER_APP_TRANSLATIONS[load];
-        const todayCopy = MEMBER_TODAY_TRANSLATIONS[load];
-        const dictionary = {
-          ...own,
-          ...(appCopy ? {
-            utilities: {
-              ...(own.utilities || {}),
-              categories: appCopy.categories,
-              badges: appCopy.badges,
-              // Bản Nôm chưa có lời chào riêng: dùng bản quốc ngữ thay vì đoán chữ.
-              home: appCopy.home || MEMBER_APP_TRANSLATIONS.vi.home,
-              catalog: {
-                ...(own.utilities?.catalog || {}),
-                ...appCopy.catalog,
-              },
-            },
-          } : {}),
-          ...(todayCopy ? {
-            memberPortal: {
-              ...(own.memberPortal || {}),
-              today: todayCopy,
-            },
-          } : {}),
-        };
-        i18n.addResourceBundle(load, 'translation', dictionary, true, true);
+        i18n.addResourceBundle(load, 'translation', own, true, true);
         inFlight.set(load, 'done');
         // i18next resolved this language against the core bundle already;
         // nudge it so mounted components pick up the real strings.

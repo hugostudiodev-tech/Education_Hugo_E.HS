@@ -20,7 +20,6 @@ import { playEduSound } from "./eduSound";
 import { KEY, VERSION } from "./eduAccounts";
 export { needsWelcome } from "./eduAccounts";
 
-const WWW = "https://www.hugowishpax.studio";
 
 export default function EduWelcome({ onDone }) {
   const { t, lang } = useEduText();

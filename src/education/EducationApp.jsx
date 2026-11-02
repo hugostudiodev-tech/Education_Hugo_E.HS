@@ -6,7 +6,7 @@ import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, usePar
 import { clearMemberSession, getMemberSession, logoutAuth, restoreMemberSession } from "../services/api/core/authSession";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useEduHead } from "./eduHead";
-import { needsWelcome, rememberAccount, takePendingGoal } from "./eduAccounts";
+import { needsWelcome, readConsent, rememberAccount, takePendingGoal } from "./eduAccounts";
 import EduShell, { EduInstallGate, EduProfile, EduSettingsPage, EduStore } from "./EduShell";
 import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
@@ -195,6 +195,14 @@ export default function EducationApp() {
         .then(() => refresh()).catch(() => {});
     }
   }, [signedIn, persona, session, refresh]);
+  // Lời đồng ý ở màn chào chỉ nằm trên máy: gửi lên máy chủ làm bằng chứng nếu máy chủ chưa có phiên bản này.
+  const consentV = learner?.consentV;
+  useEffect(() => {
+    const consent = readConsent();
+    if (!signedIn || consentV === undefined || !consent?.v || consentV >= consent.v) return;
+    fetch(`${API_BASE}/me/consent`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(consent) })
+      .then((r) => r.ok && setLearner((current) => current && { ...current, consentV: consent.v })).catch(() => {});
+  }, [signedIn, consentV]);
 
   const location = useLocation();
   // Giữ trang đang mở (vd. /feedback từ thư) để đăng nhập xong quay lại đúng chỗ.

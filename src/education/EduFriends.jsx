@@ -30,7 +30,7 @@ function useSocial() {
   const [data, setData] = useState(null);
   // Thiếu trường (máy chủ cũ đang chạy, lỗi giữa chừng) thì coi là rỗng — trang không được sập.
   const take = (d) => setData({ ...d, me: d.me || {}, league: d.league || [], classmates: d.classmates || [], friends: d.friends || [], requestsIn: d.requestsIn || [], requestsOut: d.requestsOut || [] });
-  const load = useCallback(() => call("").then(take).catch(() => setData((cur) => cur || { failed: true })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const load = useCallback(() => call("").then(take).catch(() => setData((cur) => cur || { failed: true })), []);
   useEffect(() => {
     load();
     const tick = () => document.visibilityState === "visible" && load();

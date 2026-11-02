@@ -8,6 +8,7 @@ import { checkNickname } from '../../packages/persona/nickname.js';
 import { checkAvatar } from '../../packages/persona/avatar.js';
 import { checkIntro } from '../../packages/persona/intro.js';
 import { cleanFeedback } from '../../packages/shared/eduFeedback.js';
+import { eraseLearner } from '../services/erase.js';
 
 const router = express.Router();
 router.use(['/me', '/learn', '/persona', '/feedback', '/developer'], requireUser);
@@ -31,6 +32,20 @@ router.post('/me/streak/thaw', limit(10), handle(async (req) => {
   const day = String(req.body?.day || '');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw fail(400, 'BAD_DAY', 'Ngày không hợp lệ.');
   return { success: true, ...(await thaw(req.email, day)) };
+}));
+// Bằng chứng đồng ý (NĐ 13/2023): phiên bản điều khoản + thời điểm, ghi một lần cho mỗi phiên bản.
+router.post('/me/consent', limit(10), handle(async (req) => {
+  const v = Number.parseInt(req.body?.v, 10);
+  if (!(v > 0) || req.body?.terms !== true || req.body?.age !== true) throw fail(400, 'BAD_CONSENT', 'Lời đồng ý không hợp lệ.');
+  const at = new Date(req.body?.at);
+  await Learner.updateOne({ email: req.email }, { $set: { consent: { v, at: Number.isNaN(at.getTime()) ? new Date() : at, savedAt: new Date(), terms: true, age: true } } });
+  return { success: true };
+}));
+// Xoá tài khoản Education Hugo: xoá hết dữ liệu học, không khôi phục được.
+router.delete('/me', limit(3), handle(async (req) => {
+  if (req.body?.confirm !== 'DELETE') throw fail(400, 'CONFIRM_REQUIRED', 'Thiếu xác nhận xoá.');
+  await eraseLearner(req.email);
+  return { success: true };
 }));
 router.get('/me/history', handle(async (req, res) => {
   res.set('Cache-Control', 'private, no-store');
