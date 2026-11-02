@@ -17,7 +17,7 @@ import { courseOfStep } from "../../packages/courses/index.js";
 const COURSES = [
   { id: "coding", cast: 1, ready: true, total: 26 },
   { id: "sql", cast: 6, ready: true, total: 40 }, // packages/courses/sql
-  { id: "python", cast: 5, ready: true, total: 40 }, // packages/courses/python
+  { id: "python", cast: 5, ready: true, total: 20 }, // packages/courses/python — số step đã mở
   { id: "quan", cast: 3, ready: false }, // khoá 2 "Quán" — docs/khoa-2-quan.md
 ];
 

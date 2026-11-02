@@ -21,12 +21,14 @@ import py18 from "./steps/py18.js";
 import py19 from "./steps/py19.js";
 import py20 from "./steps/py20.js";
 
-export { STAGES, STEP_IDS, STEP_PASS_PERCENT, MAX_SLIDES } from "./stages.js";
+import { STAGES as ALL_STAGES } from "./stages.js";
+
+export { STEP_IDS, STEP_PASS_PERCENT, MAX_SLIDES } from "./stages.js";
 
 const WRITTEN = new Map([py1, py2, py3, py4, py5, py6, py7, py8, py9, py10, py11, py12, py13, py14, py15, py16, py17, py18, py19, py20].map((step) => [step.id, step]));
 
-/** 40 step của khoá Python, đúng thứ tự học. Step chưa soạn mang `draft: true`. */
-export const WEB_COURSES = OUTLINE.map(([stage, title], index) => {
+/** Cả 40 step theo đề cương; step chưa soạn mang `draft: true`. */
+const OUTLINED = OUTLINE.map(([stage, title], index) => {
   const id = STEP_IDS[index];
   const content = WRITTEN.get(id);
   return {
@@ -41,3 +43,8 @@ export const WEB_COURSES = OUTLINE.map(([stage, title], index) => {
     ...(content ? {} : { draft: true, slides: [], quiz: [] }),
   };
 });
+
+// Chỉ phát ra step đã soạn và chặng có bài: khoá soạn từ đầu tới cuối nên step đã soạn luôn
+// là một đoạn đầu liền mạch, from/to của chặng vẫn đúng chỉ số.
+export const WEB_COURSES = OUTLINED.filter((step) => !step.draft);
+export const STAGES = ALL_STAGES.filter((stage) => WEB_COURSES.some((step) => step.stage === stage.id));

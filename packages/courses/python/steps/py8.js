@@ -23,7 +23,7 @@ export default {
     {
       section: "research",
       title: "f-string ra đời năm 2016",
-      body: `f-string (\"formatted string literal\") được thêm vào **Python 3.6** theo đề xuất **PEP 498** của Eric V. Smith. Trước đó người ta dùng \`%\` hoặc \`.format()\` — dài và dễ nhầm thứ tự.
+      body: `f-string ("formatted string literal") được thêm vào **Python 3.6** theo đề xuất **PEP 498** của Eric V. Smith. Trước đó người ta dùng \`%\` hoặc \`.format()\` — dài và dễ nhầm thứ tự.
 
 Ngày nay f-string là cách được khuyên dùng vì **ngắn, đọc theo đúng thứ tự câu, và chạy nhanh**.
 
