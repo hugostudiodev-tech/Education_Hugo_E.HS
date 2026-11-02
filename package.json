@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/generate-seo.mjs && npm run build:sdk && node scripts/publish-sdk.mjs",
     "preview": "vite preview",
-    "lint": "eslint src packages scripts middleware.js",
+    "lint": "eslint src packages scripts server middleware.js",
     "check:sql-course": "node scripts/checks/check-sql-course.mjs",
     "check:coder-content": "node scripts/checks/check-coder-content.mjs",
     "check:edu-streak": "node scripts/checks/check-edu-streak.mjs",

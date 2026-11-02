@@ -75,7 +75,7 @@ export default [
     // côi mà không có gì báo, và một `'process' is not defined` nằm im trong
     // khối VAPID. Chỗ này khai globals Node và tắt các luật React vô nghĩa với
     // mã máy chủ, để phần còn lại của cấu hình áp dụng được cho cả backend.
-    files: ['packages/**/*.js', 'scripts/**/*.js', 'scripts/**/*.mjs', '*.mjs'],
+    files: ['server/**/*.js', 'packages/**/*.js', 'scripts/**/*.js', 'scripts/**/*.mjs', '*.mjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

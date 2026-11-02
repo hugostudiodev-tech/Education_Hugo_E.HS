@@ -101,7 +101,7 @@ export async function thaw(email, frozenDay) {
 }
 
 /** Khiên lửa: giữ một khiên có điều kiện rồi phá băng miễn phí; hỏng thì trả khiên. */
-export async function useShield(email, frozenDay) {
+export async function spendShield(email, frozenDay) {
   const { day } = vnClock();
   const held = await Learner.updateOne({ email, shields: { $gt: 0 } }, { $inc: { shields: -1 } });
   if (!held.modifiedCount) return null;
@@ -213,7 +213,7 @@ export async function runReminders(now = new Date()) {
     const holders = await Learner.find({ shields: { $gt: 0 }, frozenNoticeDay: { $ne: day }, 'streak.count': { $gte: 1 } }).select('email streak shields prefs').limit(2000).lean();
     for (const doc of holders) {
       if (!streakView(doc.streak, day).frozen.includes(addDays(day, -1))) continue;
-      const saved = await useShield(doc.email, addDays(day, -1));
+      const saved = await spendShield(doc.email, addDays(day, -1));
       if (!saved) continue;
       await Learner.updateOne({ _id: doc._id }, { $set: { frozenNoticeDay: day } });
       if (cleanEduPrefs(doc.prefs).reminder) await notify(doc.email, { key: 'shield', vars: { n: saved.count, s: doc.shields - 1 }, url: '/streak', tag: 'edu-streak' });

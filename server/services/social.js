@@ -214,7 +214,6 @@ export async function removeFriend(email, rawCode) {
 }
 
 export const REPORT_REASONS = ['nickname', 'avatar', 'intro', 'harassment', 'cheating', 'other'];
-const esc = (text) => String(text || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
 /** Báo cáo một người học. Mỗi người chỉ có MỘT báo cáo đang chờ cho cùng một người (gửi lại = cập nhật). */
 export async function reportLearner(email, rawCode, { reason, note } = {}) {
