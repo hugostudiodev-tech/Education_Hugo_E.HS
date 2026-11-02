@@ -1,6 +1,6 @@
 // Một step chia thành các BÀI NHỎ (kiểu Duolingo) theo đúng ranh giới phần có sẵn của slide —
 // không phải soạn lại nội dung, bản dịch en/zh dùng nguyên. Bài cuối luôn là trắc nghiệm.
-// Client (trình phát, bản đồ) và máy chủ (/api/joy/edu-lesson) cùng gọi hàm này.
+// Client (trình phát, bản đồ) và máy chủ (/api/learn/lesson) cùng gọi hàm này.
 const GROUPS = [["intro", "visual"], ["research", "ideate"], ["core"], ["apply"]];
 const GROUP_OF = Object.fromEntries(GROUPS.flatMap((sections, g) => sections.map((s) => [s, g])));
 

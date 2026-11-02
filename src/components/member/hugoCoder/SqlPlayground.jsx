@@ -14,7 +14,7 @@ import "./sqlPlayground.css";
  * Bài tập (slide có `solution`): chạy lời giải trên một bản dữ liệu SẠCH rồi so kết quả —
  * đúng bảng là đạt, không bắt chép đúng từng chữ. `ordered` = thứ tự dòng cũng phải khớp.
  * Gợi ý mở dần theo số lần sai. Bài đang viết dở được giữ trên máy (localStorage).
- * ponytail: chấm ở máy học viên chỉ để luyện tập — không cộng JOY, nên không cần chấm lại ở máy chủ.
+ * ponytail: chấm ở máy học viên chỉ để luyện tập — không cộng Ngọc, nên không cần chấm lại ở máy chủ.
  */
 let engine;
 const loadEngine = () => (engine ||= initSqlJs({ locateFile: () => asset("/edu/sql/sql-wasm.wasm") }));

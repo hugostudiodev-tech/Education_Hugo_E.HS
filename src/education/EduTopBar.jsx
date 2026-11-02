@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/apiBase";
-import { joyText } from "../lib/joyDisplay";
-import { renderNotification } from "../../packages/shared/notificationText";
+import { GemIcon, gemText } from "./gems";
 import { EDU_CAST, streakPush } from "../../packages/shared/eduStreak";
 import { StreakChip } from "./EduStreak";
 import { useEduText } from "./eduText";
@@ -11,7 +10,7 @@ import { playEduSound } from "./eduSound";
 import { setEduCourse, useEduCourse } from "./useEduCourse";
 
 /**
- * Thanh trên Education Hugo — 4 ô kiểu Duolingo: khoá học · chuỗi lửa · JOY · thông báo.
+ * Thanh trên Education Hugo — 4 ô kiểu Duolingo: khoá học · chuỗi lửa · Ngọc · thông báo.
  * Mỗi ô (trừ chuỗi lửa) mở một bảng nhỏ ngay dưới thanh; bấm ra ngoài là đóng.
  */
 const COURSES = [
@@ -34,10 +33,6 @@ function usePopover() {
   return { open, setOpen, ref, toggle: (id) => setOpen((cur) => (cur === id ? null : id)) };
 }
 
-/** Đồng xu JOY vẽ bằng CSS (không ảnh, không emoji). */
-export function JoyCoin({ size = 26 }) {
-  return <span className="joy-coin" style={{ "--coin": `${size}px` }} aria-hidden="true"><b>JOY</b></span>;
-}
 
 function CoursePanel({ learner, onPick }) {
   const { t } = useEduText();
@@ -69,28 +64,25 @@ function CoursePanel({ learner, onPick }) {
 function JoyPanel({ learner }) {
   const { t } = useEduText();
   return (
-    <div className="edu-pop" role="dialog" aria-label="JOY">
-      <div className="edu-pop-joy"><JoyCoin size={48} /><b>{joyText(learner?.joyBalance || 0)}</b></div>
+    <div className="edu-pop" role="dialog" aria-label={gemText(0).replace(/^0 /, "")}>
+      <div className="edu-pop-joy"><GemIcon size={48} /><b>{gemText(learner?.gems || 0)}</b></div>
       <p>{t("topbar.joyBody")}</p>
       <Link className="edu-btn" to="/store">{t("topbar.toStore")}</Link>
     </div>
   );
 }
 
-/** Chữ một thông báo theo ngôn ngữ người đọc: push Edu (khoá edu.*), thông báo hệ thống (i18nKey), hay chữ admin viết sẵn. */
+/** Chữ một thông báo theo ngôn ngữ người đọc (khoá STREAK_PUSH), hoặc chữ admin viết sẵn. */
 function textOf(item, lang) {
-  if (item.i18nKey?.startsWith("edu.")) {
-    const text = streakPush(lang, item.i18nKey.slice(4), item.i18nParams || {});
-    if (text) return { title: text.title, message: text.body };
-  }
-  return (item.i18nKey && renderNotification(item.i18nKey, item.i18nParams || {}, lang)) || { title: item.title, message: item.message };
+  const text = item.key && streakPush(lang, item.key, item.params || {});
+  return text ? { title: text.title, message: text.body } : { title: item.title, message: item.message };
 }
 
 // Mỗi loại thông báo một ô 3D màu riêng + icon động.
 // Thông báo của Edu: mỗi loại một nhân vật (giống thư Duolingo luôn có Duo), loại khác giữ ô icon.
-const castOf = (item) => EDU_CAST[String(item.i18nKey || "").replace(/^edu\./, "")];
+const castOf = (item) => EDU_CAST[item.key];
 
-const ICON = { joy: ["gift", "gold"], payment: ["gift", "gold"], package: ["crown", "purple"], security: ["shield", "red"], system: ["sparkles", "blue"], verification: ["check", "green"], general: ["bell", "orange"], wellness: ["heart", "pink"] };
+const ICON = { gems: ["gift", "gold"], security: ["shield", "red"], system: ["sparkles", "blue"], verification: ["check", "green"], general: ["bell", "orange"], wellness: ["heart", "pink"] };
 
 function BellPanel({ items, onOpenItem, onReadAll }) {
   const { t, lang } = useEduText();
@@ -163,8 +155,8 @@ export default function EduTopBar({ learner, signedIn, inbox }) {
     return () => clearInterval(timer);
   }, [unread]);
   const openItem = (item) => { pop.setOpen(null); inbox.openItem(item); };
-  // Nhấn ô JOY: đồng xu lật một vòng và nảy lên (Web Animations, không thư viện).
-  const flipCoin = (event) => event.currentTarget.querySelector(".joy-coin")?.animate(
+  // Nhấn ô Ngọc: viên ngọc xoay một vòng và nảy lên (Web Animations, không thư viện).
+  const flipCoin = (event) => event.currentTarget.querySelector(".edu-gem")?.animate(
     [{ transform: "rotateY(0) translateY(0)" }, { transform: "rotateY(180deg) translateY(-6px)" }, { transform: "rotateY(360deg) translateY(0)" }],
     { duration: 600, easing: "cubic-bezier(.3,1.4,.5,1)" },
   );
@@ -180,8 +172,8 @@ export default function EduTopBar({ learner, signedIn, inbox }) {
       {signedIn && streak
         ? <StreakChip streak={streak} onOpen={() => navigate("/streak")} />
         : <Link className="edu-chip" to="/login" aria-label={t("streak.title")}><span className="material-symbols-outlined edu-chip-icon edu-tone-orange" aria-hidden="true">local_fire_department</span><b>0</b></Link>}
-      <button type="button" className="edu-chip edu-joy" onPointerDown={flipCoin} onClick={() => (signedIn ? pop.toggle("joy") : navigate("/login"))} aria-expanded={pop.open === "joy"} aria-label={t("shell.balance", { joy: joyText(learner?.joyBalance || 0) })}>
-        <JoyCoin /><b>{joyText(learner?.joyBalance || 0).replace(" JOY", "")}</b>
+      <button type="button" className="edu-chip edu-joy" onPointerDown={flipCoin} onClick={() => (signedIn ? pop.toggle("joy") : navigate("/login"))} aria-expanded={pop.open === "joy"} aria-label={t("shell.balance", { joy: gemText(learner?.gems || 0) })}>
+        <GemIcon /><b>{gemText(learner?.gems || 0, { unit: false })}</b>
       </button>
       <button type="button" className="edu-chip edu-bell" onClick={() => (signedIn ? (pop.toggle("bell"), pop.open !== "bell" && loadInbox()) : navigate("/login"))} aria-expanded={pop.open === "bell"} aria-label={unread > 0 ? `${t("topbar.notifications")} (${unread})` : t("topbar.notifications")}>
         <AnimIcon ref={bell} name="bell" size={30} className={unread > 0 ? "has-new" : ""} />

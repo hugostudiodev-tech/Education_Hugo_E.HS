@@ -131,7 +131,7 @@ export default function EduSettings({ learner, onLearnerUpdate, embedded = false
     const today = learner?.edu?.today;
     onLearnerUpdate({ edu: { ...learner?.edu, prefs: next, ...(today && patch.dailyGoal ? { today: { ...today, goal: patch.dailyGoal } } : {}) } });
     try {
-      const response = await fetch(`${API_BASE}/joy/edu-settings`, {
+      const response = await fetch(`${API_BASE}/me/settings`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

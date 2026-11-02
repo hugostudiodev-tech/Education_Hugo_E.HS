@@ -17,8 +17,8 @@ export const CODER_TOTAL_STEPS = CODER_STAGE_SEQUENCE.at(-1)?.to || 0;
 export const HUGOTEAM_CODING_DAYS = 30;
 /** Số step đầu học thử không cần tài khoản (trọn chặng 1). Phần còn lại miễn phí, chỉ cần đăng nhập để lưu tiến độ. */
 export const CODER_PREVIEW_STEPS = 6;
-/** Qua một step LẦN ĐẦU: mỗi câu trắc nghiệm đúng được ngần này JOY (học lại không cộng). */
-export const CODER_JOY_PER_CORRECT = 5;
+/** Qua một step LẦN ĐẦU: mỗi câu trắc nghiệm đúng được ngần này Ngọc (học lại không cộng). */
+export const GEMS_PER_CORRECT = 5;
 
 /** Các step Coding đã hoàn tất (step1…stepN), không trùng, theo thứ tự. */
 export function completedCoderSteps(completedLessons) {

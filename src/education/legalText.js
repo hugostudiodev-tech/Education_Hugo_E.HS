@@ -14,7 +14,7 @@ const EN = {
       {
         h: "1. Who we are",
         p: [
-          "Education Hugo is a non-profit educational service of Hugo Studio. It shares a single account system, JOY wallet and public identity (Persona) with www.hugowishpax.studio; where these Terms are silent, the Hugo Studio Terms of Service apply.",
+          "Education Hugo is a non-profit educational service of Hugo Studio with its own accounts, servers and data. You may sign in with Google, with your Hugo Studio account (www.hugowishpax.studio) or with a passkey; signing in with Hugo Studio only shares your name, email and profile picture with us, and no other Hugo Studio data.",
           `Questions about these Terms may be addressed to ${CONTACT}.`,
         ],
       },
@@ -29,21 +29,21 @@ const EN = {
         h: "3. Your account",
         p: [
           "You sign in with Google or with a passkey (Face ID, fingerprint or a device PIN). You are responsible for safeguarding the devices and credentials that give access to your account and for all activity that occurs under it. Notify us without delay if you suspect unauthorised access.",
-          "Courses are free of charge. Accounts nonetheless follow Hugo Studio's maintenance rules: a new account receives a trial period, which may be extended with JOY earned through learning, and verified students receive a year of access. An account that lapses may be restricted until it is renewed; your learning progress is not discarded merely because access has lapsed.",
+          "Courses and accounts are free of charge and accounts do not expire. We may close accounts that breach these Terms.",
         ],
       },
       {
-        h: "4. JOY, XP and streaks",
+        h: "4. Gems, XP and streaks",
         p: [
-          "JOY, XP, streaks, milestones and league positions are in-service motivational features. They carry no monetary value, cannot be redeemed for cash and confer no proprietary right. Their rules are computed exclusively by our servers, and we may recalibrate them to preserve fairness.",
-          "Any attempt to obtain JOY, XP or progress by automation, scripted submissions, exploitation of defects or collusion is prohibited. We may reverse illegitimately obtained balances and suspend the accounts concerned.",
+          "Gems, XP, streaks, milestones and league positions are in-service motivational features. They carry no monetary value, cannot be redeemed for cash and confer no proprietary right. Their rules are computed exclusively by our servers, and we may recalibrate them to preserve fairness.",
+          "Any attempt to obtain gems, XP or progress by automation, scripted submissions, exploitation of defects or collusion is prohibited. We may reverse illegitimately obtained balances and suspend the accounts concerned.",
         ],
       },
       {
         h: "5. The item shop",
         p: [
-          "You may exchange JOY for items in the Store. Each item takes effect as soon as the purchase succeeds: a badge is worn on your member card and public profile; Double XP doubles league XP for the stated number of hours, and further purchases add to the remaining time; a Streak Shield automatically thaws a day you missed at 8 a.m. the following morning, up to five shields at a time. Prices, stock and descriptions are shown before you confirm.",
-          "Items are personal and cannot be transferred, resold or exchanged for money. A completed purchase is final; if an item cannot be applied for a technical reason, the purchase is cancelled and the JOY is returned automatically. We may adjust prices, withdraw items or change stock at any time without affecting items you already hold.",
+          "You may exchange gems for items in the Store. Each item takes effect as soon as the purchase succeeds: a badge is worn on your member card and public profile; Double XP doubles league XP for the stated number of hours, and further purchases add to the remaining time; a Streak Shield automatically thaws a day you missed at 8 a.m. the following morning, up to five shields at a time. Prices, stock and descriptions are shown before you confirm.",
+          "Items are personal and cannot be transferred, resold or exchanged for money. A completed purchase is final; if an item cannot be applied for a technical reason, the purchase is cancelled and the gems are returned automatically. We may adjust prices, withdraw items or change stock at any time without affecting items you already hold.",
         ],
       },
       {
@@ -64,7 +64,7 @@ const EN = {
         h: "8. Moderation and enforcement",
         p: [
           "Posts are screened automatically for abusive language and periodically reviewed. Content that breaches these Terms may be hidden; hidden content remains visible to its author with a notice and may be restored on review. Reports submitted by learners are examined by people, not acted upon automatically.",
-          "Serious or repeated breaches may lead to the removal of content, the reset of a nickname or character, the loss of illegitimate JOY or XP, or the suspension or termination of the account. Where practicable, we will tell you what action was taken and why.",
+          "Serious or repeated breaches may lead to the removal of content, the reset of a nickname or character, the loss of illegitimate gems or XP, or the suspension or termination of the account. Where practicable, we will tell you what action was taken and why.",
         ],
       },
       {
@@ -105,7 +105,7 @@ const EN = {
           "Account data — your email address and display name from Google sign-in; for passkeys, a public key and device label (the biometric itself never leaves your device).",
           "Public identity (Persona) — nickname, pixel-art character, short introduction and friend code. These are visible to other signed-in learners; your real name, email and photograph are never shown on leagues, profiles or in the Community.",
           "Learning data — completed steps and lessons, quiz answers and scores, streak calendar, XP, daily goals and personal settings. SQL exercises run entirely inside your browser; what you type there is kept only on your device as a draft and is never sent to us.",
-          "Store data — items you have bought, the badge you wear, remaining Streak Shields and Double XP time, together with the JOY transactions that paid for them.",
+          "Store data — items you have bought, the badge you wear, remaining Streak Shields and Double XP time, together with the gem transactions that paid for them.",
           "Feedback — your ratings and comments in the Education Hugo survey, and the reports and support requests you send; you can review all of them under Profile › Feedback history.",
           "Social data — friends, pending friend requests, Community posts, replies and likes, and reports you submit or that concern you.",
           "Device and notification data — push subscriptions with the device language, notifications delivered to your inbox, and technical security records such as IP address and user agent, used to detect abuse.",
@@ -202,7 +202,7 @@ const EN = {
       {
         h: "Be honest",
         list: [
-          "Do not cheat on quizzes, automate submissions or exploit defects to inflate JOY, XP or streaks, and do not trade store items for money.",
+          "Do not cheat on quizzes, automate submissions or exploit defects to inflate gems, XP or streaks, and do not trade store items for money.",
           "Share work you created or are entitled to share; credit the sources you rely on. Do not post pirated material or links to malware or phishing.",
           "No spam, advertising, referral schemes or repeated identical posts.",
         ],
@@ -224,7 +224,7 @@ const VI = {
     lead: "Điều khoản này điều chỉnh việc bạn sử dụng Education Hugo — dịch vụ học tập miễn phí do Hugo Studio vận hành tại education.hugowishpax.studio. Khi tạo tài khoản hoặc tiếp tục sử dụng dịch vụ, bạn chấp nhận toàn bộ Điều khoản. Nếu không đồng ý, vui lòng không sử dụng Education Hugo.",
     sections: [
       { h: "1. Chúng tôi là ai", p: [
-        "Education Hugo là dịch vụ giáo dục phi lợi nhuận của Hugo Studio. Dịch vụ dùng chung hệ thống tài khoản, ví JOY và danh tính công khai (Persona) với www.hugowishpax.studio; điều gì Điều khoản này không nói tới thì áp dụng Điều khoản dịch vụ của Hugo Studio.",
+        "Education Hugo là dịch vụ giáo dục phi lợi nhuận của Hugo Studio, có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, bằng tài khoản Hugo Studio (www.hugowishpax.studio) hoặc bằng passkey; đăng nhập bằng Hugo Studio chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của Hugo Studio.",
         `Mọi câu hỏi về Điều khoản xin gửi tới ${CONTACT}.`,
       ] },
       { h: "2. Điều kiện sử dụng", p: [
@@ -233,15 +233,15 @@ const VI = {
       ] },
       { h: "3. Tài khoản của bạn", p: [
         "Bạn đăng nhập bằng Google hoặc bằng khoá truy cập (Face ID, vân tay hoặc mã PIN của thiết bị). Bạn có trách nhiệm giữ an toàn thiết bị và thông tin đăng nhập, và chịu trách nhiệm cho mọi hoạt động dưới tài khoản của mình. Hãy báo ngay cho chúng tôi nếu nghi ngờ có truy cập trái phép.",
-        "Các khoá học miễn phí. Tuy vậy tài khoản vẫn theo quy định duy trì của Hugo Studio: tài khoản mới có thời gian dùng thử, có thể gia hạn bằng JOY kiếm được từ việc học, và người học đã xác minh học sinh – sinh viên được một năm sử dụng. Tài khoản hết hạn có thể bị giới hạn cho tới khi gia hạn; tiến độ học không bị xoá chỉ vì hết hạn.",
+        "Khoá học và tài khoản đều miễn phí, tài khoản không hết hạn. Chúng tôi có thể đóng tài khoản vi phạm Điều khoản này.",
       ] },
-      { h: "4. JOY, XP và chuỗi lửa", p: [
-        "JOY, XP, chuỗi lửa, mốc thưởng và thứ hạng thi đua là tính năng tạo động lực trong dịch vụ. Chúng không có giá trị tiền tệ, không quy đổi được thành tiền mặt và không tạo ra quyền sở hữu nào. Quy tắc của chúng do máy chủ của chúng tôi tính toán, và có thể được điều chỉnh để giữ công bằng.",
-        "Mọi hành vi kiếm JOY, XP hoặc tiến độ bằng tự động hoá, nộp bài bằng script, khai thác lỗi hay thông đồng đều bị cấm. Chúng tôi có thể thu hồi số dư có được trái phép và tạm khoá các tài khoản liên quan.",
+      { h: "4. Ngọc, XP và chuỗi lửa", p: [
+        "Ngọc, XP, chuỗi lửa, mốc thưởng và thứ hạng thi đua là tính năng tạo động lực trong dịch vụ. Chúng không có giá trị tiền tệ, không quy đổi được thành tiền mặt và không tạo ra quyền sở hữu nào. Quy tắc của chúng do máy chủ của chúng tôi tính toán, và có thể được điều chỉnh để giữ công bằng.",
+        "Mọi hành vi kiếm Ngọc, XP hoặc tiến độ bằng tự động hoá, nộp bài bằng script, khai thác lỗi hay thông đồng đều bị cấm. Chúng tôi có thể thu hồi số dư có được trái phép và tạm khoá các tài khoản liên quan.",
       ] },
       { h: "5. Cửa hàng vật phẩm", p: [
-        "Bạn có thể đổi JOY lấy vật phẩm trong Cửa hàng. Mỗi vật phẩm có tác dụng ngay khi mua thành công: huy hiệu được đeo lên thẻ thành viên và hồ sơ công khai; Nhân đôi XP nhân đôi XP thi đua trong số giờ ghi trên vật phẩm, mua thêm thì cộng dồn vào thời gian còn lại; Khiên lửa tự phá băng ngày bạn lỡ học vào 8 giờ sáng hôm sau, giữ tối đa năm khiên. Giá, số lượng còn lại và mô tả được hiển thị trước khi bạn xác nhận.",
-        "Vật phẩm thuộc về cá nhân bạn, không chuyển nhượng, bán lại hay đổi thành tiền. Giao dịch đã hoàn tất là cuối cùng; nếu vì lý do kỹ thuật mà vật phẩm không áp dụng được, giao dịch bị huỷ và JOY được hoàn tự động. Chúng tôi có thể đổi giá, ngừng bán hoặc thay đổi số lượng bất cứ lúc nào mà không ảnh hưởng tới vật phẩm bạn đang có.",
+        "Bạn có thể đổi Ngọc lấy vật phẩm trong Cửa hàng. Mỗi vật phẩm có tác dụng ngay khi mua thành công: huy hiệu được đeo lên thẻ thành viên và hồ sơ công khai; Nhân đôi XP nhân đôi XP thi đua trong số giờ ghi trên vật phẩm, mua thêm thì cộng dồn vào thời gian còn lại; Khiên lửa tự phá băng ngày bạn lỡ học vào 8 giờ sáng hôm sau, giữ tối đa năm khiên. Giá, số lượng còn lại và mô tả được hiển thị trước khi bạn xác nhận.",
+        "Vật phẩm thuộc về cá nhân bạn, không chuyển nhượng, bán lại hay đổi thành tiền. Giao dịch đã hoàn tất là cuối cùng; nếu vì lý do kỹ thuật mà vật phẩm không áp dụng được, giao dịch bị huỷ và Ngọc được hoàn tự động. Chúng tôi có thể đổi giá, ngừng bán hoặc thay đổi số lượng bất cứ lúc nào mà không ảnh hưởng tới vật phẩm bạn đang có.",
       ] },
       { h: "6. Nội dung khoá học và sở hữu trí tuệ", p: [
         "Bài học, trắc nghiệm, hình minh hoạ, nhân vật, mã nguồn mẫu và bản thân giáo trình là tác phẩm của Hugo Studio và được bảo hộ quyền tác giả. Ảnh thực tế trong bài được dùng theo giấy phép Creative Commons ghi công ngay dưới mỗi ảnh, và công cụ SQLite chạy bài tập SQL thuộc phạm vi công cộng. Bạn được dùng nội dung để tự học; không được cào, đăng lại, bán hoặc sao chép có hệ thống khi chưa có văn bản cho phép.",
@@ -253,7 +253,7 @@ const VI = {
       ] },
       { h: "8. Kiểm duyệt và xử lý vi phạm", p: [
         "Bài đăng được lọc tự động ngôn từ thô tục và được rà soát định kỳ. Nội dung vi phạm có thể bị ẩn; nội dung bị ẩn vẫn hiện với tác giả kèm thông báo và có thể được khôi phục sau khi xem xét. Báo cáo của người học do con người xem xét, không xử lý tự động.",
-        "Vi phạm nghiêm trọng hoặc lặp lại có thể dẫn tới gỡ nội dung, đặt lại biệt danh hoặc nhân vật, thu hồi JOY/XP có được trái phép, hoặc tạm khoá hay chấm dứt tài khoản. Khi có thể, chúng tôi sẽ cho bạn biết đã xử lý gì và vì sao.",
+        "Vi phạm nghiêm trọng hoặc lặp lại có thể dẫn tới gỡ nội dung, đặt lại biệt danh hoặc nhân vật, thu hồi Ngọc/XP có được trái phép, hoặc tạm khoá hay chấm dứt tài khoản. Khi có thể, chúng tôi sẽ cho bạn biết đã xử lý gì và vì sao.",
       ] },
       { h: "9. Tính sẵn sàng và thay đổi", p: [
         "Education Hugo chạy trên hạ tầng gói miễn phí và được cung cấp “nguyên trạng” và “trong phạm vi sẵn có”. Chúng tôi cố gắng duy trì liên tục nhưng không bảo đảm dịch vụ không gián đoạn hay không lỗi, và một số tính năng có thể tạm giảm khi hết hạn mức miễn phí.",
@@ -278,7 +278,7 @@ const VI = {
         "Dữ liệu tài khoản — email và tên hiển thị từ đăng nhập Google; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
         "Danh tính công khai (Persona) — biệt danh, nhân vật pixel, lời giới thiệu ngắn và mã bạn. Người học đã đăng nhập khác thấy được những thông tin này; tên thật, email và ảnh của bạn không bao giờ hiện trên bảng thi đua, hồ sơ hay Cộng đồng.",
         "Dữ liệu học tập — step và bài đã học, câu trả lời và điểm trắc nghiệm, lịch chuỗi lửa, XP, mục tiêu ngày và cài đặt cá nhân. Bài tập SQL chạy hoàn toàn trong trình duyệt; những gì bạn gõ ở đó chỉ lưu nháp trên thiết bị của bạn và không bao giờ gửi về chúng tôi.",
-        "Dữ liệu Cửa hàng — vật phẩm đã mua, huy hiệu đang đeo, số Khiên lửa và thời gian Nhân đôi XP còn lại, cùng các giao dịch JOY đã thanh toán.",
+        "Dữ liệu Cửa hàng — vật phẩm đã mua, huy hiệu đang đeo, số Khiên lửa và thời gian Nhân đôi XP còn lại, cùng các giao dịch Ngọc đã thanh toán.",
         "Phản hồi — điểm và góp ý của bạn trong khảo sát Education Hugo, các báo cáo và yêu cầu hỗ trợ bạn gửi; bạn xem lại được tất cả ở Hồ sơ › Lịch sử phản hồi.",
         "Dữ liệu xã hội — bạn bè, lời mời kết bạn đang chờ, bài đăng, trả lời và lượt thích trong Cộng đồng, các báo cáo bạn gửi hoặc liên quan tới bạn.",
         "Dữ liệu thiết bị và thông báo — đăng ký nhận thông báo đẩy kèm ngôn ngữ thiết bị, thông báo trong hộp thư, và bản ghi bảo mật kỹ thuật như địa chỉ IP và user agent dùng để phát hiện lạm dụng.",
@@ -336,7 +336,7 @@ const VI = {
         "Biệt danh, nhân vật và lời giới thiệu không được xúc phạm, gây hiểu lầm hay mạo danh người hoặc tổ chức khác.",
       ] },
       { h: "Trung thực", list: [
-        "Không gian lận trắc nghiệm, tự động nộp bài hay khai thác lỗi để thổi phồng JOY, XP hoặc chuỗi lửa, và không mua bán vật phẩm Cửa hàng bằng tiền.",
+        "Không gian lận trắc nghiệm, tự động nộp bài hay khai thác lỗi để thổi phồng Ngọc, XP hoặc chuỗi lửa, và không mua bán vật phẩm Cửa hàng bằng tiền.",
         "Chỉ chia sẻ thứ bạn tự làm hoặc được phép chia sẻ; ghi nguồn bạn tham khảo. Không đăng nội dung vi phạm bản quyền hay liên kết tới mã độc, lừa đảo.",
         "Không spam, quảng cáo, chương trình giới thiệu hay đăng lặp lại cùng một nội dung.",
       ] },
@@ -354,7 +354,7 @@ const ZH = {
     lead: "本条款适用于你使用 Education Hugo——由 Hugo Studio 在 education.hugowishpax.studio 运营的免费学习服务。创建账户或继续使用本服务，即表示你完全接受本条款。如不同意，请勿使用 Education Hugo。",
     sections: [
       { h: "1. 我们是谁", p: [
-        "Education Hugo 是 Hugo Studio 的非营利教育服务，与 www.hugowishpax.studio 共用账户系统、JOY 钱包和公开身份（Persona）；本条款未涉及的事项，适用 Hugo Studio 服务条款。",
+        "Education Hugo 是 Hugo Studio 的非营利教育服务，拥有独立的账户、服务器和数据。你可以使用 Google、Hugo Studio 账户（www.hugowishpax.studio）或通行密钥登录；使用 Hugo Studio 登录时，我们只会获得你的姓名、邮箱和头像，不会获得 Hugo Studio 的其他数据。",
         `有关本条款的问题，请发送至 ${CONTACT}。`,
       ] },
       { h: "2. 使用资格", p: [
@@ -363,15 +363,15 @@ const ZH = {
       ] },
       { h: "3. 你的账户", p: [
         "你可以使用 Google 或通行密钥（Face ID、指纹或设备 PIN）登录。你有责任保护能访问账户的设备和凭据，并对账户下的所有活动负责。如怀疑有未经授权的访问，请立即通知我们。",
-        "课程免费。但账户仍遵循 Hugo Studio 的维护规则：新账户有试用期，可用学习获得的 JOY 延长；通过学生认证的学员可获得一年使用期。账户过期后可能受到限制，直至续期；学习进度不会仅因过期而被删除。",
+        "课程和账户均免费，账户不会过期。对于违反本条款的账户，我们可以将其关闭。",
       ] },
-      { h: "4. JOY、XP 与连胜", p: [
-        "JOY、XP、连胜、里程碑和排行名次是服务内的激励功能，不具有货币价值，不能兑换现金，也不产生任何所有权。其规则仅由我们的服务器计算，我们可为维护公平而调整。",
-        "禁止通过自动化、脚本提交、利用漏洞或串通等方式获取 JOY、XP 或进度。我们可收回不正当获得的余额并暂停相关账户。",
+      { h: "4. 宝石、XP 与连胜", p: [
+        "宝石、XP、连胜、里程碑和排行名次是服务内的激励功能，不具有货币价值，不能兑换现金，也不产生任何所有权。其规则仅由我们的服务器计算，我们可为维护公平而调整。",
+        "禁止通过自动化、脚本提交、利用漏洞或串通等方式获取 宝石、XP 或进度。我们可收回不正当获得的余额并暂停相关账户。",
       ] },
       { h: "5. 道具商店", p: [
-        "你可以在商店用 JOY 兑换道具。道具在购买成功后立即生效：徽章会佩戴在会员卡和公开主页上；双倍 XP 在标明的小时数内使排行 XP 翻倍，再次购买会累加剩余时间；火焰护盾会在你漏学后的次日早上 8 点自动为那一天破冰，最多同时持有五个。确认前会显示价格、库存和说明。",
-        "道具归你个人所有，不得转让、转售或兑换成金钱。已完成的购买为最终交易；若因技术原因道具无法生效，购买将被取消并自动退还 JOY。我们可随时调整价格、下架道具或更改库存，但不影响你已拥有的道具。",
+        "你可以在商店用 宝石 兑换道具。道具在购买成功后立即生效：徽章会佩戴在会员卡和公开主页上；双倍 XP 在标明的小时数内使排行 XP 翻倍，再次购买会累加剩余时间；火焰护盾会在你漏学后的次日早上 8 点自动为那一天破冰，最多同时持有五个。确认前会显示价格、库存和说明。",
+        "道具归你个人所有，不得转让、转售或兑换成金钱。已完成的购买为最终交易；若因技术原因道具无法生效，购买将被取消并自动退还 宝石。我们可随时调整价格、下架道具或更改库存，但不影响你已拥有的道具。",
       ] },
       { h: "6. 课程内容与知识产权", p: [
         "课程、测验、插图、角色、示例源代码及课程体系本身均为 Hugo Studio 的作品，受著作权保护。课程中的实景照片依据每张照片下方注明的知识共享许可使用，运行 SQL 练习的 SQLite 引擎属于公有领域。你可将内容用于个人学习；未经书面许可，不得抓取、转载、出售或系统性复制。",
@@ -383,7 +383,7 @@ const ZH = {
       ] },
       { h: "8. 审核与处理", p: [
         "帖子会自动过滤不当用语并定期审查。违反本条款的内容可能被隐藏；被隐藏的内容仍会附带通知向作者显示，经复核后可恢复。学员提交的举报由人工审核，不会自动处理。",
-        "严重或屡次违规可能导致删除内容、重置昵称或角色、收回不正当获得的 JOY 或 XP，或暂停、终止账户。在可行时，我们会告知你所采取的措施及原因。",
+        "严重或屡次违规可能导致删除内容、重置昵称或角色、收回不正当获得的 宝石 或 XP，或暂停、终止账户。在可行时，我们会告知你所采取的措施及原因。",
       ] },
       { h: "9. 可用性与变更", p: [
         "Education Hugo 运行在免费层基础设施上，按“现状”和“现有”提供。我们力求服务连续，但不保证不中断或无错误；免费额度用尽时，部分功能可能暂时降级。",
@@ -408,7 +408,7 @@ const ZH = {
         "账户数据——来自 Google 登录的电子邮箱和显示名称；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",
         "公开身份（Persona）——昵称、像素角色、简短介绍和好友码。其他已登录学员可以看到这些信息；你的真实姓名、邮箱和照片绝不会出现在排行、主页或社区中。",
         "学习数据——已完成的 step 和课程、测验答案与分数、连胜日历、XP、每日目标和个人设置。SQL 练习完全在你的浏览器中运行；你在其中输入的内容仅作为草稿保存在你的设备上，绝不会发送给我们。",
-        "商店数据——你购买的道具、佩戴的徽章、剩余的火焰护盾和双倍 XP 时间，以及相应的 JOY 交易记录。",
+        "商店数据——你购买的道具、佩戴的徽章、剩余的火焰护盾和双倍 XP 时间，以及相应的 宝石 交易记录。",
         "反馈——你在 Education Hugo 问卷中的评分和意见，以及你提交的举报和支持请求；你可在“个人资料 › 反馈记录”中查看全部内容。",
         "社交数据——好友、待处理的好友请求、社区帖子、回复和点赞，以及你提交或与你有关的举报。",
         "设备与通知数据——附带设备语言的推送订阅、收件箱中的通知，以及用于发现滥用的技术安全记录，如 IP 地址和用户代理。",
@@ -466,7 +466,7 @@ const ZH = {
         "昵称、角色和简介不得具有冒犯性、误导性，或冒充其他个人或组织。",
       ] },
       { h: "诚实守信", list: [
-        "不得在测验中作弊、自动提交或利用漏洞刷 JOY、XP 或连胜，也不得用金钱交易商店道具。",
+        "不得在测验中作弊、自动提交或利用漏洞刷 宝石、XP 或连胜，也不得用金钱交易商店道具。",
         "只分享你自己创作或有权分享的作品，并注明参考来源。不得发布盗版内容或指向恶意软件、钓鱼网站的链接。",
         "禁止垃圾信息、广告、推荐计划或重复发布相同内容。",
       ] },

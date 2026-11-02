@@ -48,7 +48,7 @@ assert.throws(() => thawDay(s, "2026-11-04", "2026-11-09"), { code: "STREAK_LOST
 let m = studyToday({}, "2026-12-01").state;
 m = studyToday(m, "2026-12-02").state;
 const hit = studyToday(m, "2026-12-03");
-assert.deepEqual(hit.milestone, { day: 3, joy: 30 });
+assert.deepEqual(hit.milestone, { day: 3, gems: 30 });
 assert.equal(studyToday(hit.state, "2026-12-03").milestone, null);
 
 // 8. Dữ liệu rác (client không ghi được chuỗi, nhưng DB cũ có thể bẩn) không làm sập.

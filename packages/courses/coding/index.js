@@ -52,6 +52,9 @@ export const WEB_COURSES = OUTLINE.map(([stage, title], index) => {
 });
 
 // Quyền lợi của từng gói chặng — hiển thị TRƯỚC khi thanh toán.
+// Ngọc thưởng một lần khi qua step cuối của chặng (server/services/learning.js trả).
+export const STAGE_REWARDS = { advanced: 800, security: 800, project: 800, devops: 4000 };
+
 export function getStageBenefits(stageId) {
   const stage = STAGES.find((s) => s.id === stageId);
   if (!stage) return [];
@@ -61,8 +64,7 @@ export function getStageBenefits(stageId) {
     "Trắc nghiệm cuối mỗi step chấm tại máy chủ, đạt từ 60% mới qua",
     "Chứng nhận hoàn thành chặng ghi vào hồ sơ học tập của bạn",
   ];
-  if ([3, 4, 5].includes(stage.phaseNumber)) benefits.push("Thưởng hoàn thành chặng +800 JOY");
-  if (stage.id === "devops") benefits.push("Dự án hoàn tất được duyệt: thưởng 4.000 JOY");
+  if (STAGE_REWARDS[stage.id]) benefits.push(`Thưởng hoàn thành chặng +${STAGE_REWARDS[stage.id].toLocaleString("vi-VN")} Ngọc`);
   benefits.push("Sở hữu vĩnh viễn + nhận mọi cập nhật nội dung sau này");
   return benefits;
 }

@@ -1,6 +1,6 @@
 // Học tập: ảnh chụp người học khi mở app, bài nhỏ, trắc nghiệm cuối step, chuỗi lửa,
 // mục tiêu ngày, nhắc học theo giờ. Logic chuỗi thuần nằm ở packages/shared/eduStreak.js.
-import { Learner } from '../models.js';
+import { GemTxn, Learner } from '../models.js';
 import { addGems, GEMS_PER_CORRECT } from './gems.js';
 import { addXp, XP_PER_CORRECT, XP_PER_LESSON, XP_REVIEW } from './social.js';
 import { notify } from '../lib/notify.js';
@@ -9,6 +9,7 @@ import { cleanEduPrefs, vnClock } from '../../packages/shared/eduPrefs.js';
 import { THAW_PRICE, addDays, nextMilestone, streakView, studyToday, thawDay } from '../../packages/shared/eduStreak.js';
 import { findStep } from '../../packages/courses/index.js';
 import { stepLessons } from '../../packages/courses/coding/lessons.js';
+import { STAGE_REWARDS } from '../../packages/courses/coding/index.js';
 import { getCoderLessonGate } from '../../packages/shared/coderProgression.js';
 import { gradeStepQuiz, PASS_PERCENT } from './grading.js';
 
@@ -186,8 +187,18 @@ export async function submitQuiz(email, lessonId, answers) {
       gemsEarned = graded.correct * GEMS_PER_CORRECT;
     }
   }
+  // Qua đủ mọi step của một chặng có thưởng → trả một lần (refId chặn trả đôi).
+  let stageReward = null;
+  const stage = found.course.STAGES?.find((s) => found.index >= s.from && found.index < s.to);
+  if (added.modifiedCount === 1 && STAGE_REWARDS[stage?.id] && found.course.WEB_COURSES.slice(stage.from, stage.to).every((s) => s.id === lessonId || completed.includes(s.id))) {
+    const refId = `stage-${stage.id}`;
+    if (!(await GemTxn.exists({ email, refId }))) {
+      ({ balance } = await addGems(email, STAGE_REWARDS[stage.id], 'stage', { note: `Hoàn thành chặng ${stage.code || stage.id}`, refId }));
+      stageReward = { stage: stage.id, gems: STAGE_REWARDS[stage.id] };
+    }
+  }
   if (eduStreak?.milestone?.balance) balance = Math.max(balance, eduStreak.milestone.balance);
-  return { success: true, balance, gemsEarned, ...graded, passPercent: PASS_PERCENT, eduStreak };
+  return { success: true, balance, gemsEarned, stageReward, ...graded, passPercent: PASS_PERCENT, eduStreak };
 }
 
 /**

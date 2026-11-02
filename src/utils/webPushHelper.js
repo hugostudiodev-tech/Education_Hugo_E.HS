@@ -120,7 +120,7 @@ export const webPushHelper = {
       console.log('✅ Service Worker registered successfully:', registration);
 
       // 2. Gọi API lấy VAPID Public Key từ server
-      const keyResponse = await fetch(`${API_BASE_URL}/notifications/vapid-public-key`, {
+      const keyResponse = await fetch(`${API_BASE_URL}/push/vapid-public-key`, {
         cache: 'no-store',
         credentials: 'include'
       });
@@ -140,7 +140,7 @@ export const webPushHelper = {
       console.log('✅ Browser Push Subscription Object acquired:', subscription);
 
       // 4. Gửi đối tượng Subscription Object lên server kèm theo email
-      const registerResponse = await fetch(`${API_BASE_URL}/notifications/subscribe`, {
+      const registerResponse = await fetch(`${API_BASE_URL}/push/subscribe`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -202,7 +202,7 @@ export const webPushHelper = {
       const subscription = await registration?.pushManager.getSubscription();
       if (!subscription) return;
 
-      await fetch(`${API_BASE_URL}/notifications/subscribe`, {
+      await fetch(`${API_BASE_URL}/push/subscribe`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -235,7 +235,7 @@ export const webPushHelper = {
     if (!sub) return;
     const endpoint = sub.endpoint;
     await sub.unsubscribe();
-    await fetch(`${API_BASE_URL}/notifications/unsubscribe`, {
+    await fetch(`${API_BASE_URL}/push/unsubscribe`, {
       method: 'POST',
       credentials: 'include',
       headers: {

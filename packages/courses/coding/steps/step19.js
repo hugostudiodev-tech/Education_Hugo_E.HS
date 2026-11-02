@@ -355,7 +355,7 @@ Trong phpMyAdmin, bảng \`login_attempts\` có các dòng với \`INET6_NTOA(ip
 - [ ] \`SECURITY.md\` không còn rủi ro mở; mọi mục OWASP Top 10 có biện pháp.
 - [ ] Thư mục \`lab/\` đã xoá.
 
-Đạt đủ + thưởng **800 JOY**. Chặng 5 đưa Nhịp từ "an toàn" tới "gọn gàng, nhanh, nhiều tính năng".`,
+Đạt đủ + thưởng **800 Ngọc**. Chặng 5 đưa Nhịp từ "an toàn" tới "gọn gàng, nhanh, nhiều tính năng".`,
     },
   ],
   quiz: [

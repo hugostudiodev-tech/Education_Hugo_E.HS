@@ -58,10 +58,10 @@ const COMPONENTS = [
 ];
 
 const REST = [
-  ["GET", "/coder-lessons?course=sql&page=1&limit=25", "Danh mục step + chặng (trang 1). Không cần key.", '{ items: [{ id, title, stage, lessons }], stages: [...], pagination }'],
-  ["GET", "/coder-lessons/:id?lang=en", "Toàn bộ một step: slides, trắc nghiệm (đã xáo, KHÔNG kèm đáp án).", '{ lesson: { id, title, slides, quiz } }'],
-  ["POST", "/coder-lessons/:id/grade", "Chấm trắc nghiệm. Body { answers: [...] }.", '{ score, correct, total, passed, review: [...] }'],
-  ["POST", "/edu-partner/verify", "Kiểm key còn hiệu lực.", '{ ok: true, email: "pa***@abc.edu.vn", expiresAt }'],
+  ["GET", "/lessons?course=sql&page=1&limit=25", "Danh mục step + chặng (trang 1). Không cần key.", '{ items: [{ id, title, stage, lessons }], stages: [...], pagination }'],
+  ["GET", "/lessons/:id?lang=en", "Toàn bộ một step: slides, trắc nghiệm (đã xáo, KHÔNG kèm đáp án).", '{ lesson: { id, title, slides, quiz } }'],
+  ["POST", "/lessons/:id/grade", "Chấm trắc nghiệm. Body { answers: [...] }.", '{ score, correct, total, passed, review: [...] }'],
+  ["POST", "/partner/verify", "Kiểm key còn hiệu lực.", '{ ok: true, email: "pa***@abc.edu.vn", expiresAt }'],
 ];
 
 const ERRORS = [
@@ -131,7 +131,7 @@ export default function EduDevelopers() {
     event?.preventDefault();
     setState({ busy: true, error: "" });
     try {
-      const data = await apiFetch("/edu-partner/verify", { method: "POST", body: JSON.stringify({ key: key.trim() }) });
+      const data = await apiFetch("/partner/verify", { method: "POST", body: JSON.stringify({ key: key.trim() }) });
       setPartner(data);
       try { sessionStorage.setItem(KEY_STORE, key.trim()); } catch { /* chế độ riêng tư */ }
       setState({ busy: false, error: "" });
@@ -224,7 +224,7 @@ export default function HocSQL() {
         <h2>REST API</h2>
         <Locked unlocked={unlocked}>
           <p>Gốc: <code>{API}</code>. Gửi key qua header <code>X-Edu-Partner-Key</code>. Không cookie, CORS mở cho tên miền đã đăng ký.</p>
-          <Code>{`curl -H "X-Edu-Partner-Key: ${shown}" \\\n  "${API}/coder-lessons/sql12?lang=en"`}</Code>
+          <Code>{`curl -H "X-Edu-Partner-Key: ${shown}" \\\n  "${API}/lessons/sql12?lang=en"`}</Code>
           <div className="dev-table-wrap"><table className="dev-table">
             <thead><tr><th></th><th>Đường dẫn</th><th>Làm gì</th><th>Trả về</th></tr></thead>
             <tbody>{REST.map(([m, p, d, r]) => <tr key={p}><td><b>{m}</b></td><td><code>{p}</code></td><td>{d}</td><td><code>{r}</code></td></tr>)}</tbody>

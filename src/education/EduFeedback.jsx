@@ -47,7 +47,7 @@ export default function EduFeedback() {
     setState("sending");
     setError("");
     try {
-      const response = await fetch(`${API_BASE}/joy/edu-feedback`, {
+      const response = await fetch(`${API_BASE}/feedback`, {
         method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ratings, comment, lang, source: params.get("from") === "mail" ? "mail" : "app" }),
       });
@@ -102,7 +102,7 @@ export function FeedbackHistory() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (!open || data) return;
-    fetch(`${API_BASE}/joy/edu-history`, { credentials: "include" })
+    fetch(`${API_BASE}/me/history`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setData)
       .catch(() => setData({ failed: true }));

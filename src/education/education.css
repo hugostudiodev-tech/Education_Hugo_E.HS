@@ -925,7 +925,7 @@ img.flame-buddy.is-alive { animation: flame-sway 2.4s ease-in-out infinite; tran
 .comm-empty { color: var(--edu-muted); text-align: center; padding: 24px 0; }
 .comm-more { justify-self: center; }
 
-/* ── Thanh trên 4 ô (EduTopBar): khoá học · chuỗi lửa · JOY · thông báo — chia đều như Duolingo ── */
+/* ── Thanh trên 4 ô (EduTopBar): khoá học · chuỗi lửa · Ngọc · thông báo — chia đều như Duolingo ── */
 .edu-topbar { position: relative; display: flex; align-items: center; justify-content: space-between; flex: 1; gap: 4px; }
 .edu-rail-chips .edu-topbar { flex: 1; }
 .edu-topbar .edu-chip { min-height: 44px; border: 0; background: none; color: var(--edu-ink); font: inherit; font-weight: 800; font-size: 16px; cursor: pointer; text-decoration: none; }
@@ -936,9 +936,6 @@ img.flame-buddy.is-alive { animation: flame-sway 2.4s ease-in-out infinite; tran
 .edu-bell .anim-icon { color: #c77700; filter: drop-shadow(0 2px 0 rgb(0 0 0 / .18)); }
 .edu-bell .anim-icon svg path { fill: #ffc83d; stroke-width: 1.8; }
 .edu-bell .anim-icon svg path:nth-of-type(2) { fill: #ff9f1a; }
-/* Đồng JOY: đồng xu vàng có gờ, chữ JOY dập nổi. */
-.joy-coin { display: inline-grid; place-items: center; flex: none; width: var(--coin); height: var(--coin); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #ffc800 55%, #e0a100); box-shadow: inset 0 0 0 calc(var(--coin) * .08) #f0b400, 0 calc(var(--coin) * .06) 0 #c98a00; }
-.joy-coin b { color: #a86a00; font-size: calc(var(--coin) * .3); font-weight: 900; letter-spacing: -.02em; text-shadow: 0 1px 0 rgb(255 255 255 / .6); }
 /* Bảng thả xuống dưới thanh. */
 .edu-pop { position: absolute; top: calc(100% + 10px); left: 0; right: 0; z-index: 40; display: grid; gap: 12px; max-height: min(70dvh, 560px); overflow-y: auto; padding: 16px; border: 2px solid var(--edu-line); border-radius: 18px; background: var(--edu-card); box-shadow: 0 12px 30px rgb(0 0 0 / .15); animation: edu-pop-in .18s ease-out; }
 @keyframes edu-pop-in { from { opacity: 0; transform: translateY(-6px); } }
@@ -971,12 +968,6 @@ img.flame-buddy.is-alive { animation: flame-sway 2.4s ease-in-out infinite; tran
 .edu-note-tile.is-gold { --t: #ffc800; } .edu-note-tile.is-purple { --t: #ce82ff; } .edu-note-tile.is-red { --t: #ff4b4b; }
 .edu-note-tile.is-green { --t: #58cc02; } .edu-note-tile.is-orange { --t: #ff9600; } .edu-note-tile.is-pink { --t: #ff86d0; }
 .comm-card-icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--edu-card); }
-
-/* Đồng JOY: ánh kim quét qua mặt xu vài giây một lần; nhấn thì lật (EduTopBar flipCoin). */
-.joy-coin { position: relative; overflow: hidden; }
-.joy-coin::after { content: ""; position: absolute; inset: -20%; background: linear-gradient(115deg, transparent 40%, rgb(255 255 255 / .75) 50%, transparent 60%); transform: translateX(-80%); animation: joy-shine 3.2s ease-in-out infinite; }
-@keyframes joy-shine { 0%, 60% { transform: translateX(-80%); } 85%, 100% { transform: translateX(80%); } }
-@media (prefers-reduced-motion: reduce) { .joy-coin::after { animation: none; } }
 
 /* ── Tổng quan một biểu đồ (Rail): 4 vòng đồng tâm + chú thích; nền thẻ trung tính để chữ luôn rõ ── */
 .edu-dash { display: grid; gap: 14px; padding: 18px; border: 2px solid var(--edu-line); border-radius: 20px; background: var(--edu-card); color: var(--edu-ink); }
@@ -1357,3 +1348,10 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .dev-lab-input input[type=color] { flex: none; width: 44px; padding: 2px; }
 .edu .dev-lab-preview { display: grid; gap: 12px; align-content: start; padding: 14px; border-radius: 14px; background: var(--edu-sky); min-width: 0; font-family: var(--edu-font, inherit); }
 @media (prefers-reduced-motion: reduce) { .edu .dev-locked-veil .material-symbols-outlined { animation: none; } }
+
+/* Viên ngọc (Ngọc — điểm của Education Hugo): hình thoi cắt mặt, chỉ CSS. */
+.edu-gem { position: relative; display: inline-block; flex: none; width: var(--gem); height: var(--gem); }
+.edu-gem::before { content: ""; position: absolute; inset: 8% 14%; clip-path: polygon(50% 100%, 0 38%, 22% 0, 78% 0, 100% 38%); background: linear-gradient(160deg, #b8f3ff 0%, #29cdff 38%, #0a92c2 70%, #076e93 100%); filter: drop-shadow(0 calc(var(--gem) * .06) 0 #06617f); }
+.edu-gem::after { content: ""; position: absolute; inset: 8% 14%; clip-path: polygon(50% 100%, 22% 38%, 36% 0, 64% 0, 78% 38%); background: linear-gradient(180deg, rgb(255 255 255 / .7), rgb(255 255 255 / .05) 70%); animation: gem-shine 3.2s ease-in-out infinite; }
+@keyframes gem-shine { 0%, 70%, 100% { opacity: .55; } 80% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .edu-gem::after { animation: none; } }

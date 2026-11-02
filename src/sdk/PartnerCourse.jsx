@@ -54,7 +54,7 @@ function Course({ course, onProgress }) {
         onNextPart={() => setPicked(lessonAt + 1)}
         onExit={() => setOpenId(null)}
         onSubmitQuiz={async (answers) => {
-          const data = await apiFetch(`/coder-lessons/${encodeURIComponent(current.id)}/grade`, { method: "POST", body: JSON.stringify({ answers }) });
+          const data = await apiFetch(`/lessons/${encodeURIComponent(current.id)}/grade`, { method: "POST", body: JSON.stringify({ answers }) });
           if (data.passed && !completedSet.has(current.id)) save({ ...progress, done: [...progress.done, current.id] });
           return data;
         }}
@@ -90,7 +90,7 @@ export function EducationHugo({ apiKey, course = "coding", lang = "vi", theme, a
   useEffect(() => {
     let alive = true;
     setState({ status: "checking" });
-    apiFetch("/edu-partner/verify", { method: "POST", body: "{}" })
+    apiFetch("/partner/verify", { method: "POST", body: "{}" })
       .then((data) => alive && setState({ status: "ok", ...data }))
       .catch((error) => alive && setState({ status: "invalid", message: error.message }));
     return () => { alive = false; };

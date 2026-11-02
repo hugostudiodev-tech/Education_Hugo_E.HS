@@ -82,7 +82,7 @@ function FeedbackSheet({ course, step, stepIndex, onClose }) {
     if (message.trim().length < 5 || sending) return;
     setSending(true);
     try {
-      const response = await fetch(`${API}/coder-lessons/${course.id}/feedback`, {
+      const response = await fetch(`${API}/lessons/${course.id}/feedback`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

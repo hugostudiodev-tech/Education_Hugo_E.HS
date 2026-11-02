@@ -40,8 +40,8 @@ export async function translatePost(post, from, to) {
   const job = (async () => {
     const local = from ? await onDevice(post.text, from, to) : null;
     if (local) return local;
-    const r = await fetch(`${API_BASE}/today/posts/${post.key}/translate?board=edu`, {
-      method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to, board: "edu" }),
+    const r = await fetch(`${API_BASE}/community/posts/${post.key}/translate`, {
+      method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to }),
     });
     return r.ok ? (await r.json()).text || null : null;
   })().catch(() => null);

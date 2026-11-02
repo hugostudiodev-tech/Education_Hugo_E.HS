@@ -19,7 +19,7 @@ const LIVE_MS = 15000;
 const PROFILE_URL = (code) => `https://education.hugowishpax.studio/u/${code}`;
 
 async function call(path, init) {
-  const response = await fetch(`${API_BASE}/joy/${path}`, { credentials: "include", ...init, headers: { "Content-Type": "application/json" } });
+  const response = await fetch(`${API_BASE}/social${path ? `/${path}` : ""}`, { credentials: "include", ...init, headers: { "Content-Type": "application/json" } });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw Object.assign(new Error(body.error || body.code || "FAILED"), { code: body.code, status: response.status });
   return body;
@@ -30,7 +30,7 @@ function useSocial() {
   const [data, setData] = useState(null);
   // Thiếu trường (máy chủ cũ đang chạy, lỗi giữa chừng) thì coi là rỗng — trang không được sập.
   const take = (d) => setData({ ...d, me: d.me || {}, league: d.league || [], friends: d.friends || [], requestsIn: d.requestsIn || [], requestsOut: d.requestsOut || [] });
-  const load = useCallback(() => call("edu-social").then(take).catch(() => setData((cur) => cur || { failed: true })), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const load = useCallback(() => call("").then(take).catch(() => setData((cur) => cur || { failed: true })), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     load();
     const tick = () => document.visibilityState === "visible" && load();
@@ -158,7 +158,7 @@ function AddFriend({ code, me, onRequest }) {
   useEffect(() => {
     const query = q.trim();
     if (query.length < 2) { setResults(null); return undefined; }
-    const timer = setTimeout(() => call(`edu-search?q=${encodeURIComponent(query)}`).then((d) => setResults(d.results)).catch(() => setResults([])), 300);
+    const timer = setTimeout(() => call(`search?q=${encodeURIComponent(query)}`).then((d) => setResults(d.results)).catch(() => setResults([])), 300);
     return () => clearTimeout(timer);
   }, [q]);
   const share = async () => {
@@ -194,10 +194,10 @@ export default function EduFriends({ embedded = false }) {
   const { t } = useEduText();
   const { data, act } = useSocial();
   const [tab, setTab] = useState("league");
-  const request = (code) => act("edu-friends", { method: "POST", body: JSON.stringify({ code }) }).then((ok) => ok && notify.success(t("friends.sent")));
-  const accept = (code) => act(`edu-friends/${code}/accept`, { method: "POST" }).then((ok) => ok && playEduSound("success"));
-  const decline = (code) => act(`edu-friends/${code}/decline`, { method: "POST" });
-  const remove = async (code) => { if (await notify.confirm({ title: t("friends.removeAsk") })) act(`edu-friends/${code}`, { method: "DELETE" }); };
+  const request = (code) => act("friends", { method: "POST", body: JSON.stringify({ code }) }).then((ok) => ok && notify.success(t("friends.sent")));
+  const accept = (code) => act(`friends/${code}/accept`, { method: "POST" }).then((ok) => ok && playEduSound("success"));
+  const decline = (code) => act(`friends/${code}/decline`, { method: "POST" });
+  const remove = async (code) => { if (await notify.confirm({ title: t("friends.removeAsk") })) act(`friends/${code}`, { method: "DELETE" }); };
 
   if (!data) return <p className="fr-empty">{t("common.loading")}…</p>;
   if (data.failed) return <p className="fr-empty">{t("friends.failed")}</p>;
@@ -252,7 +252,7 @@ export default function EduFriends({ embedded = false }) {
               <ul className="fr-list">
                 {data.requestsOut.map((row) => (
                   <PersonRow key={row.code} row={row}>
-                    <button type="button" className="edu-btn is-ghost" onClick={() => act(`edu-friends/${row.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>
+                    <button type="button" className="edu-btn is-ghost" onClick={() => act(`friends/${row.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>
                   </PersonRow>
                 ))}
               </ul>
@@ -280,7 +280,7 @@ function ReportSheet({ code, name, onClose }) {
     event.preventDefault();
     setBusy(true);
     try {
-      await call("edu-report", { method: "POST", body: JSON.stringify({ code, reason, note }) });
+      await call("report", { method: "POST", body: JSON.stringify({ code, reason, note }) });
       notify.success(t("friends.reportSent"));
       onClose();
     } catch (error) { notify.error(error.message); } finally { setBusy(false); }
@@ -314,7 +314,7 @@ export function EduPublicProfile() {
   const { code } = useParams();
   const [p, setP] = useState(null);
   const [reporting, setReporting] = useState(false);
-  const load = useCallback(() => call(`edu-profile/${encodeURIComponent(code)}`).then(setP).catch((e) => setP({ missing: e.status === 404, failed: true })), [code]);
+  const load = useCallback(() => call(`profile/${encodeURIComponent(code)}`).then(setP).catch((e) => setP({ missing: e.status === 404, failed: true })), [code]);
   useEffect(() => { load(); }, [load]);
   const act = async (path, init) => { try { await call(path, init); playEduSound("success"); load(); } catch (error) { notify.error(error.message); } };
   if (!p) return <section className="edu-page"><p className="fr-empty">{t("common.loading")}…</p></section>;
@@ -322,9 +322,9 @@ export function EduPublicProfile() {
   const button = {
     self: <Link className="edu-btn is-ghost" to="/profile">{t("friends.editMine")}</Link>,
     friend: <button type="button" className="edu-btn is-ghost" disabled><AnimIcon name="check" size={20} />{t("friends.isFriend")}</button>,
-    out: <button type="button" className="edu-btn is-ghost" onClick={() => act(`edu-friends/${p.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>,
-    in: <button type="button" className="edu-btn" onClick={() => act(`edu-friends/${p.code}/accept`, { method: "POST" })}>{t("friends.accept")}</button>,
-    none: <button type="button" className="edu-btn" onClick={() => act("edu-friends", { method: "POST", body: JSON.stringify({ code: p.code }) })}><AnimIcon name="add" size={20} />{t("friends.add")}</button>,
+    out: <button type="button" className="edu-btn is-ghost" onClick={() => act(`friends/${p.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>,
+    in: <button type="button" className="edu-btn" onClick={() => act(`friends/${p.code}/accept`, { method: "POST" })}>{t("friends.accept")}</button>,
+    none: <button type="button" className="edu-btn" onClick={() => act("friends", { method: "POST", body: JSON.stringify({ code: p.code }) })}><AnimIcon name="add" size={20} />{t("friends.add")}</button>,
   }[p.relation];
   return (
     <section className="edu-page fr-profile">

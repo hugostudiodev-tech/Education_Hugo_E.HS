@@ -77,7 +77,7 @@ export default function CoderLearningJourney({
         completedSet={completedSet}
         currentIndex={currentIndex}
         focusId={focusId}
-        examScores={bio?.hugoCoderExamScores || {}}
+        examScores={bio?.scores || {}}
         serverCompleted={bio?.completedLessons || []}
         lessonsDone={bio?.email ? bio?.edu?.lessons || {} : readGuestLessons()}
         onOpenLesson={onOpenLesson}

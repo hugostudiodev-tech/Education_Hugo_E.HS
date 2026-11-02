@@ -9,19 +9,18 @@ import { detectLang, translatePost } from "./postTranslate";
 
 /**
  * Cộng đồng học thuật Education Hugo (/community) — bảng riêng trên chính API Today
- * (`?board=edu`): cùng model, kiểm duyệt, bình luận, lượt thích. Tác giả hiện bằng Persona.
+^ * cùng model, kiểm duyệt, bình luận, lượt thích. Tác giả hiện bằng Persona.
  *
  * Hugo chỉ lưu CHỮ và URL. Preview dựng hoàn toàn ở trình duyệt từ URL đầu tiên của bài —
  * không upload, không proxy, không gọi API GitHub, không tải Open Graph. Nguồn ngoài hỏng
  * thì bài vẫn còn chữ và liên kết thường.
  */
-const API = `${API_BASE}/today/posts`;
-const BOARD = "board=edu";
+const API = `${API_BASE}/community/posts`;
 const MAX_TEXT = 5000;
 const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
 
 async function call(path, options = {}) {
-  const response = await fetch(`${API}${path}${path.includes("?") ? "&" : "?"}${BOARD}`, {
+  const response = await fetch(`${API}${path}`, {
     credentials: "include",
     ...options,
     headers: options.body ? { "Content-Type": "application/json" } : undefined,
@@ -193,7 +192,7 @@ function Composer({ parentKey, onPosted, placeholder }) {
     if (!text.trim() || busy) return;
     setBusy(true);
     try {
-      const { post } = await call("", { method: "POST", body: JSON.stringify({ text: text.trim(), parentKey, board: "edu" }) });
+      const { post } = await call("", { method: "POST", body: JSON.stringify({ text: text.trim(), parentKey }) });
       setText("");
       onPosted(post);
       if (post.removed) notify.warning(t("community.removed"));

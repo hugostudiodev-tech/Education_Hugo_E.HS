@@ -4,26 +4,24 @@ import { Link, NavLink } from "react-router-dom";
 import HugoLogo from "../components/HugoLogo";
 import { notify } from "../lib/notify";
 import { playEduSound } from "./eduSound";
-import { joyText } from "../lib/joyDisplay";
+import { GemIcon, gemText } from "./gems";
 import { useStandalone } from "../hooks/usePWA";
 import { detectInstallTarget } from "../config/platform";
 import { useCoderLessons } from "../hooks/useCoderLessons";
 import { API_BASE } from "../config/apiBase";
-import { ACCOUNT_EXTENSION, EXCHANGE_TAX_RATE } from "../../packages/shared/joyPrices";
-import { CODER_JOY_PER_CORRECT } from "../../packages/shared/coderProgression";
+import { GEMS_PER_CORRECT } from "../../packages/shared/coderProgression";
 import { canPromptInstall, promptInstall } from "./eduHead";
 import { rich, useEduText } from "./eduText";
 import { FlameBuddy } from "./EduStreak";
 import { useEduCourse } from "./useEduCourse";
 import { legalFor } from "./legalText";
 import { supportMailUrl } from "./eduSupport";
-import EduTopBar, { JoyCoin, useEduInbox } from "./EduTopBar";
+import EduTopBar, { useEduInbox } from "./EduTopBar";
 import AnimIcon from "../components/icons/animated/AnimIcon";
 import EduSettings from "./EduSettings";
 import { FeedbackHistory } from "./EduFeedback";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const STUDIO = "https://www.hugowishpax.studio";
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
   { to: "/progress", icon: "chart", key: "progress" },
@@ -39,8 +37,6 @@ const CODE_ZIPS = [
   "nhip-chang4-bao-mat.zip", "nhip-chang5-hoan-thien.zip", "nhip-hoan-chinh.zip",
 ];
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-const daysLeft = (deadline) => (deadline ? Math.ceil((new Date(deadline).getTime() - Date.now()) / DAY_MS) : null);
 
 /** "EDUCATION HUGO", dưới là "thuộc [giọt nước] Hugo Studio". */
 export function EduBrand({ to = "/learn" }) {
@@ -149,14 +145,13 @@ function useLearnerStats(learner) {
       const finished = stepIds.filter((id) => done.has(id)).length;
       return { ...stage, index, total: stepIds.length, finished, complete: stepIds.length > 0 && finished === stepIds.length };
     });
-    const scores = ids.map((id) => learner?.hugoCoderExamScores?.[id]).filter(Boolean).map((entry) => Number(entry?.best) || 0);
+    const scores = ids.map((id) => learner?.scores?.[id]).filter(Boolean).map((entry) => Number(entry?.best) || 0);
     return {
       done: ids.filter((id) => done.has(id)).length,
       total: ids.length,
       current: stageRows.find((row) => !row.complete) || stageRows.at(-1) || null,
       stages: stageRows,
       average: scores.length ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length) : null,
-      days: daysLeft(learner?.accessExpiresAt),
     };
   }, [courses, stages, learner]);
 }
@@ -190,9 +185,6 @@ export default function EduShell({ view, learner, signedIn, onLearnerUpdate, chi
         </nav>
         <div className="edu-side-foot">
           <EduInstall className="edu-nav" />
-          <a className="edu-nav" href={STUDIO} target="_blank" rel="noopener">
-            <HugoLogo className="h-6 w-6" aria-hidden="true" /> Hugo Studio
-          </a>
         </div>
       </aside>
 
@@ -257,9 +249,6 @@ function Rail({ learner, signedIn, stats, onStreak }) {
             </li>
           ))}
         </ul>
-        {!learner?.isEduVerified && stats.days !== null && stats.days <= 3 && (
-          <Link className="edu-dash-warn" to="/store">{stats.days > 0 ? t("shell.keepLeft", { n: stats.days }) : t("shell.expired")}</Link>
-        )}
         {zips.length > 0 && (
           <div className="edu-dash-zips">
             {zips.map((row) => (
@@ -274,9 +263,9 @@ function Rail({ learner, signedIn, stats, onStreak }) {
   );
 }
 
-/** Cửa hàng riêng của Education Hugo: duy trì tài khoản bằng JOY. */
+/** Cửa hàng riêng của Education Hugo: vật phẩm mua bằng Ngọc. */
 /**
- * Vật phẩm do admin bày bán (tab "Cửa hàng Edu"), mua bằng JOY, có tác dụng ngay:
+ * Vật phẩm do admin bày bán (tab "Cửa hàng Edu"), mua bằng Ngọc, có tác dụng ngay:
  * Khiên lửa (tự phá băng lúc 8h), Nhân đôi XP (cộng dồn giờ), Huy hiệu (đeo trên thẻ thành viên).
  */
 function EduShop({ balance, onBalance }) {
@@ -285,19 +274,19 @@ function EduShop({ balance, onBalance }) {
   const [perks, setPerks] = useState(null);
   const [busy, setBusy] = useState(null);
   const [receipt, setReceipt] = useState(null);
-  const load = useCallback(() => fetch(`${API_BASE}/joy/edu-store`, { credentials: "include" })
+  const load = useCallback(() => fetch(`${API_BASE}/store`, { credentials: "include" })
     .then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => { setItems(d.items); setPerks(d.perks); }).catch(() => setItems([])), []);
   useEffect(() => { load(); }, [load]);
   const pick = (field) => field?.[lang] || field?.vi || "";
   const post = async (path) => {
-    const r = await fetch(`${API_BASE}/joy/edu-store/${path}`, { method: "POST", credentials: "include" });
+    const r = await fetch(`${API_BASE}/store/${path}`, { method: "POST", credentials: "include" });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || t("store.failed"));
     return d;
   };
 
   const buy = async (item) => {
-    const ok = await notify.confirm({ title: t("shop.confirm", { name: pick(item.name) }), message: t(`shop.effect.${item.kind}`, { n: item.value, price: joyText(item.priceJoy) }), confirmText: t("shop.buy") });
+    const ok = await notify.confirm({ title: t("shop.confirm", { name: pick(item.name) }), message: t(`shop.effect.${item.kind}`, { n: item.value, price: gemText(item.price) }), confirmText: t("shop.buy") });
     if (!ok) return;
     setBusy(item.id);
     try {
@@ -330,13 +319,13 @@ function EduShop({ balance, onBalance }) {
           <div className="edu-receipt" onClick={(event) => event.stopPropagation()}>
             <img src="/edu/cast-5.svg" alt="" width="84" height="84" />
             <h2>{t("shop.receipt.title")}</h2>
-            <p className="edu-receipt-amount">-{num(receipt.priceJoy)} <JoyCoin size={26} /></p>
+            <p className="edu-receipt-amount">-{num(receipt.price)} <GemIcon size={26} /></p>
             <dl>
               <dt>{t("shop.receipt.code")}</dt><dd translate="no">{receipt.code}</dd>
               <dt>{t("shop.receipt.item")}</dt><dd>{pick(receipt.name)}</dd>
               <dt>{t("shop.receipt.effect")}</dt><dd>{t(`shop.receipt.kinds.${receipt.kind === "collectible" ? "badge" : receipt.kind}`, { n: receipt.value })}</dd>
-              <dt>{t("shop.receipt.before")}</dt><dd>{num(receipt.balanceBefore)} JOY</dd>
-              <dt>{t("shop.receipt.after")}</dt><dd>{num(receipt.balanceAfter)} JOY</dd>
+              <dt>{t("shop.receipt.before")}</dt><dd>{gemText(receipt.balanceBefore)}</dd>
+              <dt>{t("shop.receipt.after")}</dt><dd>{gemText(receipt.balanceAfter)}</dd>
               <dt>{t("shop.receipt.at")}</dt><dd>{new Date(receipt.createdAt).toLocaleString(lang)}</dd>
             </dl>
             <small>{t("shop.receipt.sent")}</small>
@@ -358,8 +347,8 @@ function EduShop({ balance, onBalance }) {
                 {item.kind === "badge" && item.ownedAt ? (
                   <button type="button" className="edu-shop-price" disabled={wearing} onClick={() => wear(item)}>{t(wearing ? "shop.wearing" : "shop.wear")}</button>
                 ) : (
-                  <button type="button" className="edu-shop-price" disabled={busy === item.id || item.left === 0 || balance < item.priceJoy} onClick={() => buy(item)}>
-                    {item.left === 0 ? t("shop.soldOut") : <><JoyCoin size={22} />{item.priceJoy.toLocaleString(lang)}</>}
+                  <button type="button" className="edu-shop-price" disabled={busy === item.id || item.left === 0 || balance < item.price} onClick={() => buy(item)}>
+                    {item.left === 0 ? t("shop.soldOut") : <><GemIcon size={22} />{item.price.toLocaleString(lang)}</>}
                   </button>
                 )}
                 {item.left !== null && item.left > 0 && !item.ownedAt && <small className="edu-shop-left">{t("shop.left", { n: item.left })}</small>}
@@ -386,78 +375,21 @@ function EduShop({ balance, onBalance }) {
 
 export function EduStore({ learner, onLearnerUpdate }) {
   const { t } = useEduText();
-  const [busy, setBusy] = useState(false);
-  const days = daysLeft(learner?.accessExpiresAt);
-  const tax = Math.floor(ACCOUNT_EXTENSION.priceJoy * EXCHANGE_TAX_RATE);
-  const total = ACCOUNT_EXTENSION.priceJoy + tax;
-  const balance = Number(learner?.joyBalance) || 0;
-
-  const buy = async () => {
-    const ok = await notify.confirm({
-      title: t("store.confirmTitle", { days: ACCOUNT_EXTENSION.days }),
-      message: t("store.confirmBody", { price: joyText(ACCOUNT_EXTENSION.priceJoy), tax: joyText(tax), total: joyText(total) }),
-      confirmText: t("store.confirmButton", { total: joyText(total) }),
-    });
-    if (!ok) return;
-    setBusy(true);
-    try {
-      const response = await fetch(`${API_BASE}/joy/extend-account`, { method: "POST", credentials: "include" });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || t("store.failed"));
-      onLearnerUpdate({ joyBalance: data.balance, accessExpiresAt: data.accessExpiresAt });
-      notify.success(t("store.renewed", { n: data.days }));
-    } catch (error) {
-      notify.error(error.message);
-    } finally {
-      setBusy(false);
-    }
-  };
+  const balance = Number(learner?.gems) || 0;
 
   return (
     <section className="edu-page">
       <h1 className="edu-page-title">{t("store.title")}</h1>
       <div className="edu-wallet">
-        <JoyCoin size={40} />
-        <div><b>{joyText(balance)}</b><small>{t("store.wallet")}</small></div>
+        <GemIcon size={40} />
+        <div><b>{gemText(balance)}</b><small>{t("store.wallet")}</small></div>
       </div>
 
-      {learner?.isEduVerified ? (
-        <article className="edu-offer">
-          <img src="/edu/buddy-done.svg" alt="" width="88" height="88" />
-          <div>
-            <h2>{t("store.verifiedTitle")}</h2>
-            <p>{t("store.verifiedBody", { left: days !== null ? t("store.verifiedLeft", { n: days }) : "" })}</p>
-          </div>
-        </article>
-      ) : (
-        <>
-          <article className="edu-offer">
-            <img src="/edu/buddy-learn.svg" alt="" width="88" height="88" />
-            <div>
-              <h2>{t("store.offerTitle", { days: ACCOUNT_EXTENSION.days })}</h2>
-              <p>{days === null ? "" : days > 0 ? t("store.current", { n: days }) : t("store.expired")}{t("store.chain")}</p>
-              <p className="edu-price">{joyText(ACCOUNT_EXTENSION.priceJoy)} <small>{t("store.fee", { tax: joyText(tax) })}</small></p>
-            </div>
-            <button type="button" className="edu-btn" disabled={busy || balance < total} onClick={buy}>
-              {balance < total ? t("store.notEnough") : busy ? t("store.renewing") : t("store.exchange")}
-            </button>
-          </article>
-          <article className="edu-offer edu-offer--soft">
-            <span className="material-symbols-outlined edu-offer-icon" aria-hidden="true">verified</span>
-            <div>
-              <h2>{t("store.studentTitle")}</h2>
-              <p>{t("store.studentBody")}</p>
-            </div>
-            <a className="edu-btn edu-btn--ghost" href={`${STUDIO}/login?redirect=${encodeURIComponent("/member/account")}`} target="_blank" rel="noopener">{t("store.verify")}</a>
-          </article>
-        </>
-      )}
-
-      <EduShop balance={balance} onBalance={(joyBalance) => onLearnerUpdate({ joyBalance })} />
+      <EduShop balance={balance} onBalance={(gems) => onLearnerUpdate({ gems })} />
 
       <h2 className="edu-subhead">{t("store.earnTitle")}</h2>
       <ul className="edu-earn">
-        <li><span className="material-symbols-outlined" aria-hidden="true">task_alt</span>{rich(t("store.earnFirst", { joy: CODER_JOY_PER_CORRECT }))}</li>
+        <li><span className="material-symbols-outlined" aria-hidden="true">task_alt</span>{rich(t("store.earnFirst", { joy: GEMS_PER_CORRECT }))}</li>
         <li><span className="material-symbols-outlined" aria-hidden="true">replay</span>{t("store.earnReplay")}</li>
       </ul>
     </section>
@@ -467,7 +399,7 @@ export function EduStore({ learner, onLearnerUpdate }) {
 function Stat({ icon, tone, value, label }) {
   return (
     <div className="edu-stat">
-      {icon === "joy" ? <JoyCoin size={32} /> : <span className={`material-symbols-outlined edu-tone-${tone}`} aria-hidden="true">{icon}</span>}
+      {icon === "gem" ? <GemIcon size={32} /> : <span className={`material-symbols-outlined edu-tone-${tone}`} aria-hidden="true">{icon}</span>}
       <div><b>{value}</b><small>{label}</small></div>
     </div>
   );
@@ -481,7 +413,6 @@ export function EduProfile({ learner, persona, onPersona, onSignOut, onLearnerUp
   const { t } = useEduText();
   const [editing, setEditing] = useState(false);
   const stats = useLearnerStats(learner);
-  const days = stats.days;
   const [installable, setInstallable] = useState(false);
   useEffect(() => {
     const on = () => setInstallable(true);
@@ -503,24 +434,20 @@ export function EduProfile({ learner, persona, onPersona, onSignOut, onLearnerUp
 
       <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
       <Link className="edu-btn is-ghost" to="/friends">{t("friends.cardLink")}</Link>
-      {editing && <PersonaGate editOnly email={learner?.email} current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
+      {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
       <div className="edu-stats">
         <Stat icon="local_fire_department" tone="orange" value={learner?.edu?.streak?.count ?? 0} label={t("streak.title")} />
         <Stat icon="task_alt" tone="blue" value={`${stats.done}/${stats.total || 26}`} label={t("profile.steps")} />
-        <Stat icon="joy" tone="blue" value={joyText(learner?.joyBalance || 0).replace(" JOY", "")} label="JOY" />
+        <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
-        <Stat icon="event_available" tone={!learner?.isEduVerified && days !== null && days <= 3 ? "red" : "green"} value={learner?.isEduVerified ? t("common.oneYear") : days === null ? "—" : Math.max(0, days)} label={learner?.isEduVerified ? t("profile.verified") : t("profile.left")} />
       </div>
 
       <dl className="edu-facts">
         <dt>{t("profile.account")}</dt>
         <dd>{t("profile.accountBody")}</dd>
-        <dt>{t("profile.keep")}</dt>
-        <dd>{learner?.isEduVerified ? t("profile.keepVerified") : days === null ? "—" : days > 0 ? t("profile.keepLeft", { n: days }) : t("profile.keepExpired")}</dd>
       </dl>
 
       <div className="edu-actions">
-        <a className="edu-btn" href={`${STUDIO}/login?redirect=${encodeURIComponent("/member")}`} target="_blank" rel="noopener">{t("profile.openStudio")}</a>
         {(installable || detectInstallTarget().iOS) && <EduInstall />}
         <button type="button" className="edu-btn edu-btn--ghost" onClick={onSignOut}>{t("profile.signOut")}</button>
       </div>

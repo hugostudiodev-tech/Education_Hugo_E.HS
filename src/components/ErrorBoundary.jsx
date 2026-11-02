@@ -1,7 +1,6 @@
 import React from 'react';
 import { reportIncident } from '../lib/incident';
 import StatusScreen from './system/StatusScreen';
-import { captureClientException } from '../utils/sentryMonitoring';
 
 const CHUNK_ERROR_PATTERN = /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i;
 const RELOAD_FLAG = 'chunk_reload_attempted';
@@ -83,10 +82,6 @@ export class ErrorBoundary extends React.Component {
     // Tên component gần nhất trong componentStack = "ở đâu" đọc được bằng mắt.
     const where = (errorInfo?.componentStack || '').match(/at (\w+)/)?.[1] || '';
     this.setState({ code, where, at: new Date().toLocaleString() });
-    captureClientException(error, {
-      source: 'react-error-boundary',
-      componentStack: errorInfo?.componentStack,
-    });
   }
 
   render() {

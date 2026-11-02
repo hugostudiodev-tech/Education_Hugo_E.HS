@@ -91,7 +91,7 @@ export function StreakScreen({ streak, onUpdate }) {
     if (!ok) return;
     setBusy(true);
     try {
-      const response = await fetch(`${API_BASE}/joy/edu-streak/thaw`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ day }) });
+      const response = await fetch(`${API_BASE}/me/streak/thaw`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ day }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || t("streak.thawFailed"));
       playEduSound("boing", { unlock: true });
@@ -152,7 +152,7 @@ export function StreakScreen({ streak, onUpdate }) {
             </div>
             <div className="streak-goal">
               <span className="material-symbols-outlined" aria-hidden="true">flag</span>
-              <p><b>{t("streak.next", { d: streak.next.day, joy: streak.next.joy })}</b><small>{t("streak.name")} · {title} · {t("streak.best")} {streak.best}</small></p>
+              <p><b>{t("streak.next", { d: streak.next.day, joy: streak.next.gems })}</b><small>{t("streak.name")} · {title} · {t("streak.best")} {streak.best}</small></p>
             </div>
             <p className="streak-rule">{t("streak.rule")}</p>
             <RiveCredit />
@@ -265,8 +265,8 @@ export function StreakView({ learner, onLearnerUpdate }) {
   const streak = learner?.edu?.streak;
   if (!streak) return <section className="streak-page" aria-busy="true" />;
   const onUpdate = (data) => {
-    onLearnerUpdate?.({ edu: { ...learner.edu, streak: data.streak }, ...(Number.isFinite(data.balance) ? { joyBalance: data.balance } : {}) });
-    if (data.milestone) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: data.milestone.day, joy: data.milestone.joy, stage: data.streak.stage } }));
+    onLearnerUpdate?.({ edu: { ...learner.edu, streak: data.streak }, ...(Number.isFinite(data.balance) ? { gems: data.balance } : {}) });
+    if (data.milestone) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: data.milestone.day, joy: data.milestone.gems, stage: data.streak.stage } }));
   };
   return <StreakScreen streak={streak} onUpdate={onUpdate} />;
 }

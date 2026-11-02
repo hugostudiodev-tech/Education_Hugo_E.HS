@@ -1,5 +1,4 @@
-// Education Hugo — điểm vào riêng. Backend (đăng nhập, ví JOY, chấm bài) vẫn là
-// API của Hugo Studio, gọi cùng origin qua rewrite /api, /ws trong vercel.json.
+// Education Hugo — điểm vào. API là máy chủ riêng (server/), gọi cùng origin qua rewrite /api trong vercel.json.
 import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -17,7 +16,6 @@ import ServerStatusBanner from "./components/system/ServerStatusBanner";
 import PWAUpdatePrompt from "./components/ui/PWAUpdatePrompt";
 
 const EducationApp = lazy(() => import("./education/EducationApp"));
-const PWARealtimeBridge = lazy(() => import("./components/PWARealtimeBridge"));
 const loadMotionFeatures = () => import("./config/motionFeatures").then((mod) => mod.default);
 const IOS_SPRING = { type: "spring", visualDuration: 0.42, bounce: 0.18 };
 
@@ -51,7 +49,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <LazyMotion features={loadMotionFeatures}>
           <MotionConfig reducedMotion="user" transition={IOS_SPRING}>
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Suspense fallback={null}><PWARealtimeBridge /></Suspense>
               <Suspense fallback={<StatusScreen kind="loading" />}><EducationApp /></Suspense>
               <PWAUpdatePrompt />
               <ServerStatusBanner />

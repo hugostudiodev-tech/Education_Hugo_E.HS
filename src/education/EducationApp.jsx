@@ -5,7 +5,6 @@ import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, usePar
 import { clearMemberSession, getMemberSession, logoutAuth } from "../services/api/core/authSession";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useCoderLessons } from "../hooks/useCoderLessons";
-import { useJoyStore } from "../stores/joyStore";
 import { useEduHead } from "./eduHead";
 import { needsWelcome, rememberAccount, takePendingGoal } from "./eduAccounts";
 import EduShell, { EduInstallGate, EduProfile, EduStore } from "./EduShell";
@@ -91,10 +90,9 @@ function LangLanding({ lang, signedIn }) {
 /**
  * Education Hugo — education.hugowishpax.studio.
  *
- * Cùng bản build, cùng backend, cùng TÀI KHOẢN với Hugo Studio; chỉ vỏ là riêng.
- * Học miễn phí (6 step đầu không cần tài khoản), còn tài khoản vẫn theo luật
- * Hugo Studio: hạn duy trì gia hạn bằng JOY trong Cửa hàng ở đây, xác minh giáo
- * dục được một năm. Qua một step lần đầu được +5 JOY mỗi câu đúng.
+ * Máy chủ riêng (server/), đăng nhập bằng Google, tài khoản Hugo Studio hoặc passkey.
+ * Học miễn phí, tài khoản không hết hạn (6 step đầu học thử không cần đăng nhập).
+ * Qua một step lần đầu được +5 Ngọc mỗi câu đúng; Ngọc đổi vật phẩm trong Cửa hàng.
  *
  *   /            khách: trang giới thiệu · đã đăng nhập: vào /learn
  *   /learn       bản đồ 26 step (khách vẫn xem và học thử được)
@@ -110,7 +108,7 @@ export default function EducationApp() {
   const refresh = useCallback(() => {
     if (!getMemberSession()?.email) return Promise.resolve();
     return hugoCoderApi.getAccessSnapshot()
-      .then(({ bio, edu }) => setLearner((current) => ({ ...bio, edu: edu || current?.edu })))
+      .then(({ learner: next, edu }) => setLearner((current) => ({ ...next, edu: edu || current?.edu })))
       .catch((error) => {
         // Phiên ở máy đã chết phía máy chủ: về trạng thái khách cho khớp.
         if (error?.status === 401) { clearMemberSession(); setSession(null); }
@@ -119,8 +117,8 @@ export default function EducationApp() {
 
   useEffect(() => { if (signedIn) refresh(); }, [signedIn, refresh]);
 
-  // Tự đồng bộ: cùng một tài khoản có thể đang học ở máy khác, tiêu JOY ở
-  // www, hay đăng nhập/đăng xuất ở tab khác — không bắt người học tải lại trang.
+  // Tự đồng bộ: cùng một tài khoản có thể đang học ở máy khác, hay đăng nhập/đăng
+  // xuất ở tab khác — không bắt người học tải lại trang.
   useEffect(() => {
     if (!signedIn) return undefined;
     let last = Date.now();
@@ -132,14 +130,9 @@ export default function EducationApp() {
     };
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("hugo:bio-update", refresh);
-    // Số dư JOY đổi tức thì qua WebSocket (PWARealtimeBridge) — chỉ nghe thay đổi, không lấy giá trị đầu.
-    const stopJoy = useJoyStore.subscribe((state, prev) => {
-      if (state.balance !== prev.balance) setLearner((current) => (current ? { ...current, joyBalance: state.balance } : current));
-    });
     return () => {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("hugo:bio-update", refresh);
-      stopJoy();
     };
   }, [signedIn, refresh]);
 
@@ -188,7 +181,7 @@ export default function EducationApp() {
     rememberAccount({ email: session.email, name: persona.nickname || session.displayName, avatar: persona.avatar });
     const goal = takePendingGoal();
     if (goal) {
-      fetch(`${API_BASE}/joy/edu-settings`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefs: { dailyGoal: goal } }) })
+      fetch(`${API_BASE}/me/settings`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefs: { dailyGoal: goal } }) })
         .then(() => refresh()).catch(() => {});
     }
   }, [signedIn, persona, session, refresh]);
@@ -208,7 +201,7 @@ export default function EducationApp() {
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
       {gated && (qrCode ? <EduQrHandoff code={qrCode} android={device.android} /> : <EduInstallGate />)}
       {welcome && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
-      {!welcome && !gated && persona && !persona.complete && <PersonaGate email={session.email} current={persona} onDone={setPersona} />}
+      {!welcome && !gated && persona && !persona.complete && <PersonaGate current={persona} onDone={setPersona} />}
       {celebration.event && <StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} />}
       {!gated && <EduErrorBoundary><Suspense fallback={<Loading />}><Routes>
         <Route path="/" element={signedIn ? <Navigate to="/learn" replace /> : standalone ? <EduOnboard /> : <EduLanding />} />

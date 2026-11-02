@@ -1,11 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { notify } from "../lib/notify";
 import { API_BASE } from "../config/apiBase";
 import { AVATAR_COLORS, AVATAR_PARTS, INTRO_MAX, NICKNAME_MAX, PersonaClient, checkIntro, checkNickname, randomAvatar } from "../../packages/persona";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
-
-const OnboardingProfileModal = lazy(() => import("../components/member/OnboardingProfileModal"));
 
 export const persona = new PersonaClient({ baseUrl: API_BASE });
 
@@ -80,14 +78,12 @@ function NicknameStep({ initial, onSave, busy }) {
 }
 
 /**
- * Màn bắt buộc sau đăng nhập, toàn màn, phải xong mới vào học:
- *   1. hồ sơ Hugo Studio còn thiếu (tài khoản mới) — OnboardingProfileModal, máy chủ quyết thiếu gì
- *   2. biệt danh   3. nhân vật
- * Tài khoản cũ đủ hồ sơ thì bước 1 tự bỏ qua. `editOnly` = mở từ trang hồ sơ để sửa nhân vật.
+ * Màn bắt buộc sau đăng nhập, toàn màn, phải xong mới vào học: 1. biệt danh  2. nhân vật.
+ * Đã có biệt danh thì vào thẳng bước nhân vật. `editOnly` = mở từ trang hồ sơ để sửa nhân vật.
  */
-export function PersonaGate({ email, current, onDone, editOnly = false }) {
+export function PersonaGate({ current, onDone, editOnly = false }) {
   const { t } = useEduText();
-  const [stage, setStage] = useState(editOnly ? "avatar" : "profile");
+  const [stage, setStage] = useState(editOnly || current?.nickname ? "avatar" : "nickname");
   const [nickname, setNickname] = useState(current?.nickname || "");
   const [busy, setBusy] = useState(false);
 
@@ -103,11 +99,6 @@ export function PersonaGate({ email, current, onDone, editOnly = false }) {
       notify.error(t(key) === key ? t("persona.failed") : t(key));
     } finally { setBusy(false); }
   };
-  const afterProfile = () => setStage(current?.nickname ? "avatar" : "nickname");
-
-  if (stage === "profile") {
-    return <Suspense fallback={null}><OnboardingProfileModal email={email} blocking onSkip={afterProfile} onDone={afterProfile} /></Suspense>;
-  }
   return (
     <div className="persona-gate" role="dialog" aria-modal="true" aria-labelledby="persona-title">
       <div className="persona-card">

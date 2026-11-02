@@ -43,7 +43,7 @@ const STAGE_DEFS = [
       tagline: "Tài khoản, bài đăng, trang cá nhân, theo dõi, thả tim, trả lời — trọn vòng CRUD.",
       learn: ["Đăng ký, đăng nhập, session và password_hash", "Tạo, đọc, sửa, xoá bài đăng có kiểm quyền", "Trang cá nhân, ảnh đại diện, theo dõi", "Trả lời lồng nhau, tìm kiếm và Fetch API"],
       challenge: "Mỗi thao tác ghi phải trả lời được: ai đang làm, và người đó có quyền không.",
-      promise: "Kết chặng: Nhịp là một mạng xã hội dùng được trên localhost + thưởng 800 JOY.",
+      promise: "Kết chặng: Nhịp là một mạng xã hội dùng được trên localhost + thưởng 800 Ngọc.",
       reading: [
         { title: "PHP Sessions", author: "The PHP Group", url: "https://www.php.net/manual/en/book.session.php" },
         { title: "Password Hashing", author: "The PHP Group", url: "https://www.php.net/manual/en/book.password.php" },
@@ -58,7 +58,7 @@ const STAGE_DEFS = [
       tagline: "Tự tấn công Nhịp, rồi vá từng lỗ hổng tận gốc.",
       learn: ["Mô hình mối đe doạ, CIA và OWASP Top 10", "SQL Injection và XSS", "CSRF, phiên đăng nhập, cookie và tải tệp", "Phân quyền, giới hạn tần suất và nhật ký"],
       challenge: "Mỗi lỗ hổng phải được chứng minh bằng một lần tấn công thử, và mỗi bản vá phải chặn được đúng lần tấn công đó.",
-      promise: "Kết chặng: Nhịp qua được bảng rà soát bảo mật + thưởng 800 JOY.",
+      promise: "Kết chặng: Nhịp qua được bảng rà soát bảo mật + thưởng 800 Ngọc.",
       reading: [
         { title: "OWASP Top 10", author: "OWASP Foundation", url: "https://owasp.org/www-project-top-ten/" },
         { title: "OWASP Cheat Sheet Series", author: "OWASP Foundation", url: "https://cheatsheetseries.owasp.org/" },
@@ -73,7 +73,7 @@ const STAGE_DEFS = [
       tagline: "Từ chạy được tới đáng dùng: mã gọn, nhanh, dễ tiếp cận, nhiều tính năng.",
       learn: ["Tổ chức mã theo MVC gọn và Git", "Chỉ mục SQL, lỗi N+1, ảnh và khả năng tiếp cận", "Thông báo, hashtag và nhắc tên"],
       challenge: "Thêm tính năng mà không làm vỡ tính năng cũ.",
-      promise: "Kết chặng: Nhịp đủ tính năng của một mạng xã hội nhỏ + thưởng 800 JOY.",
+      promise: "Kết chặng: Nhịp đủ tính năng của một mạng xã hội nhỏ + thưởng 800 Ngọc.",
       reading: [
         { title: "Pro Git", author: "Chacon, S. and Straub, B.", url: "https://git-scm.com/book/en/v2" },
         { title: "Optimization and Indexes", author: "Oracle", url: "https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html" },
@@ -89,7 +89,7 @@ const STAGE_DEFS = [
       tagline: "Đưa Nhịp lên Internet miễn phí, đo người dùng, viết tài liệu và bảo vệ dự án hoàn tất.",
       learn: ["Phân tích sản phẩm và dữ liệu bằng SQL", "Triển khai PHP + MySQL lên hosting miễn phí", "Viết README và hướng dẫn sử dụng", "Dự án hoàn tất: 5 tính năng mới + 3 trang liên kết"],
       challenge: "Người lạ phải tự cài, tự dùng được sản phẩm của bạn chỉ bằng tài liệu bạn viết.",
-      promise: "Vạch đích: dự án hoàn tất được Hugo Studio duyệt — thưởng 4.000 JOY.",
+      promise: "Vạch đích: hoàn tất dự án Nhịp — thưởng 4.000 Ngọc.",
       reading: [
         { title: "InfinityFree — Free PHP & MySQL hosting", author: "InfinityFree", url: "https://www.infinityfree.com/" },
         { title: "Make a README", author: "Danny Guo", url: "https://www.makeareadme.com/" },

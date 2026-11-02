@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Award, Braces, ChevronLeft, FileText, GraduationCap, MonitorPlay, X } from "lucide-react";
+import { Award, Braces, ChevronLeft, GraduationCap, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../../lib/notify";
 import { useCoderLessons } from "../../../hooks/useCoderLessons";
-import { STAGE_THEME } from "./stageThemes";
 import { CODER_STORAGE_KEYS, GUEST_LESSONS, readGuestLessons } from "./workspaceUtils";
 import CoderLearningJourney from "./CoderLearningJourney";
-import { ResourcePreview } from "../../admin/AdminCoderResourcesTab";
 import { getMemberSession } from "../../../services/api/core/authSession";
 import { hugoCoderApi } from "../../../services/api/modules/hugoCoderApi";
 import LessonPlayer from "./LessonPlayer";
-import { joyText } from "../../../lib/joyDisplay";
+import { gemText } from "../../../education/gems";
 import { useEduText } from "../../../education/eduText";
 import { nextLesson, stepLessons } from "../../../../packages/courses/coding/lessons.js";
 import "../../../styles/hugoCoderLearning.css";
@@ -23,163 +21,6 @@ function percentage(part, total) {
 }
 
 // Thẻ skeleton — dùng khi đang tải HOẶC chưa có học liệu nào (giữ layout không trống trải)
-function ResourceSkeleton() {
-  return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col">
-      <div className="w-full aspect-video bg-muted animate-pulse" />
-      <div className="p-3 space-y-2">
-        <div className="h-3.5 w-4/5 rounded bg-muted animate-pulse" />
-        <div className="h-2.5 w-2/5 rounded bg-muted animate-pulse" />
-        <div className="h-2.5 w-full rounded bg-muted animate-pulse" />
-      </div>
-    </div>
-  );
-}
-
-// ====== Tab Video / Tài liệu — học liệu admin đăng, có preview trực quan ======
-function ResourceGrid({ type, stages }) {
-  const [items, setItems] = useState(null);
-  const [stage, setStage] = useState("all");
-  const apiBase = import.meta.env.VITE_API_URL || "/api";
-  const stageFilters = [
-    { id: "all", label: "Tất cả" },
-    ...stages.map((item) => ({ id: item.id, label: `Chặng ${item.phaseNumber}` })),
-  ];
-  const stageLabels = Object.fromEntries(
-    stages.map((item) => [item.id, `Chặng ${item.phaseNumber}`]),
-  );
-
-  useEffect(() => {
-    let alive = true;
-    setItems(null);
-    fetch(`${apiBase}/coder-resources?type=${type}&stage=${stage}`, { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : { items: [] }))   // endpoint chưa sẵn / 404 → rỗng, không ném lỗi
-      .then((d) => alive && setItems(d.items || []))
-      .catch(() => alive && setItems([]));
-    return () => { alive = false; };
-  }, [type, stage]);
-
-  const loading = items === null;
-  const empty = items?.length === 0;
-
-  return (
-    <div className="space-y-4">
-      {/* Bộ lọc chặng — màu theo chặng, đồng bộ với bản đồ & trang Quản lý */}
-      <div className="flex gap-1.5 flex-wrap">
-        {stageFilters.map((f) => {
-          const active = stage === f.id;
-          const th = STAGE_THEME[f.id];
-          return (
-            <button
-              key={f.id}
-              onClick={() => setStage(f.id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-black border transition-all active:scale-95 ${
-                active
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-muted text-muted-foreground border-border hover:bg-muted/70"
-              }`}
-            >
-              {th && <span className={`w-2 h-2 rounded-full ${active ? "bg-background" : th.dot}`} />}
-              {f.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Đang tải HOẶC chưa có học liệu → skeleton (không để trống trải) */}
-      {(loading || empty) && (
-        <>
-          {empty && (
-            <div className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-3 py-2.5">
-              <span className="material-symbols-outlined text-lg text-muted-foreground">{type === "video" ? "smart_display" : "menu_book"}</span>
-              <p className="text-[13px] text-muted-foreground leading-4">
-                {type === "video" ? "Video bài học đang được biên soạn" : "Tài liệu học thuật đang được tuyển chọn"} — Hugo Studio sẽ đăng dần theo từng chặng.
-              </p>
-            </div>
-          )}
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[0, 1, 2, 3].map((i) => <ResourceSkeleton key={i} />)}
-          </div>
-        </>
-      )}
-
-      {/* Có học liệu */}
-      {!loading && !empty && (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {items.map((item) => {
-            const th = STAGE_THEME[item.stageId];
-            return (
-              <div key={item._id} className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col">
-                <ResourcePreview type={item.type} url={item.url} className="w-full aspect-video" />
-                <div className="p-3 space-y-1.5 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[13px] font-black uppercase tracking-wide border ${th ? th.chip : "bg-muted text-muted-foreground border-border"}`}>
-                      {th && <span className={`w-1.5 h-1.5 rounded-full ${th.dot}`} />}
-                      {stageLabels[item.stageId] || "Mọi chặng"}
-                    </span>
-                  </div>
-                  <p className="text-sm font-black text-foreground leading-snug">{item.title}</p>
-                  {item.source && <p className="text-[13px] font-bold text-muted-foreground">Nguồn: {item.source}</p>}
-                  {item.description && <p className="text-[13px] text-muted-foreground leading-5 line-clamp-3">{item.description}</p>}
-                  <div className="pt-1">
-                    <a href={item.url} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[13px] font-black uppercase tracking-wider text-foreground underline underline-offset-2">
-                      <span className="material-symbols-outlined text-[13px]">open_in_new</span>
-                      Mở {item.type === "video" ? "video" : "tài liệu"}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function LearningResources({ stages }) {
-  const { t } = useTranslation();
-  const [type, setType] = useState("video");
-
-  return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-bold tracking-[-0.03em] text-foreground">
-          {t("hugoCoderLearning.resources.title")}
-        </h2>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {t("hugoCoderLearning.resources.description")}
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-muted/60 p-1">
-        <button
-          type="button"
-          onClick={() => setType("video")}
-          className={`flex min-h-10 items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition ${
-            type === "video" ? "bg-card text-primary shadow-sm" : "text-muted-foreground"
-          }`}
-        >
-          <MonitorPlay className="h-4 w-4" />
-          {t("hugoCoderLearning.resources.video")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setType("document")}
-          className={`flex min-h-10 items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition ${
-            type === "document" ? "bg-card text-primary shadow-sm" : "text-muted-foreground"
-          }`}
-        >
-          <FileText className="h-4 w-4" />
-          {t("hugoCoderLearning.resources.documents")}
-        </button>
-      </div>
-      <ResourceGrid type={type} stages={stages} />
-    </div>
-  );
-}
-
-// ====== Tiến độ — danh hiệu, chặng, điểm trắc nghiệm (Education Hugo dùng lại) ======
 export function ManageTab({ bio, courses, stages }) {
   const { t: edu } = useEduText();
   const completed = useMemo(
@@ -192,7 +33,7 @@ export function ManageTab({ bio, courses, stages }) {
     return completed.includes(lastId);
   };
 
-  const scores = bio?.hugoCoderExamScores || {};
+  const scores = bio?.scores || {};
   const scoredSteps = courses.filter((course) => scores[course.id]);
   const earnedCount = stages.filter(stageEarned).length;
   // Danh hiệu theo chặng đã đi qua (6 / 11 / 15 / 19 / 22 step).
@@ -287,7 +128,7 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
     if (!getMemberSession()?.email) return undefined;
     let active = true;
     hugoCoderApi.getAccessSnapshot()
-      .then(({ bio: accessBio, edu: accessEdu }) => {
+      .then(({ learner: accessBio, edu: accessEdu }) => {
         if (!active || !accessBio) return;
         onBioUpdateRef.current?.(accessEdu ? { ...accessBio, edu: accessEdu } : accessBio);
       })
@@ -326,17 +167,17 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
   const apiBase = import.meta.env.VITE_API_URL || "/api";
 
   /**
-   * Nộp trắc nghiệm cuối step. Thành viên nộp qua award-learning: máy chủ chấm,
+   * Nộp trắc nghiệm cuối step. Thành viên nộp qua /learn/quiz: máy chủ chấm,
    * ghi điểm, kiểm thứ tự step và quyền, đạt thì ghi tiến độ. Khách học thử chỉ
    * được chấm (không lưu) ở 6 step đầu.
    */
   const submitQuiz = async (course, answers) => {
     const member = Boolean(getMemberSession()?.email);
-    const response = await fetch(member ? `${apiBase}/joy/award-learning` : `${apiBase}/coder-lessons/${course.id}/grade`, {
+    const response = await fetch(member ? `${apiBase}/learn/quiz` : `${apiBase}/lessons/${course.id}/grade`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(member ? { lessonId: course.id, evidence: { answers }, program } : { answers }),
+      body: JSON.stringify(member ? { lessonId: course.id, answers } : { answers }),
     });
     const data = await response.json().catch(() => ({}));
     // Chưa đạt vẫn là kết quả hợp lệ kèm lời giải, không phải lỗi mạng.
@@ -357,12 +198,12 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
         ...bio,
         completedLessons: [...new Set([...(bio?.completedLessons || []), course.id])],
         ...(data.eduStreak ? { edu: { ...(bio?.edu || {}), streak: data.eduStreak.streak } } : {}),
-        hugoCoderExamScores: { ...(bio?.hugoCoderExamScores || {}), [course.id]: (({ best, firstTry } = bio?.hugoCoderExamScores?.[course.id] || {}) => ({ best: Math.max(Number(best) || 0, data.score), firstTry: firstTry ?? data.score }))() },
-        ...(Number.isFinite(data.balance) ? { joyBalance: data.balance } : {}),
+        scores: { ...(bio?.scores || {}), [course.id]: (({ best, firstTry } = bio?.scores?.[course.id] || {}) => ({ best: Math.max(Number(best) || 0, data.score), firstTry: firstTry ?? data.score }))() },
+        ...(Number.isFinite(data.balance) ? { gems: data.balance } : {}),
       });
       announceStreak(data.eduStreak);
-      // Qua step lần đầu: +5 JOY mỗi câu đúng (máy chủ tính, xem award-learning).
-      if (data.joyEarned > 0) notify.success(edu("hub.earned", { joy: joyText(data.joyEarned), correct: data.correct, total: data.total }));
+      // Qua step lần đầu: +5 Ngọc mỗi câu đúng (máy chủ tính, server/services/learning.js).
+      if (data.gemsEarned > 0) notify.success(edu("hub.earned", { joy: gemText(data.gemsEarned), correct: data.correct, total: data.total }));
       if (program === "hugoteam") onProgramProgress?.(data);
     }
     if (member && program === "hugoteam" && data.alreadyCompleted) onProgramProgress?.(data);
@@ -381,7 +222,7 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
     if (!eduStreak?.streak) return;
     const { streak, milestone } = eduStreak;
     const firstToday = streak.studiedToday && !bio?.edu?.streak?.studiedToday;
-    if (milestone) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: milestone.day, joy: milestone.joy, stage: streak.stage } }));
+    if (milestone) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: milestone.day, joy: milestone.gems, stage: streak.stage } }));
     else if (firstToday) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: streak.count, stage: streak.stage } }));
   }
 
@@ -400,7 +241,7 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
       try { localStorage.setItem(GUEST_LESSONS, JSON.stringify(all)); } catch { /* chỉ mất tiến độ bài trong máy */ }
       return;
     }
-    const response = await fetch(`${apiBase}/joy/edu-lesson`, {
+    const response = await fetch(`${apiBase}/learn/lesson`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -411,7 +252,7 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
     onBioUpdate?.({
       ...bio,
       edu: { ...(bio?.edu || {}), lessons: { ...(bio?.edu?.lessons || {}), [course.id]: data.lessons }, ...(data.eduStreak ? { streak: data.eduStreak.streak } : {}) },
-      ...(Number.isFinite(data.balance) ? { joyBalance: data.balance } : {}),
+      ...(Number.isFinite(data.balance) ? { gems: data.balance } : {}),
     });
     announceStreak(data.eduStreak);
   };

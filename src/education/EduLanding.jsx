@@ -5,7 +5,8 @@ import { useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HugoLogo from "../components/HugoLogo";
-import { CODER_JOY_PER_CORRECT } from "../../packages/shared/coderProgression";
+import { GEMS_PER_CORRECT } from "../../packages/shared/coderProgression";
+import { gemText } from "./gems";
 import { STUDIO_SOCIAL_LINKS } from "../config/studioSocialLinks";
 import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
@@ -174,7 +175,7 @@ function SampleQuiz({ picked, onPick, tapping }) {
       </div>
       {picked !== null && (
         <p className={`edu-quiz-result ${right ? "is-right" : "is-wrong"}`} role="status">
-          {right ? t("landing.sample.right", { joy: CODER_JOY_PER_CORRECT }) : t("landing.sample.wrong")} {t("landing.sample.why")}
+          {right ? t("landing.sample.right", { joy: GEMS_PER_CORRECT }) : t("landing.sample.wrong")} {t("landing.sample.why")}
           <button type="button" onClick={() => onPick(null)}>{t("landing.sample.retry")}</button>
         </p>
       )}
@@ -286,12 +287,12 @@ function FeatureFree() {
       <div aria-hidden="true">
         <span className="edu-pad f1-pad" />
         {[[18, 22], [80, 14], [86, 52]].map(([x, y], i) => (
-          <span key={i} className="edu-coin f1-coin" style={{ left: `${x}%`, top: `${y}%` }}>+{CODER_JOY_PER_CORRECT} JOY</span>
+          <span key={i} className="edu-coin f1-coin" style={{ left: `${x}%`, top: `${y}%` }}>+{gemText(GEMS_PER_CORRECT)}</span>
         ))}
         <span className="edu-art-actor f1-buddy"><img src="/edu/buddy-learn.svg" alt="" /></span>
       </div>
     }>
-      <p>{rich(t("landing.freeBody", { joy: CODER_JOY_PER_CORRECT }))}</p>
+      <p>{rich(t("landing.freeBody", { joy: GEMS_PER_CORRECT }))}</p>
     </Feature>
   );
 }

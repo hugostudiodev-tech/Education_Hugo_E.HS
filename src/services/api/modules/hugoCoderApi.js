@@ -46,20 +46,8 @@ class HugoCoderApi {
     return data;
   }
 
-  subscribeFeature({ email, featureKey, months = 1 }) {
-    return this.request("/joy/subscribe-feature", {
-      body: { email, featureKey, months },
-    });
-  }
-
   getAccessSnapshot() {
-    return this.request("/joy/coder-access", { method: "GET" });
-  }
-
-  claimMilestoneReward(phase) {
-    return this.request("/joy/claim-milestone-reward", {
-      body: { phase },
-    });
+    return this.request("/me", { method: "GET" });
   }
 }
 
