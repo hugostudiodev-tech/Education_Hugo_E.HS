@@ -7,7 +7,7 @@ import { useEduText } from "./eduText";
  * Ba bản vi/en/zh — giao diện ngôn ngữ nào hiện bản đó (lang đúng để trình đọc màn hình đọc đúng giọng).
  */
 const LEGAL_LANGS = ["vi", "en", "zh"];
-const DOCS = [["terms", "/terms"], ["privacy", "/privacy"], ["guidelines", "/guidelines"], ["partners", "/partners"]];
+const DOCS = [["terms", "/terms"], ["privacy", "/privacy"], ["guidelines", "/guidelines"]];
 
 export default function EduLegal({ doc }) {
   const { t, lang } = useEduText();
@@ -16,9 +16,9 @@ export default function EduLegal({ doc }) {
   const code = LEGAL_LANGS.includes(lang) ? lang : "en";
   return (
     <article className="edu-page legal" lang={code === "zh" ? "zh-Hans" : code}>
-      <nav className="legal-tabs" aria-label={t("common.terms")}>
+      {DOCS.some(([key]) => key === doc) && <nav className="legal-tabs" aria-label={t("common.terms")}>
         {DOCS.map(([key, to]) => <Link key={key} to={to} className={key === doc ? "is-on" : ""} aria-current={key === doc ? "page" : undefined}>{LEGAL[key].title}</Link>)}
-      </nav>
+      </nav>}
       <header>
         <h1 className="edu-page-title">{page.title}</h1>
         <small>{UPDATED_LABEL[code]} {UPDATED[code]}</small>

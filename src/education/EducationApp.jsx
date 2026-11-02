@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { playEduSound } from "./eduSound";
 import { useEduCourse } from "./useEduCourse";
+import DevSite from "./DevTop";
 import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { clearMemberSession, getMemberSession, logoutAuth, restoreMemberSession } from "../services/api/core/authSession";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
@@ -220,6 +221,7 @@ export default function EducationApp() {
         <Route path="/install" element={<EduInstallGate />} />
         {/* Trang nhà phát triển: trang riêng, công khai, không khung app. */}
         <Route path="/developers" element={<EduDevelopers />} />
+        <Route path="/partners" element={<DevSite><div className="dev-legal"><EduLegal doc="partners" /></div></DevSite>} />
         <Route path="/login" element={signedIn ? <Navigate to="/learn" replace /> : (standalone ? <EduOnboard start={hasSavedAccounts() ? "signin" : "signinAs"} /> : <EduLogin onSignedIn={afterLogin} />)} />
         <Route path="/learn/:lessonId" element={<LessonView learner={me} onLearnerUpdate={mergeLearner} />} />
         <Route path="/streak" element={signedIn ? <StreakView learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
@@ -230,7 +232,7 @@ export default function EducationApp() {
           <Route path="/courses/:id" element={<EduCourseIntro />} />
           {/* Văn bản pháp lý: công khai, không cần đăng nhập. */}
           <Route path="/developer-team" element={signedIn ? <EduDeveloperTeam /> : needsLogin} />
-          {["terms", "privacy", "guidelines", "partners"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
+          {["terms", "privacy", "guidelines"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
           <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />

@@ -6,6 +6,7 @@ import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
 import { HAT_SEED } from "../../packages/courses/sql/seed.js";
 import { CONTACT } from "./legalText";
 import EduStatus from "./EduStatus";
+import DevSite from "./DevTop";
 
 const SqlPlayground = lazy(() => import("../components/member/hugoCoder/SqlPlayground"));
 
@@ -332,6 +333,8 @@ export function NutHoc({ done, onClick }) {
 }
 
 export default function EduDevelopers() {
+  // Đến từ /partners qua link "/developers#step": cuộn tới đúng mục (router không tự cuộn theo #).
+  useEffect(() => { if (location.hash) setTimeout(() => document.querySelector(location.hash)?.scrollIntoView(), 50); }, []);
   const [key, setKey] = useState(() => { try { return sessionStorage.getItem(KEY_STORE) || ""; } catch { return ""; } });
   const [partner, setPartner] = useState(null);
   const [state, setState] = useState({ busy: false, error: "" });
@@ -352,16 +355,7 @@ export default function EduDevelopers() {
   };
 
   return (
-    <div className="dev-site">
-      <header className="dev-top">
-        <Link to="/" className="dev-brand"><img src="/edu/cast-1.svg" alt="" width="32" height="32" /><span>Education Hugo <small>Nhà phát triển</small></span></Link>
-        <nav aria-label="Mục lục">
-          <a href="#ui">Thư viện mở</a>
-          <a href="#step">Thư viện step</a>
-          <Link to="/partners">Quy định đối tác</Link>
-        </nav>
-        <Link to="/learn" className="eh-btn dev-top-cta">Vào học</Link>
-      </header>
+    <DevSite>
     <article className="edu-page dev">
       <header className="dev-hero">
         <p className="dev-eyebrow">Education Hugo · Nhà phát triển</p>
@@ -502,6 +496,6 @@ export default function HocSQL() {
         </ul>
       </section>
     </article>
-    </div>
+    </DevSite>
   );
 }
