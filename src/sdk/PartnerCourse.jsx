@@ -20,7 +20,20 @@ const readProgress = (course) => {
 };
 const writeProgress = (course, value) => { try { localStorage.setItem(store(course), JSON.stringify(value)); } catch { /* hết quota */ } };
 
-function Course({ course, onProgress }) {
+const LOADING = { vi: "Đang tải khoá học…", en: "Loading the course…", zh: "正在加载课程…" };
+const CHECKING = { vi: "Đang kiểm tra key đối tác…", en: "Checking partner key…", zh: "正在验证合作伙伴密钥…" };
+const CREDIT = { vi: "Bài học bởi", en: "Lessons by", zh: "课程来自" };
+
+/** Dòng trạng thái có vòng quay nhỏ (aria-live để trình đọc màn hình đọc). */
+function Note({ alert, children }) {
+  return (
+    <p className={`edu-partner-note${alert ? " is-alert" : ""}`} role={alert ? "alert" : "status"} aria-live="polite">
+      {!alert && <span className="edu-partner-spin" aria-hidden="true" />}{children}
+    </p>
+  );
+}
+
+function Course({ course, lang, onProgress }) {
   const [openId, setOpenId] = useState(null);
   const [progress, setProgress] = useState(() => readProgress(course));
   const [picked, setPicked] = useState(null);
@@ -34,8 +47,9 @@ function Course({ course, onProgress }) {
   const lessonAt = plan ? picked ?? (completedSet.has(current.id) ? 0 : nextLesson(plan.length, progress.lessons[current.id] || [])) : 0;
   useEffect(() => setPicked(null), [openId]);
 
-  if (error && !courses.length) return <p className="edu-partner-note">{error.message}</p>;
-  if (loading && !courses.length) return <p className="edu-partner-note">…</p>;
+  // Key hết hạn / bị thu hồi giữa chừng: dừng hẳn, báo trong khung (kể cả khi bản đồ đã tải).
+  if (error && (!courses.length || error.status === 401)) return <Note alert>Education Hugo: {error.message}</Note>;
+  if (loading && !courses.length) return <Note>{LOADING[lang] || LOADING.vi}</Note>;
 
   if (current && detailReady) {
     const at = courses.findIndex((c) => c.id === current.id);
@@ -98,14 +112,18 @@ export function EducationHugo({ apiKey, course = "coding", lang = "vi", theme, a
 
   return (
     <div className={`edu edu-partner ${className}`.trim()} style={themeVars(theme)} lang={lang}>
-      {state.status === "checking" && <p className="edu-partner-note">…</p>}
-      {state.status === "invalid" && <p className="edu-partner-note" role="alert">Education Hugo: {state.message}</p>}
+      {state.status === "checking" && <Note>{CHECKING[lang] || CHECKING.vi}</Note>}
+      {state.status === "invalid" && <Note alert>Education Hugo: {state.message}</Note>}
       {state.status === "ok" && (
         <QueryClientProvider client={client}>
-          <Course course={course} onProgress={onProgress} />
+          <Course course={course} lang={lang} onProgress={onProgress} />
         </QueryClientProvider>
       )}
       <Toaster position="top-center" />
+      {/* Ghi công bắt buộc (Quy định đối tác mục 4) — không có prop hay token nào tắt được. */}
+      <p className="edu-partner-credit" style={{ display: "block", visibility: "visible", opacity: 1 }}>
+        {CREDIT[lang] || CREDIT.vi} <a href={`${ASSET_ORIGIN}/?source=partner`} target="_blank" rel="noopener">Education Hugo</a> · Hugo Studio
+      </p>
     </div>
   );
 }

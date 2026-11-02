@@ -5,6 +5,7 @@ import { THEME_RULES, themeVars } from "../sdk/theme";
 import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
 import { HAT_SEED } from "../../packages/courses/sql/seed.js";
 import { CONTACT } from "./legalText";
+import EduStatus from "./EduStatus";
 
 const SqlPlayground = lazy(() => import("../components/member/hugoCoder/SqlPlayground"));
 
@@ -212,13 +213,20 @@ const UI_COMPONENTS = [
 /* eslint-enable react/jsx-key */
 
 /** Nạp edu-ui.css đúng bản người dùng tải về — trang này tự dùng chính thư viện mở của mình. */
+// Chờ tệp nạp xong mới vẽ phần demo: không nháy giao diện "trần" lúc mới vào.
 function useUiCss() {
+  const [ready, setReady] = useState(() => Boolean(document.querySelector(`link[data-eh-ready][href="${UI_CSS}"]`)));
   useEffect(() => {
-    if (document.querySelector(`link[href="${UI_CSS}"]`)) return undefined;
-    const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: UI_CSS });
-    document.head.appendChild(link);
-    return () => link.remove();
-  }, []);
+    if (ready) return undefined;
+    let link = document.querySelector(`link[href="${UI_CSS}"]`);
+    if (!link) link = document.head.appendChild(Object.assign(document.createElement("link"), { rel: "stylesheet", href: UI_CSS }));
+    const done = () => { link.dataset.ehReady = "1"; setReady(true); };
+    if (link.sheet) done();
+    link.addEventListener("load", done);
+    link.addEventListener("error", done); // lỗi mạng: vẫn hiện trang (mất style demo) thay vì quay mãi
+    return () => { link.removeEventListener("load", done); link.removeEventListener("error", done); };
+  }, [ready]);
+  return ready;
 }
 
 const uiVars = (t) => ({ "--eh-primary": t.primary, "--eh-success": t.success, "--eh-danger": t.danger, "--eh-warning": t.warning, "--eh-radius": `${t.radius}px`, "--eh-font": `"${t.font}", system-ui, sans-serif` });
@@ -251,16 +259,17 @@ function UiLab({ tokens, setTokens, dark, setDark }) {
 }
 
 function OpenLibrary() {
-  useUiCss();
+  const ready = useUiCss();
   const [tokens, setTokens] = useState(UI_DEFAULTS);
   const [dark, setDark] = useState(false);
   const preview = { style: uiVars(tokens), "data-eh-theme": dark ? "dark" : "light", className: "dev-ui-stage" };
+  if (!ready) return <section className="dev-card"><EduStatus kind="loading" compact /></section>;
   return (
     <>
       <section id="ui" className="dev-card">
         <span className="eh-badge eh-badge--success">Miễn phí · MIT</span>
         <h2>Education Hugo UI</h2>
-        <p>Thư viện giao diện mở mà Education Hugo đang dùng: nút 3D, ô chọn đáp án, thanh tiến độ, thẻ, nhãn, ô nhập, công tắc và thông báo. Thuần CSS, một tệp khoảng 7 KB, không cần cài gói, dùng được với HTML, React, Vue hay bất kỳ framework nào. Không cần đăng ký, không cần key, dùng cả cho dự án thương mại — chỉ cần giữ dòng ghi công trong tệp.</p>
+        <p>Thư viện giao diện mở mà Education Hugo đang dùng: nút 3D, ô chọn đáp án, thanh tiến độ, thẻ, nhãn, ô nhập, công tắc và thông báo. Thuần CSS, một tệp khoảng 6 KB (2 KB khi nén), không cần cài gói, dùng được với HTML, React, Vue hay bất kỳ framework nào. Không cần đăng ký, không cần key, dùng cả cho dự án thương mại — chỉ cần giữ dòng ghi công trong tệp.</p>
         <div className="dev-ui-row">
           <a className="eh-btn" href={UI_CSS} download="edu-ui.css"><span className="material-symbols-outlined" aria-hidden="true">download</span>Tải edu-ui.css</a>
           <a className="eh-btn eh-btn--secondary" href="#ui-lab">Tuỳ biến trực tiếp</a>
@@ -424,7 +433,7 @@ export default function HocSQL() {
   );
 }`}</Code>
           <h3>4. Đăng ký tên miền</h3>
-          <p>Key nằm trong mã trang web nên ai xem nguồn cũng thấy. Vì vậy key được khoá theo <b>tên miền</b> đã đăng ký với admin: gọi từ tên miền khác sẽ bị từ chối. Thêm tên miền mới (kể cả <code>http://localhost:5173</code> khi phát triển) thì báo admin.</p>
+          <p>Key nằm trong mã trang web nên ai xem nguồn cũng thấy. Vì vậy key được khoá theo <b>tên miền</b> đã đăng ký với admin: trình duyệt gọi từ tên miền khác sẽ bị từ chối. Thêm tên miền mới (kể cả <code>http://localhost:5173</code> khi phát triển) thì gửi mail tới {CONTACT}.</p>
           <h3>Yêu cầu</h3>
           <ul>
             <li>React 18 trở lên. Gói đã kèm sẵn mọi thứ khác (sql.js, framer-motion, react-markdown…).</li>
@@ -475,7 +484,7 @@ export default function HocSQL() {
       <section id="demo" className="dev-card">
         <h2>Thử ô SQL</h2>
         <p>Đây chính là component <code>SqlPlayground</code>, chạy SQLite ngay trong trình duyệt của bạn, không cần key.</p>
-        <Suspense fallback={<p>…</p>}>
+        <Suspense fallback={<EduStatus kind="loading" compact />}>
           <SqlPlayground id="dev-demo" setup={HAT_SEED} query={"SELECT name, price\nFROM menu_items\nORDER BY price DESC;"} />
         </Suspense>
       </section>
@@ -483,11 +492,13 @@ export default function HocSQL() {
       <section id="license" className="dev-card">
         <h2>Bản quyền và bảo mật</h2>
         <ul>
-          <li><b>Key</b> có 32 ký tự ngẫu nhiên, gửi thẳng vào email đối tác. Máy chủ chỉ lưu bản băm, admin cũng không xem lại được key gốc.</li>
-          <li><b>Có hạn dùng</b> (tối đa 365 ngày) và có thể bị thu hồi bất cứ lúc nào. Hết hạn thì thư viện ngừng tải bài và báo lỗi trong khung.</li>
-          <li><b>Khoá theo tên miền</b>, và mỗi lượt dùng đều được ghi nhận (số lượt, lần dùng gần nhất).</li>
-          <li><b>Nội dung bài học</b> do Education Hugo tự biên soạn. Không được sao chép, lưu trữ hay phân phối lại ngoài thư viện, và không được gỡ ghi công.</li>
+          <li><b>Key</b> có 32 ký tự ngẫu nhiên, gửi thẳng vào email đối tác. Máy chủ chỉ lưu bản băm SHA-256, admin cũng không xem lại được key gốc. Gửi mail không thành công thì key bị huỷ ngay, không tồn tại key "mồ côi".</li>
+          <li><b>Có hạn dùng</b> (tối đa 365 ngày, gia hạn được) và có thể bị thu hồi bất cứ lúc nào; thu hồi có hiệu lực ngay ở lượt gọi kế tiếp. Hết hạn hay bị thu hồi thì thư viện ngừng tải bài và báo lỗi trong khung, kể cả khi học viên đang học dở.</li>
+          <li><b>Khoá theo tên miền</b>: trình duyệt gọi từ tên miền chưa đăng ký bị từ chối. Mỗi lượt dùng đều được ghi nhận (số lượt, lần dùng gần nhất) và admin xem được.</li>
+          <li><b>Giới hạn tốc độ</b> mỗi IP: đọc 90 lượt/phút, chấm 20 lượt/phút, kiểm key 20 lượt/10 phút.</li>
+          <li><b>Nội dung bài học</b> do Education Hugo tự biên soạn. Không được sao chép, lưu trữ hay phân phối lại ngoài thư viện. Khung thư viện luôn có dòng ghi công Education Hugo, không prop hay token nào tắt được.</li>
           <li>Tiến độ học viên của đối tác nằm trong trình duyệt của học viên (localStorage). Education Hugo không thu thập dữ liệu cá nhân của họ.</li>
+          <li>Chi tiết: <Link to="/partners">Quy định đối tác</Link>.</li>
         </ul>
       </section>
     </article>

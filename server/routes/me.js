@@ -13,10 +13,11 @@ const router = express.Router();
 router.use(['/me', '/learn', '/persona', '/feedback', '/developer'], requireUser);
 
 // Hugo Developer: đăng ký một lần (upsert theo email — bấm lại không tạo bản ghi mới).
-// Quảng cáo: công khai, chỉ trả bản đang bật. Không có thì client dùng chữ mặc định.
+// Quảng cáo: công khai.
 router.get('/promo/:key', handle(async (req, res) => {
   res.set('Cache-Control', 'public, max-age=60');
-  return { promo: await Promo.findOne({ key: String(req.params.key), enabled: true }).select('image href text -_id').lean() };
+  // Tắt → { enabled: false } để app ẩn thẻ; chưa từng soạn → null để app dùng chữ mặc định.
+  return { promo: await Promo.findOne({ key: String(req.params.key) }).select('enabled image href text -_id').lean() };
 }));
 router.get('/developer', handle(async (req) => ({ signedUp: Boolean(await DevSignup.exists({ email: req.email })) })));
 router.post('/developer/signup', limit(5), handle(async (req) => {

@@ -205,6 +205,14 @@ function Partners() {
     setForm({ email: "", days: 30, origins: "", note: "" });
   }, list.reload);
   const revoke = (k) => act(async () => { if (window.confirm(`Thu hồi key …${k.last4} của ${k.email}?`)) await call(`/admin/partners/${k._id}/revoke`, { method: "POST" }); }, list.reload);
+  const extend = (k) => act(async () => {
+    const days = window.prompt(`Gia hạn key …${k.last4} thêm bao nhiêu ngày? (còn lại tối đa 365 ngày)`, "30");
+    if (days) await call(`/admin/partners/${k._id}`, { method: "POST", body: { days } });
+  }, list.reload);
+  const domains = (k) => act(async () => {
+    const origins = window.prompt(`Tên miền cho key …${k.last4} (cách nhau dấu phẩy):`, (k.origins || []).join(", "));
+    if (origins !== null) await call(`/admin/partners/${k._id}`, { method: "POST", body: { origins: origins.split(/[\s,]+/).filter(Boolean) } });
+  }, list.reload);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div className="space-y-4">
@@ -212,16 +220,16 @@ function Partners() {
         <form onSubmit={issue} className="grid gap-2 sm:grid-cols-2">
           <Input type="email" required placeholder="Email đối tác" value={form.email} onChange={set("email")} />
           <Input type="number" min={1} max={365} placeholder="Số ngày hiệu lực" value={form.days} onChange={set("days")} />
-          <Input placeholder="Tên miền được phép (cách nhau dấu phẩy, để trống = mọi nơi)" value={form.origins} onChange={set("origins")} />
+          <Input required placeholder="Tên miền được phép, bắt buộc (vd. https://truong.edu.vn, http://localhost:5173)" value={form.origins} onChange={set("origins")} />
           <Input placeholder="Ghi chú" value={form.note} onChange={set("note")} />
           <Btn type="submit" className="sm:col-span-2">Cấp key và gửi mail</Btn>
         </form>
         {issued && <p className="mt-3 text-[14px] text-foreground">Đã gửi key …{issued.last4} tới {issued.email}, hết hạn {fmt(issued.expiresAt)}. Key chỉ hiện trong thư, máy chủ không lưu bản rõ.</p>}
       </Card>
-      <Table list={list} head={["Email", "Key", "Tên miền", "Hết hạn", "Dùng", "Trạng thái", ""]} row={(k) => [
-        k.email, `…${k.last4}`, k.origins?.join(", ") || "Mọi nơi", fmt(k.expiresAt), k.uses ?? 0,
+      <Table list={list} head={["Email", "Key", "Tên miền", "Hết hạn", "Lượt dùng", "Dùng gần nhất", "Trạng thái", ""]} row={(k) => [
+        k.email, `…${k.last4}`, k.origins?.join(", ") || "Mọi nơi (key cũ)", fmt(k.expiresAt), k.uses ?? 0, fmt(k.lastUsedAt),
         k.revokedAt ? "Đã thu hồi" : new Date(k.expiresAt) < new Date() ? "Hết hạn" : "Hoạt động",
-        !k.revokedAt && <Btn key="a" tone="danger" onClick={revoke(k)}>Thu hồi</Btn>,
+        !k.revokedAt && <div key="a" className="flex flex-wrap gap-2"><Btn tone="ghost" onClick={extend(k)}>Gia hạn</Btn><Btn tone="ghost" onClick={domains(k)}>Tên miền</Btn><Btn tone="danger" onClick={revoke(k)}>Thu hồi</Btn></div>,
       ]} />
     </div>
   );

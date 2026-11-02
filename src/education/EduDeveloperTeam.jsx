@@ -86,18 +86,24 @@ function Dancers({ ids = [1, 3, 5, 6], size = 72 }) {
   );
 }
 
+const PROMO_STORE = "edu.promo.developer";
+
 /** Nội dung quảng cáo do admin soạn (tab "Quảng cáo"); ô nào trống thì dùng chữ mặc định. */
 function usePromo() {
   const { lang } = useEduText();
   const c = COPY[lang] || COPY.vi;
-  const [promo, setPromo] = useState(null);
+  // Vẽ ngay bằng bản lưu trên máy (hoặc chữ mặc định), tải bản mới ngầm rồi thay — không chờ mạng.
+  const [promo, setPromo] = useState(() => { try { return JSON.parse(localStorage.getItem(PROMO_STORE)) ?? false; } catch { return false; } });
   useEffect(() => {
-    fetch(`${API_BASE}/promo/developer`).then((r) => r.json()).then((d) => setPromo(d.promo || false)).catch(() => setPromo(false));
+    fetch(`${API_BASE}/promo/developer`).then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
+      setPromo(d.promo || false);
+      try { localStorage.setItem(PROMO_STORE, JSON.stringify(d.promo || false)); } catch { /* chế độ riêng tư */ }
+    }).catch(() => {});
   }, []);
   const text = promo?.text?.[lang] || {};
   const pick = (field, fallback) => text[field] || fallback;
   return {
-    hidden: promo === null, // chờ tải thì chưa vẽ, tránh nháy chữ cũ rồi đổi
+    off: promo?.enabled === false,
     image: promo?.image || "/edu/dev-rocket.webp",
     href: promo?.href || "/developer-team",
     badge: pick("badge", c.badge), title: pick("title", c.promoTitle), body: pick("body", c.promoBody), cta: pick("cta", c.promoCta),
@@ -107,7 +113,7 @@ function usePromo() {
 /** Thẻ quảng cáo trong Hồ sơ: một thẻ như mọi thẻ khác — chữ bên trái, ảnh gọn bên phải. */
 export function DeveloperPromo() {
   const p = usePromo();
-  if (p.hidden) return null;
+  if (p.off) return null; // admin tắt quảng cáo
   const inner = (
     <>
       <div className="edu-dev-promo-body">

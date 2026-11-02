@@ -6,7 +6,7 @@ import { requireAdmin } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
 import { AdminLog, DevSignup, Promo, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
 import { addGems } from '../services/gems.js';
-import { issuePartnerKey, listPartnerKeys, revokePartnerKey } from '../services/partner.js';
+import { issuePartnerKey, listPartnerKeys, revokePartnerKey, updatePartnerKey } from '../services/partner.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
 
 const router = express.Router();
@@ -130,6 +130,11 @@ router.post('/partners', handle(async (req) => {
     if (error.status) throw error;
     throw fail(400, 'ISSUE_FAILED', error.message);
   }
+}));
+router.post('/partners/:id', handle(async (req) => {
+  const out = await updatePartnerKey(oid(req.params.id), { days: req.body?.days, origins: req.body?.origins });
+  await log(req, 'partner_update', req.params.id, { expiresAt: out.expiresAt, origins: out.origins });
+  return out;
 }));
 router.post('/partners/:id/revoke', handle(async (req) => {
   const r = await revokePartnerKey(oid(req.params.id));

@@ -17,7 +17,7 @@ export default async function middleware(request) {
   if (p.startsWith("/sdk/")) {
     const key = p.split("/")[2] || "";
     if (!process.env.SDK_SECRET) return deny(503, "Gói chưa phát hành.");
-    const res = await fetch(`${API}/edu-partner/verify`, { method: "POST", headers: { "x-edu-partner-key": key, "content-type": "application/json" }, body: "{}" }).catch(() => null);
+    const res = await fetch(`${API}/partner/verify`, { method: "POST", headers: { "x-edu-partner-key": key, "content-type": "application/json" }, body: "{}" }).catch(() => null);
     if (!res?.ok) return deny(res?.status === 401 ? 401 : 503, "Key đối tác không hợp lệ hoặc đã hết hạn. Liên hệ Hugo Studio để được cấp key.");
     return rewrite(`/_sdk/${process.env.SDK_SECRET}.tgz`, url, { "cache-control": "no-store" });
   }
