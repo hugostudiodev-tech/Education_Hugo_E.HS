@@ -35,6 +35,7 @@ const PAGES = {
   feedback: () => import("./EduFeedback"),
   legal: () => import("./EduLegal.jsx"),
   developers: () => import("./EduDevelopers.jsx"),
+  devTeam: () => import("./EduDeveloperTeam.jsx"),
 };
 const EduLanding = lazy(PAGES.landing);
 const EduLogin = lazy(PAGES.login);
@@ -48,6 +49,7 @@ const EduFriends = lazy(PAGES.friends);
 const EduFeedback = lazy(PAGES.feedback);
 const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
+const EduDeveloperTeam = lazy(PAGES.devTeam);
 const EduPublicProfile = lazy(() => PAGES.friends().then((mod) => ({ default: mod.EduPublicProfile })));
 const CoderProgress = lazy(() => PAGES.hub().then((mod) => ({ default: mod.ManageTab })));
 
@@ -228,6 +230,7 @@ export default function EducationApp() {
           <Route path="/courses/:id" element={<EduCourseIntro />} />
           {/* Văn bản pháp lý: công khai, không cần đăng nhập. */}
           <Route path="/developers" element={<EduDevelopers />} />
+          <Route path="/developer-team" element={signedIn ? <EduDeveloperTeam /> : needsLogin} />
           {["terms", "privacy", "guidelines"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />

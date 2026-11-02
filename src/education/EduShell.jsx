@@ -20,6 +20,7 @@ import AnimIcon from "../components/icons/animated/AnimIcon";
 import EduSettings from "./EduSettings";
 import { FeedbackHistory } from "./EduFeedback";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { DeveloperPromo } from "./EduDeveloperTeam";
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
@@ -429,6 +430,7 @@ export function EduProfile({ learner, persona }) {
         <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
       </div>
+      <DeveloperPromo />
       <Link className="edu-btn is-ghost" to="/friends">{t("friends.cardLink")}</Link>
     </section>
   );

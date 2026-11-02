@@ -182,3 +182,10 @@ export const PartnerKey = model('PartnerKey', new Schema({
 export const AdminLog = model('AdminLog', new Schema({
   admin: String, action: String, target: String, detail: Mixed,
 }, { timestamps: true }));
+
+// Đăng ký chương trình Hugo Developer (mỗi người học một lần; hội đồng xét sau).
+export const DevSignup = model('DevSignup', new Schema({
+  email: { type: String, required: true, unique: true, lowercase: true },
+  name: String,
+  status: { type: String, enum: ['new', 'contacted', 'accepted', 'declined'], default: 'new' },
+}, { timestamps: true }));

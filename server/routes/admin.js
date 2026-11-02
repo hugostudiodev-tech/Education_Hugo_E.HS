@@ -4,7 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { requireAdmin } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
-import { AdminLog, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
+import { AdminLog, DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
 import { addGems } from '../services/gems.js';
 import { issuePartnerKey, listPartnerKeys, revokePartnerKey } from '../services/partner.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
@@ -169,6 +169,15 @@ router.get('/lesson-feedback', handle(async () => ({ items: await LessonFeedback
 router.post('/lesson-feedback/:id', handle(async (req) => {
   const status = ['new', 'seen', 'fixed'].includes(req.body?.status) ? req.body.status : 'seen';
   await LessonFeedback.updateOne({ _id: oid(req.params.id) }, { $set: { status } });
+  return { success: true };
+}));
+// ── Hugo Developer ───────────────────────────────────────────────────────────
+router.get('/developers', handle(async () => ({ items: await DevSignup.find().sort({ createdAt: -1 }).limit(500).lean() })));
+router.post('/developers/:id', handle(async (req) => {
+  const status = ['new', 'contacted', 'accepted', 'declined'].includes(req.body?.status) ? req.body.status : 'contacted';
+  const r = await DevSignup.updateOne({ _id: oid(req.params.id) }, { $set: { status } });
+  if (!r.matchedCount) throw fail(404, 'NOT_FOUND');
+  await log(req, `developer_${status}`, req.params.id);
   return { success: true };
 }));
 router.get('/log', handle(async () => ({ items: await AdminLog.find().sort({ createdAt: -1 }).limit(300).lean() })));

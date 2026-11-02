@@ -3,14 +3,21 @@ import express from 'express';
 import { requireUser } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
 import { finishLesson, savePrefs, snapshot, submitQuiz, thaw } from '../services/learning.js';
-import { Feedback, GemTxn, Learner, LessonFeedback, Receipt, Report } from '../models.js';
+import { DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Receipt, Report } from '../models.js';
 import { checkNickname } from '../../packages/persona/nickname.js';
 import { checkAvatar } from '../../packages/persona/avatar.js';
 import { checkIntro } from '../../packages/persona/intro.js';
 import { cleanFeedback } from '../../packages/shared/eduFeedback.js';
 
 const router = express.Router();
-router.use(['/me', '/learn', '/persona', '/feedback'], requireUser);
+router.use(['/me', '/learn', '/persona', '/feedback', '/developer'], requireUser);
+
+// Hugo Developer: đăng ký một lần (upsert theo email — bấm lại không tạo bản ghi mới).
+router.get('/developer', handle(async (req) => ({ signedUp: Boolean(await DevSignup.exists({ email: req.email })) })));
+router.post('/developer/signup', limit(5), handle(async (req) => {
+  await DevSignup.updateOne({ email: req.email }, { $setOnInsert: { email: req.email, name: req.user?.name || '' } }, { upsert: true });
+  return { success: true, signedUp: true };
+}));
 
 router.get('/me', handle((req, res) => { res.set('Cache-Control', 'private, no-store'); return snapshot(req.email, req.user); }));
 router.put('/me/settings', limit(30), handle(async (req) => ({ success: true, prefs: await savePrefs(req.email, req.body?.prefs) })));

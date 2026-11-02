@@ -272,6 +272,23 @@ function Feedback() {
   );
 }
 
+function Developers() {
+  const list = useList("/admin/developers");
+  const STATUS = { new: "Mới đăng ký", contacted: "Đã liên hệ", accepted: "Nhận vào", declined: "Chưa phù hợp" };
+  const set = (d, status) => act(() => call(`/admin/developers/${d._id}`, { method: "POST", body: { status } }), list.reload);
+  return (
+    <div className="space-y-3">
+      <p className="text-[14px] text-muted-foreground">{list.items ? `${list.items.length} người đăng ký` : ""} · Danh sách để hội đồng xét và xây chương trình.</p>
+      <Table list={list} head={["Lúc đăng ký", "Email", "Tên", "Trạng thái", ""]} row={(d) => [
+        fmt(d.createdAt), d.email, d.name || "—", STATUS[d.status] || d.status,
+        <select key="s" value={d.status} onChange={(e) => set(d, e.target.value)()} className="min-h-[40px] rounded-lg border border-border bg-card px-2 text-[14px] text-foreground">
+          {Object.entries(STATUS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+        </select>,
+      ]} />
+    </div>
+  );
+}
+
 function Log() {
   const list = useList("/admin/log");
   return <Table list={list} head={["Lúc", "Admin", "Thao tác", "Đối tượng"]} row={(l) => [fmt(l.createdAt), l.admin, l.action, l.target]} />;
@@ -298,6 +315,7 @@ const TABS = [
   ["learners", "Người học", "group", Learners],
   ["store", "Cửa hàng", "storefront", Store],
   ["partners", "Đối tác", "key", Partners],
+  ["developers", "Hugo Developer", "code", Developers],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],
