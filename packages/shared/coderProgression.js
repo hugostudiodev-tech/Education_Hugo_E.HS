@@ -1,5 +1,6 @@
 import { STAGES } from "../courses/coding/stages.js";
 import { STEP_IDS as SQL_STEP_IDS } from "../courses/sql/stages.js";
+import { STEP_IDS as PYTHON_ADVANCED_STEP_IDS } from "../courses/python-advanced/stages.js";
 
 // Ranh giới chặng (đánh số step từ 1) suy từ đề cương khoá Coding.
 export const CODER_STAGE_SEQUENCE = Object.freeze(
@@ -80,6 +81,18 @@ export function getCoderStageGate(completedLessons, targetStageId) {
 }
 
 export function getCoderLessonGate(completedLessons, lessonId) {
+  const advancedIndex = PYTHON_ADVANCED_STEP_IDS.indexOf(lessonId);
+  if (advancedIndex >= 0) {
+    const completed = new Set(Array.isArray(completedLessons) ? completedLessons : []);
+    const missingLessons = PYTHON_ADVANCED_STEP_IDS.slice(0, advancedIndex)
+      .filter((id) => !completed.has(id));
+    return {
+      unlocked: !missingLessons.length,
+      code: missingLessons.length ? "PREVIOUS_LESSONS_INCOMPLETE" : null,
+      stage: null,
+      missingLessons,
+    };
+  }
   // Khoá SQL: cùng luật "học đúng thứ tự", chỉ tính các step sql trước nó.
   const sqlIndex = SQL_STEP_IDS.indexOf(lessonId);
   if (sqlIndex >= 0) {
@@ -106,5 +119,6 @@ export function getCoderLessonGate(completedLessons, lessonId) {
 }
 
 export function isCoderLessonId(lessonId) {
-  return Boolean(getCoderStageForLesson(lessonId));
+  return Boolean(getCoderStageForLesson(lessonId))
+    || PYTHON_ADVANCED_STEP_IDS.includes(lessonId);
 }

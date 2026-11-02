@@ -5,21 +5,17 @@ import HugoDrop from "../system/HugoDrop";
 import StatusScreen from "../system/StatusScreen";
 import { notify } from "../../lib/notify";
 
-const POLL_MS = 30 * 60 * 1000;
+const POLL_MS = 2 * 60 * 1000;
 const BOOT_REASON = "hugo:boot-reason";
 const VERSION = import.meta.env.VITE_APP_VERSION || "";
 
 /*
- * Bản mới KHÔNG còn tự tải lại giữa chừng (trước đây updateServiceWorker(true)
- * chạy ngay khi có bản mới — đang gõ dở hay đang thanh toán cũng bị tải lại).
- * Giờ: hiện tấm báo nhỏ; bấm "Cập nhật" hoặc rời app (ẩn tab) là áp dụng — rời
- * app thì không ai thấy trang tải lại. Lúc cập nhật có màn giọt nước, mở lại
- * báo "Đã cập nhật lên phiên bản X".
+ * Luôn giữ thông báo bản mới cho đến khi người học chủ động cập nhật.
+ * Khi xác nhận, kích hoạt service worker mới rồi tải lại ứng dụng.
  */
 export default function PWAUpdatePrompt() {
   const { t } = useTranslation();
   const [updating, setUpdating] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
@@ -67,36 +63,30 @@ export default function PWAUpdatePrompt() {
     };
   }, []);
 
-  const apply = (visible) => {
+  const apply = async () => {
     try { sessionStorage.setItem(BOOT_REASON, "update"); } catch { /* ignore */ }
-    if (visible) setUpdating(true);
-    updateServiceWorker(true);
+    setUpdating(true);
+    try {
+      await updateServiceWorker(true);
+    } catch (error) {
+      console.error("PWA update activation failed:", error);
+      setUpdating(false);
+      notify.error(t("system.update.failed", { defaultValue: "Không thể cập nhật lúc này. Hãy thử lại." }));
+    }
   };
 
-  // Rời app khi đang có bản mới → cập nhật ngầm, quay lại là đã mới.
-  useEffect(() => {
-    if (!needRefresh) return undefined;
-    const onHide = () => { if (document.hidden) apply(false); };
-    document.addEventListener("visibilitychange", onHide);
-    return () => document.removeEventListener("visibilitychange", onHide);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needRefresh]);
-
   if (updating) return <div className="fixed inset-0 z-[500]"><StatusScreen kind="updating" /></div>;
-  if (!needRefresh || dismissed) return null;
+  if (!needRefresh) return null;
 
   return (
     <div className="hs-sheet" role="dialog" aria-live="polite" aria-label={t("system.update.title", { defaultValue: "Đã có phiên bản mới" })}>
       <HugoDrop mode="fill" className="h-9 w-9 shrink-0" label="" />
       <p className="hs-sheet__text">
         {t("system.update.title", { defaultValue: "Đã có phiên bản mới" })}
-        <small>{t("system.update.body", { defaultValue: "Tự cập nhật khi rời ứng dụng, hoặc cập nhật ngay." })}</small>
+        <small>{t("system.update.body", { defaultValue: "Bản mới đã sẵn sàng. Bấm nút bên cạnh để tải phiên bản mới và làm mới ứng dụng." })}</small>
       </p>
-      <button type="button" className="hs-btn" onClick={() => setDismissed(true)} aria-label={t("system.update.later", { defaultValue: "Để sau" })}>
-        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
-      </button>
-      <button type="button" className="hs-btn hs-btn--primary" onClick={() => apply(true)}>
-        {t("system.update.now", { defaultValue: "Cập nhật" })}
+      <button type="button" className="hs-btn hs-btn--primary" onClick={apply} disabled={updating}>
+        {t("system.update.now", { defaultValue: "Tải bản mới và tải lại" })}
       </button>
     </div>
   );

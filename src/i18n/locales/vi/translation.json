@@ -8438,9 +8438,10 @@
     },
     "update": {
       "title": "Đã có phiên bản mới",
-      "body": "Tự cập nhật khi rời ứng dụng, hoặc cập nhật ngay.",
-      "now": "Cập nhật",
+      "body": "Bản mới đã sẵn sàng. Bấm nút bên cạnh để tải phiên bản mới và làm mới ứng dụng.",
+      "now": "Tải bản mới và tải lại",
       "later": "Để sau",
+      "failed": "Không thể cập nhật lúc này. Hãy kiểm tra kết nối rồi thử lại.",
       "done": "Đã cập nhật lên phiên bản {{version}}"
     }
   }

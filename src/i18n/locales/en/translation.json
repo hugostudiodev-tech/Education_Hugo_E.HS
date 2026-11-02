@@ -8396,9 +8396,10 @@
     },
     "update": {
       "title": "A new version is available",
-      "body": "Updates when you leave the app, or update now.",
-      "now": "Update",
+      "body": "The new version is ready. Select the button to download it and reload the app.",
+      "now": "Update and reload",
       "later": "Later",
+      "failed": "The update could not be applied. Check your connection and try again.",
       "done": "Updated to version {{version}}"
     }
   }

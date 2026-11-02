@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { readFileSync } from "node:fs";
 
-const APP_VERSION = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).version;
+const PACKAGE_VERSION = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).version;
+const REVISION = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || "";
+const APP_VERSION = REVISION ? `${PACKAGE_VERSION}+${REVISION.slice(0, 7)}` : PACKAGE_VERSION;
 // Dev mặc định nói chuyện với backend Education cục bộ; muốn chạy với production:
 // VITE_DEV_BACKEND_URL=https://education-hugo-api.onrender.com npm run dev
 const DEV_BACKEND = process.env.VITE_DEV_BACKEND_URL || "http://localhost:8100";
@@ -28,7 +30,8 @@ export default defineConfig({
         importScripts: ["/push-sw.js"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//, /^\/ws/],
-        globPatterns: ["**/*.{html,svg,png,woff2}", "assets/index-*.{js,css}", "assets/vendor-*.js", "assets/i18n-*.js"],
+        // Every hashed app chunk must change the precache manifest or installed apps won't prompt for updates.
+        globPatterns: ["**/*.{html,svg,png,woff2}", "assets/**/*.{js,css,json,wasm}"],
         globIgnores: ["**/image/**", "**/edu/video/**", "**/edu/mail/**"],
         runtimeCaching: [
           { urlPattern: /\/api(?:\/|$)/, handler: "NetworkOnly" },

@@ -3,6 +3,7 @@
 import * as coding from "./coding/stages.js";
 import * as sql from "./sql/stages.js";
 import * as python from "./python/stages.js";
+import * as pythonAdvanced from "./python-advanced/stages.js";
 
 // cast: nhân vật clay của từng chặng (apps/web/public/edu/cast-N.svg) — khớp CourseMap.jsx.
 export const CATALOG = [
@@ -38,6 +39,20 @@ export const CATALOG = [
       zh: "从第一行 print 到类与算法——打造班级小助手，直接在浏览器中运行 Python。",
     },
     keywords: "học Python miễn phí, Python cơ bản, học lập trình Python, Tin học 10 Python, Tin học 11 Python, ôn thi học sinh giỏi tin học",
+  },
+  {
+    id: "python-advanced", cast: 5, hours: 32, stages: pythonAdvanced.STAGES, outline: pythonAdvanced.OUTLINE,
+    stageCast: {
+      "pa-start": 5, "pa-research": 7, "pa-database": 6, "pa-sql": 4,
+      "pa-architecture": 8, "pa-api": 2, "pa-analysis": 3, "pa-capstone": 1,
+    },
+    title: { vi: "Python nâng cao", en: "Advanced Python", zh: "Python 进阶" },
+    tagline: {
+      vi: "Từ dữ liệu nghiên cứu CSV tới SQLite, API và báo cáo tái lập — xây LabLog qua 40 bài thực hành.",
+      en: "Build LabLog in 40 hands-on steps: take research data from CSV through SQLite and an API to a reproducible report.",
+      zh: "通过 40 个实践步骤构建 LabLog：将研究数据从 CSV 经由 SQLite 和 API 转化为可复现报告。",
+    },
+    keywords: "Python nâng cao, Python nghiên cứu dữ liệu, Python SQLite API, khoá học Python cơ sở dữ liệu, FastAPI cho học sinh sinh viên",
   },
 ];
 

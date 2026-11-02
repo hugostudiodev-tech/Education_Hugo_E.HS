@@ -9,7 +9,8 @@ import { gradeStepQuiz, PASS_PERCENT } from '../services/grading.js';
 import { partnerKeyOf, verifyPartnerKey } from '../services/partner.js';
 import { optionalUser, requireUser } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
-import { LessonFeedback } from '../models.js';
+import { Learner, LessonFeedback } from '../models.js';
+import { getCoderLessonGate } from '../../packages/shared/coderProgression.js';
 
 const router = express.Router();
 const SUMMARY = ['id', 'title', 'lang', 'file', 'practiceType', 'duration', 'stage', 'draft'];
@@ -44,6 +45,12 @@ router.get('/:id', limit(90), optionalUser, handle(async (req, res) => {
   const found = findStep(req.params.id);
   if (!found) throw fail(404, 'NOT_FOUND', 'Không có step này.');
   const lang = langOf(req.query.lang);
+  if (found.key === 'python-advanced') {
+    if (!req.email) throw fail(401, 'LOGIN_REQUIRED', 'Đăng nhập để làm bài kiểm tra đầu vào và lưu kết quả.');
+    const learner = await Learner.findOne({ email: req.email }).select('completed').lean();
+    const gate = getCoderLessonGate(learner?.completed || [], found.step.id);
+    if (!gate.unlocked) throw fail(403, 'COURSE_ADMISSION_REQUIRED', 'Hoàn thành bài kiểm tra đầu vào và các bài trước theo thứ tự.');
+  }
   if (found.index < found.course.preview) {
     res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=3600');
     return { lesson: present(found.step, lang) };
@@ -61,6 +68,9 @@ router.get('/:id', limit(90), optionalUser, handle(async (req, res) => {
 router.post('/:id/grade', limit(20), handle(async (req) => {
   const found = findStep(req.params.id);
   if (!found) throw fail(404, 'NOT_FOUND', 'Không có step này.');
+  if (found.key === 'python-advanced') {
+    throw fail(403, 'COURSE_ACCESS_REQUIRED', 'Bài kiểm tra và tiến độ khoá này cần đăng nhập; hãy nộp bài trong trình học.');
+  }
   if (found.index >= found.course.preview && !(await partnerOk(req))) throw fail(403, 'COURSE_ACCESS_REQUIRED', 'Step này cần đăng nhập.');
   const graded = gradeStepQuiz(found.step.id, req.body?.answers);
   if (!graded) throw fail(409, 'STEP_NOT_READY', 'Step này đang được soạn.');

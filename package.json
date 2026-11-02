@@ -14,9 +14,10 @@
     "lint": "eslint src packages scripts server middleware.js",
     "check:sql-course": "node scripts/checks/check-sql-course.mjs",
     "check:python-course": "node scripts/checks/check-python-course.mjs",
+    "check:python-advanced-course": "node scripts/checks/check-python-advanced-course.mjs",
     "check:coder-content": "node scripts/checks/check-coder-content.mjs",
     "check:edu-streak": "node scripts/checks/check-edu-streak.mjs",
-    "check:all": "npm run lint && npm run check:sql-course && npm run check:python-course && npm run check:coder-content && npm run check:edu-streak && npm run build",
+    "check:all": "npm run lint && npm run check:sql-course && npm run check:python-course && npm run check:python-advanced-course && npm run check:coder-content && npm run check:edu-streak && npm run build",
     "build:sdk": "mkdir -p dist-sdk && vite build --config sdk/vite.config.js && cd sdk && npm pack --pack-destination ../dist-sdk"
   },
   "dependencies": {

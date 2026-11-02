@@ -3,8 +3,13 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchLesson, fetchLessonPage } from "../services/api/modules/coderLessonsApi";
 import { localizeStage, localizeStepTitle, useEduText } from "../education/eduText";
 
-/** Khoá của một step: "sqlN" → SQL, "pyN" → Python, còn lại là Coding. */
-export const courseOfStep = (id) => { const s = String(id || ""); return /^sql\d+$/.test(s) ? "sql" : /^py\d+$/.test(s) ? "python" : "coding"; };
+/** Khoá của step theo prefix ID để tải đúng catalog. */
+export const courseOfStep = (id) => {
+  const step = String(id || "");
+  return /^sql\d+$/.test(step) ? "sql"
+    : /^pa\d+$/.test(step) ? "python-advanced"
+      : /^py\d+$/.test(step) ? "python" : "coding";
+};
 
 export function useCoderLessons(activeCourseId, { enabled = true, program = "coding", course: wanted } = {}) {
   const course = wanted || courseOfStep(activeCourseId);
