@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { asset } from "../../../config/partner";
 import initSqlJs from "sql.js/dist/sql-wasm.js";
 import { HAT_SEED } from "../../../../packages/courses/sql/seed.js";
 import { playEduSound } from "../../../education/eduSound";
@@ -16,7 +17,7 @@ import "./sqlPlayground.css";
  * ponytail: chấm ở máy học viên chỉ để luyện tập — không cộng JOY, nên không cần chấm lại ở máy chủ.
  */
 let engine;
-const loadEngine = () => (engine ||= initSqlJs({ locateFile: () => "/edu/sql/sql-wasm.wasm" }));
+const loadEngine = () => (engine ||= initSqlJs({ locateFile: () => asset("/edu/sql/sql-wasm.wasm") }));
 const MAX_ROWS = 200;
 const DRAFT = "edu.sql.";
 

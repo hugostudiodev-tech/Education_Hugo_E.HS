@@ -1,0 +1,13 @@
+{
+  "name": "@education-hugo/react",
+  "version": "1.0.0",
+  "description": "Khoá học Education Hugo cho website đối tác — cần key do Hugo Studio cấp.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": { ".": "./dist/index.js", "./style.css": "./dist/style.css" },
+  "files": ["dist"],
+  "sideEffects": ["*.css"],
+  "peerDependencies": { "react": ">=18", "react-dom": ">=18" },
+  "license": "SEE LICENSE IN LICENSE.md"
+}

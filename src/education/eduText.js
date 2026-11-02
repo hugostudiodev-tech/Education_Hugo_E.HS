@@ -1,6 +1,7 @@
 import { createElement, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { EDU_COPY } from "./eduCopy";
+import { partner } from "../config/partner";
 
 /**
  * Đọc chữ Education Hugo theo ngôn ngữ của app (cùng khoá "hugo-language" với Hugo Studio).
@@ -27,7 +28,7 @@ export function rich(text) {
 
 export function useEduText() {
   const { i18n } = useTranslation();
-  const lang = eduLang(i18n.resolvedLanguage || i18n.language);
+  const lang = eduLang(partner.lang || i18n?.resolvedLanguage || i18n?.language);
   return { lang, t: (key, vars) => eduT(lang, key, vars) };
 }
 

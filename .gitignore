@@ -6,3 +6,6 @@ dist
 .vercel
 .DS_Store
 *.mov
+.env*
+dist-sdk
+sdk/dist

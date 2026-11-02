@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { asset } from "../../../config/partner";
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -429,7 +430,7 @@ export default function LessonPlayer({ course, onExit, onSubmitQuiz, onNextLesso
   const kind = KIND[step.kind] || KIND.core;
   const media = step.visual
     ? <CodingVisual name={step.visual} label={step.title} />
-    : step.image ? <img className="coding-shot-img" src={step.image.src} alt={step.image.alt} loading="lazy" decoding="async" /> : null;
+    : step.image ? <img className="coding-shot-img" src={asset(step.image.src)} alt={step.image.alt} loading="lazy" decoding="async" /> : null;
   const KindIcon = kind.icon;
   const STEP_MOOD = { apply: "practice", check: "exam", result: result?.passed ? "correct" : result ? "wrong" : "exam" };
 

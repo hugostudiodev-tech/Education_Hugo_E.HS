@@ -35,6 +35,7 @@ const PAGES = {
   friends: () => import("./EduFriends"),
   feedback: () => import("./EduFeedback"),
   legal: () => import("./EduLegal.jsx"),
+  developers: () => import("./EduDevelopers.jsx"),
 };
 const EduLanding = lazy(PAGES.landing);
 const EduLogin = lazy(PAGES.login);
@@ -47,6 +48,7 @@ const EduCommunity = lazy(PAGES.community);
 const EduFriends = lazy(PAGES.friends);
 const EduFeedback = lazy(PAGES.feedback);
 const EduLegal = lazy(PAGES.legal);
+const EduDevelopers = lazy(PAGES.developers);
 const EduPublicProfile = lazy(() => PAGES.friends().then((mod) => ({ default: mod.EduPublicProfile })));
 const CoderProgress = lazy(() => PAGES.hub().then((mod) => ({ default: mod.ManageTab })));
 
@@ -197,7 +199,7 @@ export default function EducationApp() {
   const device = detectInstallTarget();
   const phoneWeb = (device.iOS || device.android) && !standalone;
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
-  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines"].includes(location.pathname) || location.pathname.startsWith("/courses/");
+  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/");
   const gated = phoneWeb && !publicPage;
   // Quét QR thẻ bạn bè bằng camera điện thoại luôn mở trình duyệt, không mở PWA (iOS cấm, Android mở tab nhúng).
   const qrCode = /^\/u\/([A-Za-z0-9]{4,12})$/.exec(location.pathname)?.[1];
@@ -223,6 +225,7 @@ export default function EducationApp() {
           <Route path="/learn" element={<LearnMap learner={me} onLearnerUpdate={mergeLearner} />} />
           <Route path="/courses/:id" element={<EduCourseIntro />} />
           {/* Văn bản pháp lý: công khai, không cần đăng nhập. */}
+          <Route path="/developers" element={<EduDevelopers />} />
           {["terms", "privacy", "guidelines"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />

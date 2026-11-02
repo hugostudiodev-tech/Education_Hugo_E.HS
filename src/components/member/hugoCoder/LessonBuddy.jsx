@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isEduHost } from "../../../../packages/shared/eduSite";
+import { asset } from "../../../config/partner";
 import { useEduText } from "../../../education/eduText";
 
 /**
@@ -13,7 +13,7 @@ const MOODS = ["learn", "practice", "exam", "correct", "wrong", "done"];
 // Ảnh dựng sẵn bằng DiceBear: scripts/generate-coder-buddy.mjs.
 // Education Hugo dùng bộ nhân vật clay màu tươi; Hugo Studio giữ Hugo avataaars.
 // Cả hai dựng sẵn bằng scripts/generate-mascots.mjs.
-const ART_DIR = typeof window !== "undefined" && isEduHost(window.location.hostname) ? "/edu" : "/coder";
+const ART_DIR = "/edu";
 const avatarFor = (mood) => `${ART_DIR}/buddy-${MOODS.includes(mood) ? mood : "learn"}.svg`;
 
 export default function LessonBuddy({ mood = "learn", size = "sm", seed = 0 }) {
@@ -28,7 +28,7 @@ export default function LessonBuddy({ mood = "learn", size = "sm", seed = 0 }) {
 
   return (
     <div className={`lesson-buddy is-${size} is-${mood}`}>
-      <img className="lesson-buddy-art" src={avatarFor(mood)} alt={config.alt} draggable="false" />
+      <img className="lesson-buddy-art" src={asset(avatarFor(mood))} alt={config.alt} draggable="false" />
 
       <p className="lesson-buddy-bubble">{line}</p>
     </div>

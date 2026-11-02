@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { asset } from "../../../config/partner";
 import { BookOpen, Check, Code2, Database, Flag, GraduationCap, Lightbulb, Lock, NotebookPen, PenLine, Rocket, ShieldCheck, Sparkles, Star, Trophy, Users, X } from "lucide-react";
 
 // Biểu tượng học tập xoay vòng trên các nút step (sách, bút, mũ tốt nghiệp…).
@@ -186,7 +187,7 @@ function Unit({ unit, lessons, currentIndex, completedSet, onOpenLesson, focusId
               {index === mascotAt && (
                 <img
                   className="cmap-mascot"
-                  src={look.mascot}
+                  src={asset(look.mascot)}
                   alt=""
                   width="96"
                   height="110"
