@@ -34,7 +34,9 @@ Dùng lại mọi thứ của chặng: toán tử, ngoặc, round(), f-string.`,
 
 x̄ = (w₁x₁ + w₂x₂ + … + wₙxₙ) / (w₁ + w₂ + … + wₙ)
 
-Khi mọi trọng số bằng nhau, hai cách cho cùng kết quả. Cách tính này dùng cả trong điểm GPA đại học (trọng số = số tín chỉ).`,
+Khi mọi trọng số bằng nhau, hai cách cho cùng kết quả. Cách tính này dùng cả trong điểm GPA đại học (trọng số = số tín chỉ). Ví dụ trong khóa là **quy ước giả định để học công thức**, không phải quy chế điểm áp dụng cho mọi trường.
+
+> OpenStax (2023) *Introductory Statistics 2e: Measures of the Center of the Data*. Available at: https://openstax.org/books/introductory-statistics-2e/pages/2-5-measures-of-the-center-of-the-data`,
     },
     {
       section: "ideate",

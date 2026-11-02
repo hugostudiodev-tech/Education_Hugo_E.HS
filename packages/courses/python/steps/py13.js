@@ -34,7 +34,9 @@ Python kiểm từ bậc trên cùng xuống; gặp bậc đúng đầu tiên l�
       title: "Bảng quyết định",
       body: `Trong kỹ thuật phần mềm, khi có nhiều điều kiện, người ta vẽ **bảng quyết định** (decision table): mỗi hàng là một tổ hợp điều kiện, cột cuối là hành động. Bảng giúp kiểm tra đã phủ **hết mọi trường hợp** và **không chồng chéo**.
 
-Bảng xếp loại ở slide trước chính là một bảng quyết định nhỏ. Viết bảng trước, code sau — bạn sẽ ít sót trường hợp hơn.`,
+Bảng xếp loại ở slide trước chính là một bảng quyết định nhỏ. Viết bảng trước, code sau — bạn sẽ ít sót trường hợp hơn.
+
+> ISTQB (n.d.) *ISTQB Glossary: Decision Table Testing*. Available at: https://glossary.istqb.org/en_US/term/decision-table-testing`,
     },
     {
       section: "ideate",

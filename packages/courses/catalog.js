@@ -31,13 +31,13 @@ export const CATALOG = [
   {
     id: "python", cast: 5, hours: 40, stages: python.STAGES, outline: python.OUTLINE,
     stageCast: { "py-basic": 5, "py-math": 7, "py-branch": 3, "py-loop": 2, "py-data": 4, "py-func": 6, "py-file": 8, "py-advanced": 1 },
-    title: { vi: "Python cho học sinh", en: "Python for Students", zh: "中学生 Python" },
+    title: { vi: "Python cơ bản", en: "Python Basics", zh: "Python 基础" },
     tagline: {
       vi: "Từ dòng print đầu tiên tới lớp đối tượng và thuật toán — xây Sổ Lớp, chạy Python ngay trong trình duyệt.",
       en: "From your first print to classes and algorithms — build a class organiser, running Python right in your browser.",
       zh: "从第一行 print 到类与算法——打造班级小助手，直接在浏览器中运行 Python。",
     },
-    keywords: "học Python miễn phí, Python cho học sinh, học lập trình Python, Tin học 10 Python, Tin học 11 Python, ôn thi học sinh giỏi tin học",
+    keywords: "học Python miễn phí, Python cơ bản, học lập trình Python, Tin học 10 Python, Tin học 11 Python, ôn thi học sinh giỏi tin học",
   },
 ];
 

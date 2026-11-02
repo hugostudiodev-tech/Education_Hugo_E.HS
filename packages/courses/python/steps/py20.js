@@ -29,9 +29,11 @@ Kết chặng: **sổ tiết kiệm** quỹ lớp.`,
       title: "Lãi kép",
       body: `Gửi P đồng, lãi suất r mỗi kỳ, sau n kỳ có:
 
-**A = P × (1 + r)ⁿ**
+**A = P × (1 + r)ⁿ** (\`r\` là lãi suất viết dạng thập phân, ví dụ 0.5% = 0.005).
 
-Lãi kỳ sau tính trên cả tiền gốc **lẫn lãi đã có** — "lãi mẹ đẻ lãi con". Bạn có thể tính bằng công thức (\`**\`), hoặc bằng **vòng lặp tích luỹ** mỗi tháng nhân thêm (1 + r). Hai cách phải ra cùng một số — đó cũng là cách kiểm tra chương trình.`,
+Lãi kỳ sau tính trên cả tiền gốc **lẫn lãi đã có** — "lãi mẹ đẻ lãi con". Bạn có thể tính bằng công thức (\`**\`), hoặc bằng **vòng lặp tích luỹ** mỗi tháng nhân thêm (1 + r). Hai cách phải ra cùng một số — đó cũng là cách kiểm tra chương trình. Bài toán giả định lãi suất cố định, ghép lãi mỗi tháng và chưa tính thuế, phí hay lạm phát; kết quả không phải dự báo lợi nhuận thực tế.
+
+> Khan Academy (n.d.) *Compound interest*. Available at: https://www.khanacademy.org/economics-finance-domain/core-finance/interest-tutorial/compound-interest-tutorial/a/compound-interest-and-e`,
     },
     {
       section: "ideate",

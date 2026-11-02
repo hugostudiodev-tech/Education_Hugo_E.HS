@@ -28,7 +28,9 @@ Quy chế trong dự án là **giả định** để luyện tập.`,
       title: "Kiểm tra dữ liệu trước — \"rác vào, rác ra\"",
       body: `Ngành máy tính có câu **"Garbage in, garbage out"** (GIGO): dữ liệu vào sai thì kết quả ra cũng sai, dù chương trình đúng.
 
-Vì vậy chương trình tốt luôn **kiểm tra dữ liệu ở cửa vào** (input validation) trước khi xử lý. Điểm 12 hay -3 phải bị chặn ngay, không được lọt vào bước xét học bổng.`,
+Vì vậy chương trình tốt luôn **kiểm tra dữ liệu ở cửa vào** (input validation) trước khi xử lý. Điểm 12 hay -3 phải bị chặn ngay, không được lọt vào bước xét học bổng.
+
+> OWASP Foundation (n.d.) *Input Validation Cheat Sheet*. Available at: https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html`,
     },
     {
       section: "ideate",

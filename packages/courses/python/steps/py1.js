@@ -73,7 +73,9 @@ Mục tiêu của Python từ đầu: **dễ đọc như tiếng Anh**. Ngày na
 - **Tự động hoá**: đổi tên 500 tệp ảnh, gửi thư hàng loạt — vài dòng Python.
 - **Trường học**: môn Tin học THPT ở Việt Nam dạy lập trình bằng Python.
 
-Vì vậy học Python không chỉ để thi: đó là công cụ bạn dùng được ở gần như mọi ngành.`,
+Vì vậy học Python không chỉ để thi: đó là công cụ bạn dùng được ở gần như mọi ngành.
+
+> Python Software Foundation (n.d.) *Applications for Python*. Available at: https://www.python.org/about/apps/`,
     },
     {
       section: "research",
@@ -84,7 +86,9 @@ Vì vậy học Python không chỉ để thi: đó là công cụ bạn dùng �
 print("Xin chào")
 ~~~
 
-Trong một số ngôn ngữ khác, bạn cần thêm khai báo lớp, hàm chính, dấu chấm phẩy… trước khi in được một dòng. Python bỏ hết phần nghi thức đó, để bạn tập trung vào **cách giải bài toán** — lý do nó hay được chọn làm ngôn ngữ đầu tiên.`,
+Python cho phép viết chương trình ngắn mà không cần khai báo kiểu cho biến trước. Đây là một lựa chọn thiết kế, không có nghĩa ngôn ngữ khác khó hơn hay kém tốt hơn: mỗi ngôn ngữ phù hợp với mục tiêu khác nhau.
+
+> Python Software Foundation (n.d.) *An Informal Introduction to Python*. Available at: https://docs.python.org/3/tutorial/introduction.html`,
     },
     {
       section: "ideate",

@@ -36,7 +36,7 @@ export const EDU_COPY = {
       progress: "Tiến độ khoá Coding", cardLink: "Thẻ thành viên & kết bạn",
     },
     topbar: {
-      courses: "Khoá học của bạn", course: { coding: "Lập trình Web", sql: "SQL & Cơ sở dữ liệu", python: "Python cho học sinh", quan: "Quán — khoá 2" }, courseProgress: "{done}/{total} step đã qua",
+      courses: "Khoá học của bạn", course: { coding: "Lập trình Web", sql: "SQL & Cơ sở dữ liệu", python: "Python cơ bản", quan: "Quán — khoá 2" }, courseProgress: "{done}/{total} step đã qua",
       addCourse: "Thêm khoá học (sắp ra mắt)", joyBody: "Ngọc kiếm được khi qua bài lần đầu và giữ chuỗi lửa. Dùng để mua vật phẩm trong Cửa hàng và phá băng chuỗi.",
       toStore: "Mở Cửa hàng", notifications: "Thông báo", readAll: "Đánh dấu đã đọc", empty: "Chưa có thông báo nào. Hugo sẽ nhắc bạn khi có tin mới.",
     },
@@ -278,7 +278,7 @@ export const EDU_COPY = {
       progress: "Coding course progress", cardLink: "Member card & friends",
     },
     topbar: {
-      courses: "Your courses", course: { coding: "Web Programming", sql: "SQL & Databases", python: "Python for Students", quan: "Quán — course 2" }, courseProgress: "{done}/{total} steps passed",
+      courses: "Your courses", course: { coding: "Web Programming", sql: "SQL & Databases", python: "Python Basics", quan: "Quán — course 2" }, courseProgress: "{done}/{total} steps passed",
       addCourse: "Add a course (coming soon)", joyBody: "Earn gems by passing lessons the first time and keeping your streak. Spend them on Shop items or to thaw a frozen streak.",
       toStore: "Open the Shop", notifications: "Notifications", readAll: "Mark all read", empty: "No notifications yet. Hugo will let you know when something new arrives.",
     },
@@ -598,7 +598,7 @@ export const EDU_COPY = {
       progress: "编程课程进度", cardLink: "会员卡与好友",
     },
     topbar: {
-      courses: "你的课程", course: { coding: "网页编程", sql: "SQL 与数据库", python: "中学生 Python", quan: "Quán —— 第 2 门课" }, courseProgress: "已完成 {done}/{total} 个 step",
+      courses: "你的课程", course: { coding: "网页编程", sql: "SQL 与数据库", python: "Python 基础", quan: "Quán —— 第 2 门课" }, courseProgress: "已完成 {done}/{total} 个 step",
       addCourse: "添加课程（即将上线）", joyBody: "首次通过课程和保持连续记录可赚取宝石，用于在商店兑换道具或给连续记录破冰。",
       toStore: "打开商店", notifications: "通知", readAll: "全部标为已读", empty: "还没有通知。有新消息时 Hugo 会告诉你。",
     },

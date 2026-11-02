@@ -27,7 +27,9 @@ export default {
 
 **a = b × q + r**, với 0 ≤ r < b.
 
-Đây là **định lý chia có dư** (Euclid). Python làm đúng như vậy: \`a // b\` cho q, \`a % b\` cho r. Phép chia lấy dư có mặt khắp nơi: đồng hồ (giờ quay vòng 12), lịch (thứ quay vòng 7), mã kiểm tra số thẻ…`,
+Đây là **định lý chia có dư** (Euclid). Python làm đúng như vậy: \`a // b\` cho q, \`a % b\` cho r. Phép chia lấy dư có mặt khắp nơi: đồng hồ (giờ quay vòng 12), lịch (thứ quay vòng 7), mã kiểm tra số thẻ…
+
+> Python Software Foundation (n.d.) *Expressions: Binary arithmetic operations*. Available at: https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations`,
     },
     {
       section: "ideate",

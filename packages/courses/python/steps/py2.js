@@ -38,7 +38,9 @@ si_so = 40
       title: "Vì sao không viết thẳng số 40?",
       body: `Tưởng tượng số 40 xuất hiện ở 15 chỗ trong chương trình. Một bạn chuyển trường — bạn phải sửa 15 chỗ, và chỉ cần quên một chỗ là kết quả sai.
 
-Với biến, bạn chỉ sửa **một dòng**: \`si_so = 39\`. Lập trình viên gọi những con số viết thẳng, không tên tuổi là **"số ma thuật"** (magic number) — một thói quen nên tránh.`,
+Với biến, bạn chỉ sửa **một dòng**: \`si_so = 39\`. Lập trình viên gọi những con số viết thẳng, không tên tuổi là **"số ma thuật"** (magic number) — một thói quen nên tránh.
+
+> Python Software Foundation (n.d.) *PEP 8 — Style Guide for Python Code: Constants*. Available at: https://peps.python.org/pep-0008/#constants`,
     },
     {
       section: "ideate",

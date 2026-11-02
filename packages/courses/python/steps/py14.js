@@ -30,7 +30,9 @@ export default {
 | False | True | False | True |
 | False | False | False | False |
 
-Và \`not True\` = False, \`not False\` = True. Đây là ba phép cơ bản của **đại số Boole** — mạch điện tử thực hiện chúng bằng các **cổng logic** AND, OR, NOT.`,
+Và \`not True\` = False, \`not False\` = True. Đây là ba phép cơ bản của **đại số Boole** — mạch điện tử thực hiện chúng bằng các **cổng logic** AND, OR, NOT.
+
+> Python Software Foundation (n.d.) *Built-in Types: Boolean Operations*. Available at: https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not`,
     },
     {
       section: "ideate",

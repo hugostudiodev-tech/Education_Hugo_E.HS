@@ -28,12 +28,12 @@ Sửa rồi chạy lại.`,
     },
     {
       section: "research",
-      title: "\"Bug\" — con bọ thật năm 1947",
-      body: `Năm 1947, nhóm vận hành máy tính Harvard Mark II tìm thấy **một con bướm đêm** kẹt trong rơ-le làm máy chạy sai. Họ dán con bướm vào sổ nhật ký với ghi chú "first actual case of bug being found". Nhà khoa học máy tính **Grace Hopper** — thành viên nhóm — hay kể lại câu chuyện này, và từ "bug" (lỗi) cùng "debug" (gỡ lỗi) trở nên phổ biến.
+      title: "Lỗi cú pháp và lỗi khi chạy",
+      body: `Có lỗi khiến Python **không hiểu cách viết**, như thiếu dấu ngoặc; có lỗi chỉ xuất hiện **khi chương trình đang chạy**, như đổi chữ không phải số thành \`int\`.
 
-Trang nhật ký kèm con bướm hiện được lưu tại Bảo tàng Lịch sử Quốc gia Hoa Kỳ (Smithsonian).
+Đọc tên lỗi và dòng được báo trước. Ví dụ, \`SyntaxError\` thường chỉ cách viết; \`ValueError\` thường chỉ giá trị không đổi được sang kiểu mong muốn.
 
-> Smithsonian National Museum of American History (n.d.) *Log Book With Computer Bug*. Available at: https://americanhistory.si.edu/collections/object/nmah_334663`,
+> Python Software Foundation (n.d.) *Errors and Exceptions*. Available at: https://docs.python.org/3/tutorial/errors.html`,
     },
     {
       section: "research",
@@ -45,7 +45,11 @@ Quy trình bốn bước:
 1. **Đọc** dòng cuối của thông báo: loại lỗi là gì?
 2. **Tìm** số dòng (line) được chỉ ra.
 3. **Đoán** nguyên nhân, sửa **một** chỗ.
-4. **Chạy lại** — lặp đến khi hết lỗi.`,
+4. **Chạy lại** — lặp đến khi hết lỗi.
+
+Đây là quy trình thử–quan sát–điều chỉnh: mỗi lần chỉ đổi một điều giúp biết thay đổi nào làm kết quả khác đi.
+
+> Python Software Foundation (n.d.) *Errors and Exceptions*. Available at: https://docs.python.org/3/tutorial/errors.html`,
     },
     {
       section: "ideate",

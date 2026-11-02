@@ -1,4 +1,4 @@
-// Tám chặng của khoá Python cho học sinh. Mã chặng mang tiền tố `py-`, id step là `pyN`
+// Tám chặng của khoá Python cơ bản. Mã chặng mang tiền tố `py-`, id step là `pyN`
 // để không đụng khoá Coding (stepN) và SQL (sqlN).
 //
 // Cả khoá xoay quanh MỘT dự án: "Sổ Lớp" — trợ lý nhỏ của một lớp học với bảng điểm,
