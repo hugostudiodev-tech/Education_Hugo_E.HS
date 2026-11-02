@@ -41,10 +41,15 @@ app.use(cors({ origin: (origin, cb) => cb(null, !origin || ORIGINS.includes(orig
 
 // Better Auth đọc body thô — gắn TRƯỚC express.json.
 app.all('/api/auth/*', toNodeHandler(auth));
+// Thiếu cấu hình mail thì mã admin không bao giờ tới: báo ngay thay vì để admin chờ thư.
+app.post('/api/admin-auth/email-otp/send-verification-otp', (req, res, next) => {
+  if (process.env.RESEND_API_KEY) return next();
+  return res.status(503).json({ code: 'MAIL_NOT_CONFIGURED', message: 'Máy chủ chưa cấu hình gửi mail (RESEND_API_KEY trên Render), nên chưa gửi được mã. Dùng Face ID / vân tay nếu đã bật.' });
+});
 app.all('/api/admin-auth/*', toNodeHandler(getAdminAuth()));
 app.use(express.json({ limit: '200kb' }));
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down', uptime: Math.round(process.uptime()) }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down', uptime: Math.round(process.uptime()), mail: Boolean(process.env.RESEND_API_KEY) }));
 app.use('/api/lessons', lessons);
 app.use('/api/partner', partner);
 app.use('/api/push', push);

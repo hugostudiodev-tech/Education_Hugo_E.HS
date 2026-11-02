@@ -41,6 +41,40 @@ function act(fn, reload) {
   };
 }
 
+// Client Better Auth của admin (/api/admin-auth) — chỉ để dùng passkey. Nạp động: trang học không cần.
+let adminClient;
+async function adminAuthClient() {
+  if (adminClient) return adminClient;
+  const [{ createAuthClient }, { passkeyClient }] = await Promise.all([import("better-auth/client"), import("@better-auth/passkey/client")]);
+  const api = new URL(API_BASE, window.location.origin);
+  adminClient = createAuthClient({ baseURL: api.origin, basePath: `${api.pathname.replace(/\/$/, "")}/admin-auth`, fetchOptions: { credentials: "include" }, plugins: [passkeyClient()] });
+  return adminClient;
+}
+const PASSKEY_SET = "edu.admin.passkey";
+
+/** Gợi ý bật passkey sau khi đăng nhập bằng mã: lần sau vào bằng Face ID, không tốn thư. */
+function PasskeyOffer() {
+  const [state, setState] = useState(() => { try { return localStorage.getItem(PASSKEY_SET) ? "done" : "offer"; } catch { return "offer"; } });
+  if (state === "done" || !window.PublicKeyCredential) return null;
+  const add = async () => {
+    setState("busy");
+    const client = await adminAuthClient();
+    const r = await client.passkey.addPasskey({ name: navigator.platform || "Admin" });
+    if (r?.error) { setState("offer"); window.alert("Chưa bật được passkey: " + (r.error.message || "bị huỷ")); return; }
+    try { localStorage.setItem(PASSKEY_SET, "1"); } catch { /* riêng tư */ }
+    setState("done");
+  };
+  return (
+    <Card className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <span className="text-[14px] text-foreground">Bật đăng nhập bằng Face ID / vân tay cho máy này — lần sau vào không cần mã email.</span>
+      <div className="flex gap-2">
+        <Btn onClick={add} disabled={state === "busy"}>Bật passkey</Btn>
+        <Btn tone="ghost" onClick={() => { try { localStorage.setItem(PASSKEY_SET, "skip"); } catch { /* riêng tư */ } setState("done"); }}>Để sau</Btn>
+      </div>
+    </Card>
+  );
+}
+
 function Login({ onDone }) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -51,6 +85,12 @@ function Login({ onDone }) {
     e.preventDefault(); setBusy(true); setError("");
     try { await fn(); } catch (err) { setError(err.message); } finally { setBusy(false); }
   };
+  const withPasskey = run(async () => {
+    const client = await adminAuthClient();
+    const r = await client.signIn.passkey();
+    if (r?.error) throw new Error("Không đăng nhập được bằng passkey. Máy này chưa bật passkey thì dùng mã email bên dưới.");
+    onDone();
+  });
   const send = run(async () => {
     await call("/admin-auth/email-otp/send-verification-otp", { method: "POST", body: { email: email.trim(), type: "sign-in" } });
     setStep("otp");
@@ -63,10 +103,16 @@ function Login({ onDone }) {
     <main className="grid min-h-dvh place-items-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <h1 className="text-[20px] font-bold text-foreground">Quản trị Education Hugo</h1>
+        {step === "email" && window.PublicKeyCredential && (
+          <form onSubmit={withPasskey} className="mt-4">
+            <Btn type="submit" disabled={busy} className="w-full">Đăng nhập bằng Face ID / vân tay</Btn>
+            <p className="mt-3 text-center text-[13px] text-muted-foreground">hoặc nhận mã qua email</p>
+          </form>
+        )}
         {step === "email" ? (
           <form onSubmit={send} className="mt-4 space-y-3">
             <Input type="email" required autoFocus autoComplete="email" placeholder="Email quản trị" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Btn type="submit" disabled={busy} className="w-full">Gửi mã đăng nhập</Btn>
+            <Btn type="submit" tone="ghost" disabled={busy} className="w-full">Gửi mã đăng nhập</Btn>
           </form>
         ) : (
           <form onSubmit={verify} className="mt-4 space-y-3">
@@ -484,6 +530,7 @@ export default function EduAdmin() {
         </div>
       </nav>
       <main className="min-w-0 flex-1 p-4 md:p-6">
+        <PasskeyOffer />
         <h1 className="mb-4 text-[22px] font-bold text-foreground">{label}</h1>
         <View />
       </main>

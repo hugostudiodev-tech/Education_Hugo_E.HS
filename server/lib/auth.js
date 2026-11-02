@@ -50,16 +50,28 @@ export function initAuth() {
     appName: 'Education Hugo Admin',
     basePath: '/api/admin-auth',
     advanced: advanced('edu-admin'),
-    session: { expiresIn: 7 * DAY, updateAge: DAY, modelName: 'admin_session' },
+    // 30 ngày, tự gia hạn mỗi lần vào trang (updateAge): admin dùng thường xuyên gần như không phải xin mã lại.
+    session: { expiresIn: 30 * DAY, updateAge: DAY, modelName: 'admin_session' },
     user: { modelName: 'admin_user' },
     account: { modelName: 'admin_account' },
     verification: { modelName: 'admin_verification' },
-    plugins: [emailOTP({
+    plugins: [
+      // Passkey admin (Face ID / vân tay): đăng nhập không tốn thư. Bảng riêng admin_passkey — tách khỏi passkey người học.
+      passkey({
+        rpID: process.env.PASSKEY_RP_ID || (isProd ? 'hugowishpax.studio' : 'localhost'),
+        rpName: 'Education Hugo Admin',
+        origin: isProd ? ORIGINS : null,
+        authenticatorSelection: { userVerification: 'required' },
+        schema: { passkey: { modelName: 'admin_passkey' } },
+      }),
+      emailOTP({
       otpLength: 6, expiresIn: 300, allowedAttempts: 5,
       // Email lạ: im lặng (không lộ ai là admin), không gửi mã.
       sendVerificationOTP: async ({ email, otp }) => {
         if (!ADMIN_EMAILS.has(email.toLowerCase())) return;
-        await sendMail(email, `Mã đăng nhập quản trị: ${otp}`, `<p>Mã đăng nhập trang quản trị Education Hugo:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${otp}</p><p>Mã hết hạn sau 5 phút. Không phải bạn yêu cầu thì bỏ qua thư này.</p>`);
+        // Better Auth gửi thư ở chế độ nền: lỗi ở đây không tới được trình duyệt. Thiếu cấu hình mail
+        // thì đã chặn trước ở server/index.js; Resend lỗi lúc gửi thì ghi log.
+        await sendMail(email, `Mã đăng nhập quản trị: ${otp}`, `<p>Mã đăng nhập trang quản trị Education Hugo:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${otp}</p><p>Mã hết hạn sau 5 phút. Không phải bạn yêu cầu thì bỏ qua thư này.</p>`).catch((error) => console.error('[admin OTP] gửi thư lỗi:', error.message));
       },
     })],
     databaseHooks: { user: { create: { before: async (user) => {
