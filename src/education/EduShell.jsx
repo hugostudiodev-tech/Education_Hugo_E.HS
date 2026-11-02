@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PersonaAvatar, PersonaGate, PersonaInfoForm } from "./EduPersona";
-import { Link, NavLink } from "react-router-dom";
 import HugoLogo from "../components/HugoLogo";
 import { notify } from "../lib/notify";
 import { playEduSound } from "./eduSound";
@@ -20,7 +19,7 @@ import EduTopBar, { useEduInbox } from "./EduTopBar";
 import AnimIcon from "../components/icons/animated/AnimIcon";
 import EduSettings from "./EduSettings";
 import { FeedbackHistory } from "./EduFeedback";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
@@ -405,59 +404,75 @@ function Stat({ icon, tone, value, label }) {
   );
 }
 
-/** Hồ sơ: một tài khoản Hugo Studio dùng cho cả hai nơi. */
-export function EduProfile({ learner, persona, onPersona, onSignOut, onLearnerUpdate }) {
-  const { lang: legalLang } = useEduText();
-  const legal = legalFor(legalLang);
-  const support = supportMailUrl({ lang: legalLang, nickname: persona?.nickname });
+/** Hồ sơ: trang thông tin của người học. Cài đặt nằm ở trang riêng (bánh răng góc phải). */
+export function EduProfile({ learner, persona }) {
   const { t } = useEduText();
-  const [editing, setEditing] = useState(false);
   const stats = useLearnerStats(learner);
-  const [installable, setInstallable] = useState(false);
-  useEffect(() => {
-    const on = () => setInstallable(true);
-    window.addEventListener("edu:installable", on);
-    return () => window.removeEventListener("edu:installable", on);
-  }, []);
-
+  const name = persona?.nickname || learner?.displayName || t("profile.learner");
   return (
-    <section className="edu-page">
-      <h1 className="edu-page-title">{t("profile.title")}</h1>
-      <div className="edu-profile">
-        <PersonaAvatar avatar={persona?.avatar} name={persona?.nickname || learner?.displayName} size={72} />
-        <div>
-          <b className={persona?.nickname ? "nick-font" : ""}>{persona?.nickname || learner?.displayName || t("profile.learner")}</b>
-          <small>{learner?.email}</small>
-        </div>
-        <button type="button" className="edu-btn is-ghost" onClick={() => setEditing(true)}>{t("persona.edit")}</button>
+    <section className="edu-page edu-me">
+      <header className="edu-me-bar">
+        <h1 className="edu-page-title">{t("profile.title")}</h1>
+        <Link to="/settings" className="edu-icon-btn" aria-label={t("nav.settings")}>
+          <span className="material-symbols-outlined" aria-hidden="true">settings</span>
+        </Link>
+      </header>
+      <div className="edu-me-hero">
+        <PersonaAvatar avatar={persona?.avatar} name={name} size={112} />
+        <b className={persona?.nickname ? "nick-font" : ""}>{name}</b>
+        {persona?.intro && <p>{persona.intro}</p>}
+        <small>{learner?.email}</small>
       </div>
-
-      <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
-      <Link className="edu-btn is-ghost" to="/friends">{t("friends.cardLink")}</Link>
-      {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
       <div className="edu-stats">
         <Stat icon="local_fire_department" tone="orange" value={learner?.edu?.streak?.count ?? 0} label={t("streak.title")} />
         <Stat icon="task_alt" tone="blue" value={`${stats.done}/${stats.total || 26}`} label={t("profile.steps")} />
         <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
       </div>
+      <Link className="edu-btn is-ghost" to="/friends">{t("friends.cardLink")}</Link>
+    </section>
+  );
+}
 
+/** /settings — mọi chỉnh sửa và tuỳ chọn. Nút X đóng, quay về Hồ sơ. */
+export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLearnerUpdate }) {
+  const { t, lang } = useEduText();
+  const navigate = useNavigate();
+  const legal = legalFor(lang);
+  const support = supportMailUrl({ lang, nickname: persona?.nickname });
+  const [editing, setEditing] = useState(false);
+  const [installable, setInstallable] = useState(false);
+  useEffect(() => {
+    const on = () => setInstallable(true);
+    window.addEventListener("edu:installable", on);
+    return () => window.removeEventListener("edu:installable", on);
+  }, []);
+  const close = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/profile", { replace: true }));
+
+  return (
+    <section className="edu-page edu-me">
+      <header className="edu-me-bar">
+        <h1 className="edu-page-title">{t("nav.settings")}</h1>
+        <button type="button" className="edu-icon-btn" onClick={close} aria-label={t("common.close")}>
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <button type="button" className="edu-btn is-ghost" onClick={() => setEditing(true)}>{t("persona.edit")}</button>
+      {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
+      <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
+      <EduSettings embedded learner={learner} onLearnerUpdate={onLearnerUpdate} />
       <dl className="edu-facts">
         <dt>{t("profile.account")}</dt>
         <dd>{t("profile.accountBody")}</dd>
       </dl>
-
-      <div className="edu-actions">
-        {(installable || detectInstallTarget().iOS) && <EduInstall />}
-        <button type="button" className="edu-btn edu-btn--ghost" onClick={onSignOut}>{t("profile.signOut")}</button>
-      </div>
-      <EduSettings embedded learner={learner} onLearnerUpdate={onLearnerUpdate} />
+      {(installable || detectInstallTarget().iOS) && <EduInstall />}
       <Link className="edu-btn edu-btn--ghost" to="/feedback">{t("history.write")}</Link>
       {/* Hỗ trợ: mở app Mail (điện thoại) hoặc Gmail web (máy tính) với thư soạn sẵn thông tin thành viên. */}
       <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">{t("common.support")}</a>
       <FeedbackHistory />
+      <button type="button" className="edu-btn edu-btn--ghost" onClick={onSignOut}>{t("profile.signOut")}</button>
       <p className="edu-legal">
-        <Link to="/terms">{legal.terms.title}</Link> · <Link to="/privacy">{legal.privacy.title}</Link> · <Link to="/guidelines">{legal.guidelines.title}</Link> · <a href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">{t("common.support")}</a>
+        <Link to="/terms">{legal.terms.title}</Link> · <Link to="/privacy">{legal.privacy.title}</Link> · <Link to="/guidelines">{legal.guidelines.title}</Link>
       </p>
     </section>
   );

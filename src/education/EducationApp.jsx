@@ -7,7 +7,7 @@ import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useCoderLessons } from "../hooks/useCoderLessons";
 import { useEduHead } from "./eduHead";
 import { needsWelcome, rememberAccount, takePendingGoal } from "./eduAccounts";
-import EduShell, { EduInstallGate, EduProfile, EduStore } from "./EduShell";
+import EduShell, { EduInstallGate, EduProfile, EduSettingsPage, EduStore } from "./EduShell";
 import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
 import { useEduPrefs } from "./useEduPrefs";
@@ -222,7 +222,7 @@ export default function EducationApp() {
         <Route path="/learn/:lessonId" element={<LessonView learner={me} onLearnerUpdate={mergeLearner} />} />
         <Route path="/streak" element={signedIn ? <StreakView learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
         {/* Cài đặt đã gộp vào Hồ sơ; giữ địa chỉ cũ cho push/link cũ. */}
-        <Route path="/settings" element={<Navigate to="/profile" replace />} />
+        <Route path="/settings" element={signedIn ? <div className="edu-settings-screen"><EduSettingsPage learner={me} persona={persona} onPersona={setPersona} onSignOut={signOut} onLearnerUpdate={mergeLearner} /></div> : needsLogin} />
         <Route element={<ShellLayout learner={me} signedIn={signedIn} onLearnerUpdate={mergeLearner} />}>
           <Route path="/learn" element={<LearnMap learner={me} onLearnerUpdate={mergeLearner} />} />
           <Route path="/courses/:id" element={<EduCourseIntro />} />
@@ -236,7 +236,7 @@ export default function EducationApp() {
           <Route path="/community/:postKey" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/progress" element={signedIn ? <ProgressView learner={me} /> : needsLogin} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
-          <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} onPersona={setPersona} onSignOut={signOut} onLearnerUpdate={mergeLearner} /> : needsLogin} />
+          <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} /> : needsLogin} />
         </Route>
         {/* PWA cài lúc manifest của www còn hiệu lực sẽ mở /member/today — ở Edu không có trang đó.
             Đường dẫn kiểu www về /learn (giữ query, vd. ?source=pwa); trong app đã cài, đường lạ cũng về /learn thay vì 404. */}
