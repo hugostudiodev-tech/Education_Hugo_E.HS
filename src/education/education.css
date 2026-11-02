@@ -1402,3 +1402,12 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu-dev-promo .edu-dev-art { background: #1cb0f6; }
 .edu-dev-hero { padding-top: 0; overflow: hidden; }
 .edu-dev-hero > .edu-dev-art { width: calc(100% + 36px); margin: 0 -18px 4px; }
+/* Tên lửa tràn khỏi khung (3D): ảnh cao 520, nền chỉ phủ 440 trên cùng → 80/420 ≈ 19% bề rộng đè xuống phần dưới. */
+.edu-dev-art { overflow: visible; background: none !important; }
+.edu-dev-art img { position: relative; z-index: 1; margin-bottom: -19%; border-radius: 18px 18px 0 0; }
+.edu-dev-promo { overflow: visible; }
+.edu-dev-promo .edu-dev-promo-body { padding-top: calc(19% + 4px); }
+.edu-dev-hero { overflow: visible; background: none; color: inherit; padding-bottom: 8px; }
+.edu-dev-hero > .edu-dev-art { margin-bottom: calc(19% * 1 + 8px); }
+.edu-dev-hero h1 { color: var(--edu-ink); }
+.edu-dev-hero p { color: var(--edu-muted); opacity: 1; }
