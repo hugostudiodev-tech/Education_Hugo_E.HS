@@ -3,10 +3,14 @@ import express from 'express';
 import { handle, limit, fail } from '../lib/limits.js';
 import { partnerKeyOf, verifyPartnerKey } from '../services/partner.js';
 import { partnerDocs } from '../services/partnerDocs.js';
+import { ORIGINS } from '../lib/config.js';
 
 const router = express.Router();
 router.post('/verify', limit(20, 10 * 60_000), handle(async (req) => {
-  const doc = await verifyPartnerKey(partnerKeyOf(req) || req.body?.key, req.get('origin'));
+  // Trang /developers nằm trên tên miền Education Hugo, không phải tên miền của đối tác: bỏ qua kiểm tên miền ở đây.
+  // Bài học (routes/lessons.js) vẫn kiểm tên miền như cũ.
+  const origin = ORIGINS.includes(req.get('origin')) ? null : req.get('origin');
+  const doc = await verifyPartnerKey(partnerKeyOf(req) || req.body?.key, origin);
   if (!doc) throw fail(401, 'PARTNER_KEY_INVALID', 'Key không đúng, đã hết hạn hoặc không dùng được trên tên miền này.');
   const [name, host] = doc.email.split('@');
   const key = partnerKeyOf(req) || req.body?.key;
