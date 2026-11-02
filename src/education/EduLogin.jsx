@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { loginMemberWithGoogle, loginMemberWithPasskey } from "../services/api/core/authSession";
+import { loginMemberWithGoogle, loginMemberWithHugoStudio, loginMemberWithPasskey } from "../services/api/core/authSession";
+import HugoLogo from "../components/HugoLogo";
 import { loadGoogleIdentity } from "../utils/loadGoogleIdentity";
 import { EduBrand } from "./EduShell";
 import { useEduText } from "./eduText";
 
 /**
- * Đăng nhập = đăng ký: lần đầu bấm Google là máy chủ (Better Auth) tạo tài khoản
- * Hugo Studio kèm hồ sơ. Không có đường xác thực thứ hai — cùng
- * `POST /api/auth/sign-in/social` và passkey như www, nên tài khoản tạo ở đây
- * đăng nhập được bên Hugo Studio và ngược lại.
+ * Đăng nhập = đăng ký: lần đầu đăng nhập là máy chủ Education Hugo tạo tài khoản.
+ * Google, tài khoản Hugo Studio (OAuth) và passkey cùng email là cùng một người học.
  */
 /** Nút Google + passkey dùng chung cho /login và luồng PWA. `hint`: email gợi ý cho tài khoản đã lưu trên máy. */
 export function SignInPanel({ onSignedIn, hint = "" }) {
@@ -63,9 +62,20 @@ export function SignInPanel({ onSignedIn, hint = "" }) {
     finish(result.session ? result : { error: t("login.passkeyFailed") });
   };
 
+  const hugo = async () => {
+    setBusy(true);
+    setError("");
+    const next = new URLSearchParams(window.location.search).get("next") || "/learn";
+    const { error: failure } = await loginMemberWithHugoStudio(next.startsWith("/") ? next : "/learn");
+    if (failure) { setError(failure === "network" ? t("login.failed") : failure); setBusy(false); }
+  };
+
   return (
     <>
       <div ref={buttonRef} className="edu-google" aria-busy={busy} />
+      <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={hugo} disabled={busy}>
+        <HugoLogo className="h-5 w-5" aria-hidden="true" /> {t("login.hugo")}
+      </button>
       {blocked && <p className="edu-alert" role="alert">{t("login.blocked", { origin: window.location.origin })}</p>}
       <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={passkey} disabled={busy}>
         <span className="material-symbols-outlined" aria-hidden="true">passkey</span> {t("login.passkey")}

@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { playEduSound } from "./eduSound";
 import { useEduCourse } from "./useEduCourse";
 import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { clearMemberSession, getMemberSession, logoutAuth } from "../services/api/core/authSession";
+import { clearMemberSession, getMemberSession, logoutAuth, restoreMemberSession } from "../services/api/core/authSession";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useCoderLessons } from "../hooks/useCoderLessons";
 import { useEduHead } from "./eduHead";
@@ -116,6 +116,15 @@ export default function EducationApp() {
   }, []);
 
   useEffect(() => { if (signedIn) refresh(); }, [signedIn, refresh]);
+
+  // Quay về từ trang đồng ý của Hugo Studio (?signedin=hugo): phiên đã nằm trong cookie, ghi vào máy.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("signedin") !== "hugo") return;
+    url.searchParams.delete("signedin");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    restoreMemberSession().then((next) => next && setSession(next)).catch(() => {});
+  }, []);
 
   // Tự đồng bộ: cùng một tài khoản có thể đang học ở máy khác, hay đăng nhập/đăng
   // xuất ở tab khác — không bắt người học tải lại trang.
