@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://api.hugowishpax.studio/api/:path*"
+      "destination": "https://education-hugo-api.onrender.com/api/:path*"
     },
     {
       "source": "/((?!api/|assets/|.*\\.[a-zA-Z0-9]+$).*)",
