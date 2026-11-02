@@ -1,5 +1,7 @@
 /* Education Hugo — màu tươi kiểu ứng dụng học: một nền trắng, xanh lá chủ đạo,
    nút "nổi" có gờ dưới. Mọi biến nằm dưới .edu nên không lọt ra Hugo Studio. */
+:root { --edu-page-bg: #ffffff; }
+:root.dark { --edu-page-bg: #131f24; }
 .edu {
   /* Màu chủ đạo = xanh giọt nước của Hugo Studio (hsl 194 100% 58%). Nút dùng
      sắc đậm hơn một chút để chữ trắng còn đọc được; xanh lá chỉ còn cho "đúng". */
@@ -14,7 +16,7 @@
   --edu-orange: #ff9600;
   --edu-red: #ff4b4b;
   --edu-yellow: #ffc800;
-  --edu-bg: #ffffff;
+  --edu-bg: var(--edu-page-bg);
   --edu-card: #ffffff;
   --edu-soft: #f7f7f7;
   --edu-line: #e5e5e5;
@@ -29,7 +31,6 @@
   -webkit-font-smoothing: antialiased;
 }
 :root.dark .edu {
-  --edu-bg: #131f24;
   --edu-card: #131f24;
   --edu-soft: #202f36;
   --edu-line: #37464f;
@@ -390,7 +391,7 @@
 .edu-phone-line { height: 26%; border-radius: 12px; background: var(--edu-sky); }
 .edu-phone-line.is-short { height: 14%; background: #fff3c4; }
 .edu-runner {
-  --w: clamp(84px, 14vw, 190px);
+  --w: min(14vw, 22%, 190px);
   position: absolute; z-index: 2; left: 20%; bottom: 70%;
   width: var(--w); margin-left: calc(var(--w) * (-.5 + (var(--k) - 1) * .4));
 }

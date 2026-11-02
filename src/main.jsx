@@ -10,6 +10,7 @@ import "./i18n/config.js";
 import { installApiAuthInterceptor } from "./services/api/core/authInterceptor";
 import { liquidPress } from "./lib/liquidGlass/LiquidPressEngine";
 import { queryClient } from "./lib/queryClient";
+import { isStandalone, subscribeDisplayMode } from "./config/platform";
 import ErrorBoundary from "./components/ErrorBoundary";
 import StatusScreen from "./components/system/StatusScreen";
 import ServerStatusBanner from "./components/system/ServerStatusBanner";
@@ -21,6 +22,14 @@ const EduAdmin = lazy(() => import("./education/admin/EduAdmin"));
 const IS_ADMIN = window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/");
 const loadMotionFeatures = () => import("./config/motionFeatures").then((mod) => mod.default);
 const IOS_SPRING = { type: "spring", visualDuration: 0.42, bounce: 0.18 };
+
+const syncStandaloneMode = () => {
+  const standalone = isStandalone();
+  document.documentElement.classList.toggle("standalone-pwa", standalone);
+  document.body.classList.toggle("standalone-pwa", standalone);
+};
+syncStandaloneMode();
+subscribeDisplayMode(syncStandaloneMode);
 
 window.addEventListener("vite:preload-error", (event) => {
   event.preventDefault();
