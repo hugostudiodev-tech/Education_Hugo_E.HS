@@ -57,7 +57,8 @@ export function useCoderLessons(activeCourseId, { enabled = true, program = "cod
   const detailQuery = useQuery({
     queryKey: ["coder-lessons", "detail", selectedId, program, lang],
     queryFn: ({ signal }) => fetchLesson(selectedId, signal, program, lang),
-    enabled: enabled && Boolean(selectedId),
+    // Bản đồ/thống kê chỉ cần catalog; body bài học chỉ tải khi người dùng mở bài.
+    enabled: enabled && Boolean(activeCourseId),
     placeholderData: summary ? { lesson: summary } : undefined,
     staleTime: 10 * 60_000,
     // 401 (chưa đăng nhập) / 403 (Hugo Team hết hạn) là câu trả lời cuối, thử lại vô ích.
@@ -79,7 +80,7 @@ export function useCoderLessons(activeCourseId, { enabled = true, program = "cod
     selectedLesson,
     // Chi tiết đã tải xong (có slide) — bản tóm tắt trong danh mục thì chưa.
     detailReady: Boolean(detailQuery.data?.lesson?.slides),
-    loading: catalogQuery.isLoading || (Boolean(selectedId) && detailQuery.isLoading),
+    loading: catalogQuery.isLoading || (Boolean(activeCourseId) && detailQuery.isLoading),
     error: catalogQuery.error || detailQuery.error,
     // 401/403 từ máy chủ: hub hiện lời nhắc đăng nhập thay cho bài.
     detailError: detailQuery.error,

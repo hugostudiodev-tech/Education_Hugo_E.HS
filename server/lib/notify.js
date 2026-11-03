@@ -21,19 +21,19 @@ const langOf = (locale) => { const c = String(locale || '').toLowerCase().slice(
 const COPY = {
   vi: {
     cta: { welcome: 'HỌC NGAY', security: 'KIỂM TRA TÀI KHOẢN', frozen: 'SƯỞI ẤM LỬA NHỎ', milestone: 'XEM LỊCH LỬA', friendRequest: 'XEM LỜI MỜI' },
-    tagline: 'Khoá học miễn phí cho học sinh – sinh viên · một dự án phi lợi nhuận của Hugo Studio',
+    tagline: 'Khoá học miễn phí cho học sinh – sinh viên · nhận ủng hộ tự nguyện để duy trì dự án',
     reason: 'Bạn nhận thư này vì có tài khoản Education Hugo. Tắt thư email trong Hồ sơ > Thông báo.',
     terms: 'Điều khoản', privacy: 'Quyền riêng tư', profile: 'Hồ sơ',
   },
   en: {
     cta: { welcome: 'LEARN NOW', security: 'REVIEW MY ACCOUNT', frozen: 'WARM UP LITTLE FLAME', milestone: 'SEE MY STREAK', friendRequest: 'SEE THE REQUEST' },
-    tagline: 'Free courses for students · a nonprofit project by Hugo Studio',
+    tagline: 'Free courses for students · supported by voluntary donations',
     reason: 'You are receiving this because you have an Education Hugo account. Turn emails off in Profile > Notifications.',
     terms: 'Terms', privacy: 'Privacy', profile: 'Profile',
   },
   zh: {
     cta: { welcome: '立即学习', security: '检查账户', frozen: '温暖小火苗', milestone: '查看火苗日历', friendRequest: '查看邀请' },
-    tagline: '面向学生的免费课程 · Hugo Studio 的非营利项目',
+    tagline: '面向学生的免费课程 · 由自愿捐助支持',
     reason: '你收到此邮件是因为你拥有 Education Hugo 账户。可在 个人资料 > 通知 中关闭邮件。',
     terms: '条款', privacy: '隐私', profile: '个人资料',
   },

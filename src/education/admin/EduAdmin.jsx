@@ -365,7 +365,7 @@ function Table({ list, head, row }) {
   );
 }
 
-/** Bài chia sẻ kinh nghiệm ở Cộng đồng: chỉ admin đăng, chọn mascot đại diện cho từng bài. */
+/** Ads: chỉ admin đăng, chọn mascot đại diện cho từng bài. */
 function Articles() {
   const list = useList("/admin/articles");
   const [mascots, setMascots] = useState([]);
@@ -379,7 +379,7 @@ function Articles() {
       setForm(empty); setMsg(form._id ? "Đã sửa bài." : "Đã đăng bài."); list.reload();
     } catch (e) { setMsg(e.message); }
   };
-  const remove = (a) => act(async () => { if (window.confirm(`Xoá bài "${a.title || a.text.slice(0, 40)}" và mọi bình luận?`)) await call(`/admin/articles/${a._id}`, { method: "DELETE" }); }, list.reload);
+  const remove = (a) => act(async () => { if (window.confirm(`Xoá Ads "${a.title || a.text.slice(0, 40)}"?`)) await call(`/admin/articles/${a._id}`, { method: "DELETE" }); }, list.reload);
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
@@ -504,7 +504,7 @@ const TABS = [
   ["partners", "Đối tác", "key", Partners],
   ["developers", "Hugo Developer", "code", Developers],
   ["promos", "Quảng cáo", "campaign", Promos],
-  ["articles", "Bài viết", "article", Articles],
+  ["articles", "Ads", "campaign", Articles],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],

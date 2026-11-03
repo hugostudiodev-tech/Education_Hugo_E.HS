@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Award, Braces, ChevronLeft, GraduationCap, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,6 @@ import { useCoderLessons } from "../../../hooks/useCoderLessons";
 import { CODER_STORAGE_KEYS, GUEST_LESSONS, readGuestLessons } from "./workspaceUtils";
 import CoderLearningJourney from "./CoderLearningJourney";
 import { getMemberSession } from "../../../services/api/core/authSession";
-import { hugoCoderApi } from "../../../services/api/modules/hugoCoderApi";
 import LessonPlayer from "./LessonPlayer";
 import { gemText } from "../../../education/gems";
 import { useEduText } from "../../../education/eduText";
@@ -118,28 +117,6 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
   const { courses: allCourses, stages, loading, detailReady, detailError } = useCoderLessons(selectedLessonId, { program, course: selectedLessonId ? undefined : course });
   const courses = maxSteps ? allCourses.slice(0, maxSteps) : allCourses;
   const progressBio = program === "hugoteam" ? { ...bio, completedLessons: programProgress || [] } : bio;
-  const onBioUpdateRef = useRef(onBioUpdate);
-
-  useEffect(() => {
-    onBioUpdateRef.current = onBioUpdate;
-  }, [onBioUpdate]);
-
-  useEffect(() => {
-    if (!getMemberSession()?.email) return undefined;
-    let active = true;
-    hugoCoderApi.getAccessSnapshot()
-      .then(({ learner: accessBio, edu: accessEdu }) => {
-        if (!active || !accessBio) return;
-        onBioUpdateRef.current?.(accessEdu ? { ...accessBio, edu: accessEdu } : accessBio);
-      })
-      .catch(() => {
-        // Hồ sơ đã lưu vẫn dùng được khi mất mạng.
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const openLesson = (lessonId) => onLessonChange ? onLessonChange(lessonId) : navigate(`${basePath}/${lessonId}`);
   // Thoát step thì về BẢN ĐỒ khoá học, không văng ra ngoài app.
   const exitLesson = () => onLessonChange ? onLessonChange(null) : navigate(basePath);

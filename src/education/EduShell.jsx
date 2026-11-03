@@ -23,8 +23,7 @@ import { DeveloperPromo } from "./EduDeveloperTeam";
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
-  { to: "/friends", icon: "users", key: "friends" },
-  { to: "/community", icon: "message", key: "community" },
+  { to: "/ads", icon: "message", key: "community" },
   { to: "/store", icon: "bag", key: "store" },
   { to: "/profile", icon: "user", key: "profile" },
 ];
@@ -154,7 +153,7 @@ function useLearnerStats(learner) {
   }, [courses, stages, learner]);
 }
 
-export default function EduShell({ view, learner, signedIn, onLearnerUpdate, children }) {
+export default function EduShell({ view, learner, signedIn, children }) {
   const { t } = useEduText();
   const stats = useLearnerStats(learner);
   const location = useLocation();
@@ -163,12 +162,9 @@ export default function EduShell({ view, learner, signedIn, onLearnerUpdate, chi
   useEffect(() => {
     if (new URLSearchParams(location.search).has("streak")) navigate("/streak", { replace: true });
   }, [location.search, navigate]);
-  const openStreak = () => navigate("/streak");
   const nav = NAV.map((item) => ({ ...item, label: t(`nav.${item.key}`), to: signedIn || item.to === "/learn" ? item.to : "/login" }));
 
   const inbox = useEduInbox(signedIn);
-  const chips = <EduTopBar learner={learner} signedIn={signedIn} stats={stats} inbox={inbox} />;
-
   return (
     <div className={`edu-app edu-view-${view}`}>
       <aside className="edu-side">
@@ -186,15 +182,14 @@ export default function EduShell({ view, learner, signedIn, onLearnerUpdate, chi
         </div>
       </aside>
 
-      <header className="edu-top">{chips}</header>
+      <header className="edu-top"><EduTopBar learner={learner} signedIn={signedIn} stats={stats} inbox={inbox} /></header>
 
       <main className="edu-main">
         {children}
       </main>
 
       <aside className="edu-rail">
-        <div className="edu-rail-chips">{chips}</div>
-        <Rail learner={learner} signedIn={signedIn} stats={stats} onStreak={openStreak} />
+        <Rail learner={learner} signedIn={signedIn} stats={stats} />
       </aside>
 
       <nav className="edu-tabs" aria-label="Education Hugo">
@@ -208,7 +203,7 @@ export default function EduShell({ view, learner, signedIn, onLearnerUpdate, chi
   );
 }
 
-function Rail({ learner, signedIn, stats, onStreak }) {
+function Rail({ learner, signedIn, stats }) {
   const { t } = useEduText();
   if (!signedIn) {
     return (
@@ -428,7 +423,6 @@ export function EduProfile({ learner, persona }) {
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
       </div>
       <DeveloperPromo />
-      <Link className="edu-btn is-ghost" to="/friends">{t("friends.cardLink")}</Link>
     </section>
   );
 }

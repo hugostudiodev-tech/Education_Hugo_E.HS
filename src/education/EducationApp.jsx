@@ -20,8 +20,7 @@ import EduStatus, { EduErrorBoundary } from "./EduStatus";
 import { API_BASE } from "../config/apiBase";
 import "./education.css";
 
-// Mọi màn ngoài khung chính đều tải lười; người đã đăng nhập không phải tải trang giới thiệu (GSAP),
-// đăng nhập hay onboarding. Sau lần vẽ đầu, prefetchPages() tải sẵn các trang khi trình duyệt rảnh.
+// Mọi màn ngoài khung chính đều tải lười; PWA chỉ tải màn người dùng thực sự mở.
 const PAGES = {
   landing: () => import("./EduLanding"),
   login: () => import("./EduLogin"),
@@ -31,7 +30,6 @@ const PAGES = {
   course: () => import("./EduCourseIntro"),
   hub: () => import("../components/member/hugoCoder/HugoCoderHub"),
   community: () => import("./EduCommunity"),
-  friends: () => import("./EduFriends"),
   feedback: () => import("./EduFeedback"),
   legal: () => import("./EduLegal.jsx"),
   developers: () => import("./EduDevelopers.jsx"),
@@ -45,12 +43,10 @@ const StreakView = lazy(() => PAGES.streak().then((mod) => ({ default: mod.Strea
 const EduCourseIntro = lazy(PAGES.course);
 const HugoCoderHub = lazy(PAGES.hub);
 const EduCommunity = lazy(PAGES.community);
-const EduFriends = lazy(PAGES.friends);
 const EduFeedback = lazy(PAGES.feedback);
 const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
 const EduDeveloperTeam = lazy(PAGES.devTeam);
-const EduPublicProfile = lazy(() => PAGES.friends().then((mod) => ({ default: mod.EduPublicProfile })));
 
 const hasSavedAccounts = () => { try { return JSON.parse(localStorage.getItem("edu.accounts") || "[]").length > 0; } catch { return false; } };
 /** Sau đăng nhập: về ?next= nếu là đường dẫn nội bộ, không thì /learn. */
@@ -60,23 +56,15 @@ const afterLogin = () => {
 };
 const Loading = () => <EduStatus kind="loading" />;
 
-/** Tải sẵn mọi trang khi trình duyệt rảnh — bấm chuyển trang là có ngay, không chờ mạng. */
-function prefetchPages(signedIn) {
-  const run = () => Object.entries(PAGES)
-    .filter(([name]) => (signedIn ? !["landing", "login", "onboard"].includes(name) : true))
-    .forEach(([, load]) => load().catch(() => {}));
-  if ("requestIdleCallback" in window) window.requestIdleCallback(run, { timeout: 4000 }); else setTimeout(run, 2500);
-}
-
 // Khung chính (thanh trên, menu, cột phải, hộp thông báo) dựng MỘT lần cho mọi trang trong nó;
 // chuyển trang chỉ đổi phần nội dung, chờ tải thì quay nhỏ ngay trong vùng nội dung.
 const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team)/, "profile"],
-  [/^\/(friends|u\/)/, "friends"], [/^\/community/, "community"], [/^\/store/, "store"]];
-function ShellLayout({ learner, signedIn, onLearnerUpdate }) {
+  [/^\/(ads|community)/, "community"], [/^\/store/, "store"]];
+function ShellLayout({ learner, signedIn }) {
   const { pathname } = useLocation();
   const view = VIEW_OF.find(([re]) => re.test(pathname))?.[1] || "learn";
   return (
-    <EduShell view={view} learner={learner} signedIn={signedIn} onLearnerUpdate={onLearnerUpdate}>
+    <EduShell view={view} learner={learner} signedIn={signedIn}>
       <Suspense fallback={<EduStatus kind="loading" compact />}><Outlet /></Suspense>
     </EduShell>
   );
@@ -176,8 +164,6 @@ export default function EducationApp() {
   const textSize = useEduPrefs(signedIn ? learner?.edu?.prefs : null);
   // Lần đầu vào: chọn ngôn ngữ → đồng ý điều khoản (xem EduWelcome). Âm thanh chạm cho cả site.
   const [welcome, setWelcome] = useState(needsWelcome);
-  // Tải sẵn các trang khi rảnh (một lần, sau lần vẽ đầu).
-  useEffect(() => { prefetchPages(signedIn); }, [signedIn]);
   useEffect(() => installEduTapSounds(), []);
   const celebration = useStreakCelebration();
   // Biệt danh + nhân vật bắt buộc (sau bước chào/điều khoản): chưa xong thì không vào học được.
@@ -201,7 +187,11 @@ export default function EducationApp() {
     const consent = readConsent();
     if (!signedIn || consentV === undefined || !consent?.v || consentV >= consent.v) return;
     fetch(`${API_BASE}/me/consent`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(consent) })
-      .then((r) => r.ok && setLearner((current) => current && { ...current, consentV: consent.v })).catch(() => {});
+      .then((r) => {
+        if (!r.ok) { if (r.status === 400) setWelcome(true); return; }
+        setLearner((current) => current && { ...current, consentV: consent.v });
+        if (consent.guardianPhone) localStorage.setItem("edu.consent", JSON.stringify({ ...consent, guardianPhone: undefined }));
+      }).catch(() => {});
   }, [signedIn, consentV]);
 
   const location = useLocation();
@@ -212,12 +202,9 @@ export default function EducationApp() {
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
   const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/");
   const gated = phoneWeb && !publicPage;
-  // Quét QR thẻ bạn bè bằng camera điện thoại luôn mở trình duyệt, không mở PWA (iOS cấm, Android mở tab nhúng).
-  const qrCode = /^\/u\/([A-Za-z0-9]{4,12})$/.exec(location.pathname)?.[1];
-
   return (
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
-      {gated && (qrCode ? <EduQrHandoff code={qrCode} android={device.android} /> : <EduInstallGate />)}
+      {gated && <EduInstallGate />}
       {welcome && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
       {!welcome && !gated && persona && !persona.complete && <PersonaGate current={persona} onDone={setPersona} />}
       {celebration.event && <StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} />}
@@ -235,17 +222,15 @@ export default function EducationApp() {
         <Route path="/streak" element={signedIn ? <StreakView learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
         {/* Cài đặt đã gộp vào Hồ sơ; giữ địa chỉ cũ cho push/link cũ. */}
         <Route path="/settings" element={signedIn ? <div className="edu-settings-screen"><EduSettingsPage learner={me} persona={persona} onPersona={setPersona} onSignOut={signOut} onLearnerUpdate={mergeLearner} /></div> : needsLogin} />
-        <Route element={<ShellLayout learner={me} signedIn={signedIn} onLearnerUpdate={mergeLearner} />}>
+        <Route element={<ShellLayout learner={me} signedIn={signedIn} />}>
           <Route path="/learn" element={<LearnMap learner={me} onLearnerUpdate={mergeLearner} />} />
           <Route path="/courses/:id" element={<EduCourseIntro />} />
           {/* Văn bản pháp lý: công khai, không cần đăng nhập. */}
           <Route path="/developer-team" element={signedIn ? <EduDeveloperTeam /> : needsLogin} />
           {["terms", "privacy", "guidelines"].map((doc) => <Route key={doc} path={`/${doc}`} element={<EduLegal doc={doc} />} />)}
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
-          <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
-          <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />
-          <Route path="/community" element={signedIn ? <EduCommunity /> : needsLogin} />
-          <Route path="/community/:postKey" element={signedIn ? <EduCommunity /> : needsLogin} />
+          <Route path="/ads" element={signedIn ? <EduCommunity /> : needsLogin} />
+          <Route path="/community/*" element={<Navigate to="/ads" replace />} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} /> : needsLogin} />
         </Route>
@@ -256,28 +241,6 @@ export default function EducationApp() {
         ))}
         <Route path="*" element={standalone ? <Navigate to="/learn" replace /> : <EduStatus kind="notFound" />} />
       </Routes></Suspense></EduErrorBoundary>}
-    </div>
-  );
-}
-
-/** Màn trung chuyển khi quét QR bạn bè trên trình duyệt điện thoại: chép mã để dán trong app. */
-function EduQrHandoff({ code, android }) {
-  const { t } = useEduText();
-  const [copied, setCopied] = useState(false);
-  const copy = () => navigator.clipboard?.writeText(code).then(() => { setCopied(true); playEduSound("coin"); }).catch(() => {});
-  // Android: intent mở bằng Chrome; WebAPK đã cài sẽ nhận đường dẫn trong phạm vi của nó.
-  const intent = `intent://${window.location.host}/u/${code}#Intent;scheme=https;package=com.android.chrome;end`;
-  return (
-    <div className="edu-gate edu-qr">
-      <main className="edu-ob-main">
-        <img className="edu-ob-hero is-wave" src="/edu/cast-1.svg" alt="" width="130" height="130" />
-        <h1 className="edu-ob-title">{t("friends.qrTitle")}</h1>
-        <p className="edu-ob-lead">{t("friends.qrBody")}</p>
-        <button type="button" className="edu-qr-code" onClick={copy} aria-label={t("friends.qrCopy")}>{code}</button>
-        <button type="button" className="edu-btn edu-btn--wide edu-ob-go" onClick={copy}>{t(copied ? "friends.qrCopied" : "friends.qrCopy")}</button>
-        {android && <a className="edu-btn edu-btn--ghost edu-btn--wide" href={intent}>{t("friends.qrOpen")}</a>}
-        <Link className="edu-ob-later" to="/install">{t("friends.qrInstall")}</Link>
-      </main>
     </div>
   );
 }

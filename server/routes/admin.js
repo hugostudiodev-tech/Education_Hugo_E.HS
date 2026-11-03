@@ -207,7 +207,7 @@ router.put('/promo/:key', handle(async (req) => {
   await log(req, 'promo_update', key, { enabled: promo.enabled });
   return { promo };
 }));
-// ── Bài viết Cộng đồng (chỉ admin đăng) ─────────────────────────────────────
+// ── Ads (chỉ admin đăng) ────────────────────────────────────────────────────
 const MASCOTS = ['cast-1', 'cast-2', 'cast-3', 'cast-4', 'cast-5', 'cast-6', 'cast-7', 'cast-8', 'buddy-learn', 'buddy-done', 'buddy-exam', 'buddy-practice', 'buddy-correct', 'buddy-wrong'];
 function cleanArticle(b = {}) {
   const title = String(b.title || '').trim().slice(0, 120);

@@ -1,7 +1,7 @@
 import { apiFetch } from "../core/apiClient";
 
 export function fetchLessonPage(page = 1, signal, course = "coding") {
-  return apiFetch(`/lessons?page=${page}&limit=25${course === "coding" ? "" : `&course=${course}`}`, { signal });
+  return apiFetch(`/lessons?page=${page}&limit=50${course === "coding" ? "" : `&course=${course}`}`, { signal });
 }
 
 export function fetchLesson(lessonId, signal, program = "coding", lang = "vi") {

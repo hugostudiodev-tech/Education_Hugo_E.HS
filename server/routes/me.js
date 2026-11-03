@@ -36,9 +36,15 @@ router.post('/me/streak/thaw', limit(10), handle(async (req) => {
 // Bằng chứng đồng ý (NĐ 13/2023): phiên bản điều khoản + thời điểm, ghi một lần cho mỗi phiên bản.
 router.post('/me/consent', limit(10), handle(async (req) => {
   const v = Number.parseInt(req.body?.v, 10);
-  if (!(v > 0) || req.body?.terms !== true || req.body?.age !== true) throw fail(400, 'BAD_CONSENT', 'Lời đồng ý không hợp lệ.');
+  const ageGroup = req.body?.ageGroup;
+  const guardianPhone = String(req.body?.guardianPhone || '').trim();
+  const needsGuardian = ageGroup === '14-15';
+  if (!(v > 0) || req.body?.terms !== true || req.body?.age !== true || !['14-15', '16+'].includes(ageGroup)
+    || (needsGuardian && (req.body?.guardianConsent !== true || !/^\+?[0-9][0-9 .()-]{7,20}$/.test(guardianPhone)))) {
+    throw fail(400, 'BAD_CONSENT', 'Lời đồng ý hoặc thông tin người giám hộ không hợp lệ.');
+  }
   const at = new Date(req.body?.at);
-  await Learner.updateOne({ email: req.email }, { $set: { consent: { v, at: Number.isNaN(at.getTime()) ? new Date() : at, savedAt: new Date(), terms: true, age: true } } });
+  await Learner.updateOne({ email: req.email }, { $set: { consent: { v, at: Number.isNaN(at.getTime()) ? new Date() : at, savedAt: new Date(), terms: true, age: true, ageGroup, guardianConsent: needsGuardian || undefined, guardianPhone: needsGuardian ? guardianPhone : undefined } } });
   return { success: true };
 }));
 // Xoá tài khoản Education Hugo: xoá hết dữ liệu học, không khôi phục được.

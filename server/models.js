@@ -49,7 +49,7 @@ const learnerSchema = new Schema({
   xpWeekly: { type: Number, default: 0 },
   // Khoá bởi admin (báo cáo vi phạm)
   bannedAt: Date,
-  // Lời đồng ý điều khoản + độ tuổi (EduWelcome): { v, at, savedAt, terms, age }
+  // Lời đồng ý điều khoản + nhóm tuổi; người 14–15 có xác nhận và SĐT người giám hộ.
   consent: { type: Mixed, default: undefined },
 }, { timestamps: true, minimize: false });
 learnerSchema.index({ 'prefs.reminder': 1, 'prefs.reminderHour': 1 });

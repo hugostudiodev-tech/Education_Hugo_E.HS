@@ -23,7 +23,7 @@ export function takePendingGoal() {
 
 // Lần đầu vào Edu: chọn ngôn ngữ + đồng ý điều khoản (EduWelcome). Đổi VERSION là hỏi lại.
 export const KEY = "edu.consent";
-export const VERSION = 1;
+export const VERSION = 2;
 
 /** Lời đồng ý đã lưu trên máy ({ v, at, terms, age }) hoặc null. */
 export const readConsent = () => read(KEY, null);

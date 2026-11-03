@@ -4,7 +4,6 @@ import confetti from "canvas-confetti";
 import { notify } from "../lib/notify";
 import { API_BASE } from "../config/apiBase";
 import { THAW_PRICE } from "../../packages/shared/eduStreak";
-import EduFriends from "./EduFriends";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 
@@ -75,7 +74,6 @@ export function StreakScreen({ streak, onUpdate }) {
   const { t } = useEduText();
   const [month, setMonth] = useState(streak.today.slice(0, 7));
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState("me");
   const [riveFailed, setRiveFailed] = useState(false);
   const onRiveFail = useCallback(() => setRiveFailed(true), []);
   const frozen = streak.frozenNow && !streak.studiedToday;
@@ -117,14 +115,7 @@ export function StreakScreen({ streak, onUpdate }) {
         <h1>{t("streak.title")}</h1>
         <span aria-hidden="true" />
       </header>
-      <div className="streak-tabs-line" role="tablist">
-        {["me", "friends"].map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} className={tab === id ? "is-on" : ""} onClick={() => setTab(id)}>{t(`streak.tab.${id}`)}</button>
-        ))}
-      </div>
-
-      {tab === "me" ? (
-        <>
+      <>
           <div className="streak-band">
             <div>
               <b className="streak-big">{streak.count}</b>
@@ -157,10 +148,7 @@ export function StreakScreen({ streak, onUpdate }) {
             <p className="streak-rule">{t("streak.rule")}</p>
             <RiveCredit />
           </div>
-        </>
-      ) : (
-        <div className="streak-body"><EduFriends embedded /></div>
-      )}
+      </>
     </section>
   );
 }

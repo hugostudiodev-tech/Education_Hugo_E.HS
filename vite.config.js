@@ -30,8 +30,8 @@ export default defineConfig({
         importScripts: ["/push-sw.js"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//, /^\/ws/],
-        // Every hashed app chunk must change the precache manifest or installed apps won't prompt for updates.
-        globPatterns: ["**/*.{html,svg,png,woff2}", "assets/**/*.{js,css,json,wasm}"],
+        // Chỉ app shell được precache; route/lesson chunks vào runtime cache khi thật sự mở.
+        globPatterns: ["**/*.{html,svg,png,woff2}", "assets/index-*.{js,css}"],
         globIgnores: ["**/image/**", "**/edu/video/**", "**/edu/mail/**"],
         runtimeCaching: [
           { urlPattern: /\/api(?:\/|$)/, handler: "NetworkOnly" },

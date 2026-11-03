@@ -131,7 +131,6 @@ export function useEduInbox(signedIn) {
       .then((data) => { setItems(data.notifications || []); setUnread(data.unreadCount || 0); })
       .catch(() => setItems((cur) => cur || []));
   }, [signedIn]);
-  useEffect(() => { load(); }, [load]);
   const patch = (path) => fetch(`${API_BASE}/inbox/${path}`, { method: "PATCH", credentials: "include" }).catch(() => {});
   const openItem = (item) => {
     if (!item.read) { patch(`${item._id}/read`); setUnread((n) => Math.max(0, n - 1)); setItems((all) => all.map((x) => (x._id === item._id ? { ...x, read: true } : x))); }
