@@ -106,13 +106,14 @@ export default function EducationApp() {
 
   useEffect(() => { if (signedIn) refresh(); }, [signedIn, refresh]);
 
-  // Quay về từ trang đồng ý của Hugo Studio (?signedin=hugo): phiên đã nằm trong cookie, ghi vào máy.
+  // Quay về từ trang đồng ý OAuth (?signedin=discord|facebook|hugo-studio): phiên đã nằm trong cookie, ghi vào máy.
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (url.searchParams.get("signedin") !== "hugo") return;
+    const provider = url.searchParams.get("signedin");
+    if (!provider) return;
     url.searchParams.delete("signedin");
     window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-    restoreMemberSession().then((next) => next && setSession(next)).catch(() => {});
+    restoreMemberSession(provider === "hugo" ? "hugo-studio" : provider).then((next) => next && setSession(next)).catch(() => {});
   }, []);
 
   // Tự đồng bộ: cùng một tài khoản có thể đang học ở máy khác, hay đăng nhập/đăng

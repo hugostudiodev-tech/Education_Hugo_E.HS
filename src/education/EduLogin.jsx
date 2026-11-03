@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { loginMemberWithGoogle, loginMemberWithHugoStudio, loginMemberWithPasskey } from "../services/api/core/authSession";
-import HugoLogo from "../components/HugoLogo";
+import { loginMemberWithGoogle, loginMemberWithPasskey, loginMemberWithRedirect } from "../services/api/core/authSession";
 import { loadGoogleIdentity } from "../utils/loadGoogleIdentity";
 import { EduBrand } from "./EduShell";
 import { useEduText } from "./eduText";
 
 /**
  * Đăng nhập = đăng ký: lần đầu đăng nhập là máy chủ Education Hugo tạo tài khoản.
- * Google, tài khoản Hugo Studio (OAuth) và passkey cùng email là cùng một người học.
+ * Google và passkey (Face ID) cùng email là cùng một người học.
  */
 /** Nút Google + passkey dùng chung cho /login và luồng PWA. `hint`: email gợi ý cho tài khoản đã lưu trên máy. */
 export function SignInPanel({ onSignedIn, hint = "" }) {
@@ -47,7 +46,7 @@ export function SignInPanel({ onSignedIn, hint = "" }) {
         if (cancelled || !buttonRef.current) return;
         googleId.initialize({ client_id: clientId, ...(hint ? { login_hint: hint } : {}), callback: (response) => handlerRef.current(response), use_fedcm_for_prompt: false });
         buttonRef.current.innerHTML = "";
-        googleId.renderButton(buttonRef.current, { theme: "outline", size: "large", shape: "pill", width: 300, text: "continue_with" });
+        googleId.renderButton(buttonRef.current, { theme: "outline", size: "large", shape: "pill", width: 200, text: "signin_with" });
         timer = setTimeout(() => !cancelled && setBlocked((buttonRef.current?.offsetHeight || 0) < 20), 2500);
       })
       .catch(() => !cancelled && setBlocked(true));
@@ -62,24 +61,32 @@ export function SignInPanel({ onSignedIn, hint = "" }) {
     finish(result.session ? result : { error: t("login.passkeyFailed") });
   };
 
-  const hugo = async () => {
+  const redirect = async (provider) => {
     setBusy(true);
     setError("");
     const next = new URLSearchParams(window.location.search).get("next") || "/learn";
-    const { error: failure } = await loginMemberWithHugoStudio(next.startsWith("/") ? next : "/learn");
+    const { error: failure } = await loginMemberWithRedirect(provider, next.startsWith("/") ? next : "/learn");
     if (failure) { setError(failure === "network" ? t("login.failed") : failure); setBusy(false); }
   };
 
   return (
     <>
-      <div ref={buttonRef} className="edu-google" aria-busy={busy} />
-      <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={hugo} disabled={busy}>
-        <HugoLogo className="h-5 w-5" aria-hidden="true" /> {t("login.hugo")}
-      </button>
+      <div className="edu-signin-row">
+        <div ref={buttonRef} className="edu-google" aria-busy={busy} />
+        <button type="button" className="edu-btn edu-btn--ghost edu-faceid" onClick={passkey} disabled={busy} aria-label={t("login.passkey")}>
+          <span className="material-symbols-outlined" aria-hidden="true">face</span> Face ID
+        </button>
+      </div>
+      <details className="edu-signin-more">
+        <summary>{t("login.more")}</summary>
+        <div className="edu-signin-row">
+          <button type="button" className="edu-btn edu-btn--ghost edu-faceid" onClick={() => redirect("discord")} disabled={busy}>
+            <img src="/edu/logo-discord.svg" alt="" width="20" height="20" /> Discord
+          </button>
+          {/* ponytail: Facebook ẩn tới khi Meta xác minh doanh nghiệp — server đã sẵn (FACEBOOK_CLIENT_ID) */}
+        </div>
+      </details>
       {blocked && <p className="edu-alert" role="alert">{t("login.blocked", { origin: window.location.origin })}</p>}
-      <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={passkey} disabled={busy}>
-        <span className="material-symbols-outlined" aria-hidden="true">passkey</span> {t("login.passkey")}
-      </button>
       {busy && <p className="edu-note">{t("login.verifying")}</p>}
       {error && <p className="edu-alert" role="alert">{error}</p>}
     </>

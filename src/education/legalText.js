@@ -14,7 +14,7 @@ const EN = {
       {
         h: "1. Who we are",
         p: [
-          "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. It has its own accounts, servers and data. You may sign in with Google, with your Hugo Studio account (www.hugowishpax.studio) or with a passkey; signing in with Hugo Studio only shares your name, email and profile picture with us, and no other Hugo Studio data.",
+          "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. It has its own accounts, servers and data. You may sign in with Google, Discord or a passkey; signing in with Google or Discord only shares your name, email and profile picture with us, and nothing else from those accounts.",
           "Education Hugo was conceived and built by Hugo, a student at the University of Greenwich (Vietnam), as a non-profit contribution to the community. Its source code, lessons, characters and artwork belong to the author unless stated otherwise; do not copy or republish them without permission.",
           `Questions about these Terms may be addressed to ${CONTACT}.`,
         ],
@@ -29,7 +29,7 @@ const EN = {
       {
         h: "3. Your account",
         p: [
-          "You sign in with Google or with a passkey (Face ID, fingerprint or a device PIN). You are responsible for safeguarding the devices and credentials that give access to your account and for all activity that occurs under it. Notify us without delay if you suspect unauthorised access.",
+          "You sign in with Google, Discord or a passkey (Face ID, fingerprint or a device PIN). You are responsible for safeguarding the devices and credentials that give access to your account and for all activity that occurs under it. Notify us without delay if you suspect unauthorised access.",
           "Courses and accounts are free of charge and accounts do not expire. We may close accounts that breach these Terms.",
         ],
       },
@@ -103,7 +103,7 @@ const EN = {
       {
         h: "2. Data we process",
         list: [
-          "Account data — your email address and display name from Google sign-in; for passkeys, a public key and device label (the biometric itself never leaves your device).",
+          "Account data — your email address, display name and profile picture from Google or Discord sign-in; for passkeys, a public key and device label (the biometric itself never leaves your device).",
           "Profile identity (Persona) — nickname, pixel-art character and short introduction. These are used within your own account; your real name, email and photograph are not displayed on the Ads page.",
           "Learning data — completed steps and lessons, quiz answers and scores, streak calendar, XP, daily goals and personal settings. SQL exercises run entirely inside your browser; what you type there is kept only on your device as a draft and is never sent to us.",
           "Store data — items you have bought, the badge you wear, remaining Streak Shields and Double XP time, together with the gem transactions that paid for them.",
@@ -128,7 +128,7 @@ const EN = {
         p: ["We rely on a small number of processors, each bound to handle data only on our instructions:"],
         list: [
           "MongoDB Atlas (database), Render (application server), Vercel (web hosting) and Cloudflare (network delivery and protection).",
-          "Google, solely for sign-in when you choose it.",
+          "Google and Discord, solely for sign-in when you choose them.",
           "Resend (with an SMTP relay as fallback), which delivers our emails; it receives your email address and the message content only.",
           "Browser push services operated by Apple, Google or Mozilla, which relay notifications to your device.",
           "Telegram, which delivers internal alerts to our administrators; alerts never contain your email address.",
@@ -153,7 +153,7 @@ const EN = {
       {
         h: "7. Your rights",
         p: [
-          `You may access, correct or delete your personal data, request a copy of it in a portable format, withdraw consent to notifications, and object to or restrict certain processing. Most controls live in Profile; you can delete your Education Hugo account and all its learning data under Settings → "Delete Education Hugo account" (your Hugo Studio sign-in account is deleted separately in Hugo Studio's account settings), and any other request may be sent to ${CONTACT}. We will respond within the time limits set by law and may first verify your identity.`,
+          `You may access, correct or delete your personal data, request a copy of it in a portable format, withdraw consent to notifications, and object to or restrict certain processing. Most controls live in Profile; you can delete your Education Hugo account and all its learning data under Settings → "Delete Education Hugo account" (to also revoke access, remove Education Hugo under Connected apps in your Google or Discord account), and any other request may be sent to ${CONTACT}. We will respond within the time limits set by law and may first verify your identity.`,
         ],
       },
       {
@@ -225,7 +225,7 @@ const VI = {
     lead: "Điều khoản này điều chỉnh việc bạn sử dụng Education Hugo — dịch vụ học tập miễn phí do Hugo Studio vận hành tại education.hugowishpax.studio. Khi tạo tài khoản hoặc tiếp tục sử dụng dịch vụ, bạn chấp nhận toàn bộ Điều khoản. Nếu không đồng ý, vui lòng không sử dụng Education Hugo.",
     sections: [
       { h: "1. Chúng tôi là ai", p: [
-        "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, bằng tài khoản Hugo Studio (www.hugowishpax.studio) hoặc bằng passkey; đăng nhập bằng Hugo Studio chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của Hugo Studio.",
+        "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, Discord hoặc passkey; đăng nhập bằng Google hay Discord chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của các tài khoản đó.",
         "Education Hugo do Hugo, sinh viên Đại học Greenwich (Việt Nam), lên ý tưởng và xây dựng như một dự án phi lợi nhuận đóng góp cho cộng đồng. Mã nguồn, bài học, nhân vật và hình ảnh thuộc quyền của tác giả, trừ khi ghi khác; không sao chép hay đăng lại khi chưa được phép.",
         `Mọi câu hỏi về Điều khoản xin gửi tới ${CONTACT}.`,
       ] },
@@ -234,7 +234,7 @@ const VI = {
         "Mỗi người chỉ được có một tài khoản, không tạo tài khoản thay người khác và không mạo danh bất kỳ ai.",
       ] },
       { h: "3. Tài khoản của bạn", p: [
-        "Bạn đăng nhập bằng Google hoặc bằng khoá truy cập (Face ID, vân tay hoặc mã PIN của thiết bị). Bạn có trách nhiệm giữ an toàn thiết bị và thông tin đăng nhập, và chịu trách nhiệm cho mọi hoạt động dưới tài khoản của mình. Hãy báo ngay cho chúng tôi nếu nghi ngờ có truy cập trái phép.",
+        "Bạn đăng nhập bằng Google, Discord hoặc bằng khoá truy cập (Face ID, vân tay hoặc mã PIN của thiết bị). Bạn có trách nhiệm giữ an toàn thiết bị và thông tin đăng nhập, và chịu trách nhiệm cho mọi hoạt động dưới tài khoản của mình. Hãy báo ngay cho chúng tôi nếu nghi ngờ có truy cập trái phép.",
         "Khoá học và tài khoản đều miễn phí, tài khoản không hết hạn. Chúng tôi có thể đóng tài khoản vi phạm Điều khoản này.",
       ] },
       { h: "4. Ngọc, XP và chuỗi lửa", p: [
@@ -277,7 +277,7 @@ const VI = {
         `Hugo Studio là bên kiểm soát dữ liệu cá nhân được mô tả ở đây. Yêu cầu liên quan tới dữ liệu của bạn xin gửi tới ${CONTACT}. Chúng tôi xử lý dữ liệu cá nhân theo pháp luật Việt Nam về bảo vệ dữ liệu cá nhân, gồm Luật Bảo vệ dữ liệu cá nhân 2025 (hiệu lực từ 01/01/2026), Nghị định 13/2023/NĐ-CP và văn bản thay thế (nếu có).`,
       ] },
       { h: "2. Dữ liệu chúng tôi xử lý", list: [
-        "Dữ liệu tài khoản — email và tên hiển thị từ đăng nhập Google; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
+        "Dữ liệu tài khoản — email, tên hiển thị và ảnh đại diện từ đăng nhập Google hoặc Discord; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
         "Danh tính hồ sơ (Persona) — biệt danh, nhân vật pixel và lời giới thiệu ngắn. Các thông tin này được dùng trong tài khoản của bạn; tên thật, email và ảnh của bạn không hiển thị trên trang Ads.",
         "Dữ liệu học tập — step và bài đã học, câu trả lời và điểm trắc nghiệm, lịch chuỗi lửa, XP, mục tiêu ngày và cài đặt cá nhân. Bài tập SQL chạy hoàn toàn trong trình duyệt; những gì bạn gõ ở đó chỉ lưu nháp trên thiết bị của bạn và không bao giờ gửi về chúng tôi.",
         "Dữ liệu Cửa hàng — vật phẩm đã mua, huy hiệu đang đeo, số Khiên lửa và thời gian Nhân đôi XP còn lại, cùng các giao dịch Ngọc đã thanh toán.",
@@ -294,7 +294,7 @@ const VI = {
       ], p: ["Chúng tôi không dùng dữ liệu của bạn cho quảng cáo, không lập hồ sơ tiếp thị và không đưa ra quyết định có hệ quả pháp lý đối với bạn chỉ bằng phương tiện tự động."] },
       { h: "4. Nhà cung cấp dịch vụ", p: ["Chúng tôi dùng một số ít bên xử lý, mỗi bên chỉ được xử lý dữ liệu theo chỉ dẫn của chúng tôi:"], list: [
         "MongoDB Atlas (cơ sở dữ liệu), Render (máy chủ ứng dụng), Vercel (lưu trữ web) và Cloudflare (phân phối và bảo vệ mạng).",
-        "Google, chỉ cho việc đăng nhập khi bạn chọn.",
+        "Google và Discord, chỉ cho việc đăng nhập khi bạn chọn.",
         "Resend (kèm máy chủ SMTP dự phòng) để gửi email; bên này chỉ nhận địa chỉ email của bạn và nội dung thư.",
         "Dịch vụ thông báo đẩy của trình duyệt do Apple, Google hoặc Mozilla vận hành, chuyển thông báo tới thiết bị của bạn.",
         "Telegram, chuyển cảnh báo nội bộ tới quản trị viên; cảnh báo không bao giờ chứa email của bạn.",
@@ -310,7 +310,7 @@ const VI = {
         "Khi bạn xoá tài khoản, dữ liệu cá nhân được xoá hoặc ẩn danh không thể khôi phục, trừ phần pháp luật buộc chúng tôi lưu giữ.",
       ] },
       { h: "7. Quyền của bạn", p: [
-        `Bạn có quyền truy cập, chỉnh sửa hoặc xoá dữ liệu cá nhân, yêu cầu bản sao ở định dạng có thể chuyển, rút lại sự đồng ý nhận thông báo, và phản đối hoặc hạn chế một số hoạt động xử lý. Phần lớn công cụ nằm trong Hồ sơ; bạn tự xoá tài khoản Education Hugo cùng toàn bộ dữ liệu học ở Cài đặt → "Xoá tài khoản Education Hugo" (tài khoản đăng nhập Hugo Studio xoá riêng trong phần cài đặt của Hugo Studio), và mọi yêu cầu khác xin gửi tới ${CONTACT}. Chúng tôi trả lời trong thời hạn luật định và có thể xác minh danh tính của bạn trước.`,
+        `Bạn có quyền truy cập, chỉnh sửa hoặc xoá dữ liệu cá nhân, yêu cầu bản sao ở định dạng có thể chuyển, rút lại sự đồng ý nhận thông báo, và phản đối hoặc hạn chế một số hoạt động xử lý. Phần lớn công cụ nằm trong Hồ sơ; bạn tự xoá tài khoản Education Hugo cùng toàn bộ dữ liệu học ở Cài đặt → "Xoá tài khoản Education Hugo" (muốn thu hồi quyền truy cập, gỡ Education Hugo trong mục Ứng dụng đã kết nối của tài khoản Google hoặc Discord), và mọi yêu cầu khác xin gửi tới ${CONTACT}. Chúng tôi trả lời trong thời hạn luật định và có thể xác minh danh tính của bạn trước.`,
       ] },
       { h: "8. Người học dưới 18 tuổi", p: [
         "Education Hugo dành cho người từ 14 tuổi. Người học 14–15 tuổi phải cung cấp số điện thoại cha mẹ/người giám hộ và xác nhận đã được cho phép; số này là dữ liệu riêng tư, chỉ dùng để chứng minh hoặc xác minh sự tham gia của người giám hộ và xử lý yêu cầu an toàn hoặc quyền dữ liệu. Chúng tôi không công khai danh tính thật của người chưa thành niên. Cha mẹ hoặc người giám hộ có thể liên hệ để xem lại hoặc xoá dữ liệu của trẻ.",
@@ -356,7 +356,7 @@ const ZH = {
     lead: "本条款适用于你使用 Education Hugo——由 Hugo Studio 在 education.hugowishpax.studio 运营的免费学习服务。创建账户或继续使用本服务，即表示你完全接受本条款。如不同意，请勿使用 Education Hugo。",
     sections: [
       { h: "1. 我们是谁", p: [
-        "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。项目拥有独立的账户、服务器和数据。你可以使用 Google、Hugo Studio 账户（www.hugowishpax.studio）或通行密钥登录；使用 Hugo Studio 登录时，我们只会获得你的姓名、邮箱和头像，不会获得 Hugo Studio 的其他数据。",
+        "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。项目拥有独立的账户、服务器和数据。你可以使用 Google、Discord 或通行密钥登录；使用 Google 或 Discord 登录时，我们只会获得你的姓名、邮箱和头像，不会获得这些账户的其他数据。",
         "Education Hugo 由格林威治大学（越南）学生 Hugo 构思并开发，是一个回馈社区的非营利项目。除另有说明外，源代码、课程、角色和美术作品归作者所有；未经许可不得复制或转载。",
         `有关本条款的问题，请发送至 ${CONTACT}。`,
       ] },
@@ -365,7 +365,7 @@ const ZH = {
         "每人只能拥有一个账户，不得替他人创建账户，也不得冒充任何人。",
       ] },
       { h: "3. 你的账户", p: [
-        "你可以使用 Google 或通行密钥（Face ID、指纹或设备 PIN）登录。你有责任保护能访问账户的设备和凭据，并对账户下的所有活动负责。如怀疑有未经授权的访问，请立即通知我们。",
+        "你可以使用 Google、Discord 或通行密钥（Face ID、指纹或设备 PIN）登录。你有责任保护能访问账户的设备和凭据，并对账户下的所有活动负责。如怀疑有未经授权的访问，请立即通知我们。",
         "课程和账户均免费，账户不会过期。对于违反本条款的账户，我们可以将其关闭。",
       ] },
       { h: "4. 宝石、XP 与连胜", p: [
@@ -408,7 +408,7 @@ const ZH = {
         `Hugo Studio 是本文所述个人数据的控制者。有关你数据的请求请发送至 ${CONTACT}。我们依据越南有关个人数据保护的法律处理个人数据，包括《2025 年个人数据保护法》（2026 年 1 月 1 日起施行）、第 13/2023/NĐ-CP 号法令及其后续法规。`,
       ] },
       { h: "2. 我们处理的数据", list: [
-        "账户数据——来自 Google 登录的电子邮箱和显示名称；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",
+        "账户数据——来自 Google 或 Discord 登录的电子邮箱、显示名称和头像；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",
         "个人资料身份（Persona）——昵称、像素角色和简短介绍。这些信息用于你自己的账户；真实姓名、邮箱和照片不会显示在 Ads 页面。",
         "学习数据——已完成的 step 和课程、测验答案与分数、连胜日历、XP、每日目标和个人设置。SQL 练习完全在你的浏览器中运行；你在其中输入的内容仅作为草稿保存在你的设备上，绝不会发送给我们。",
         "商店数据——你购买的道具、佩戴的徽章、剩余的火焰护盾和双倍 XP 时间，以及相应的 宝石 交易记录。",
@@ -425,7 +425,7 @@ const ZH = {
       ], p: ["我们不将你的数据用于广告，不建立营销画像，也不会仅凭自动化手段作出对你产生法律效果的决定。"] },
       { h: "4. 服务提供方", p: ["我们依赖少数处理方，每一方都只能按照我们的指示处理数据："], list: [
         "MongoDB Atlas（数据库）、Render（应用服务器）、Vercel（网页托管）和 Cloudflare（网络分发与防护）。",
-        "Google，仅在你选择时用于登录。",
+        "Google 和 Discord，仅在你选择时用于登录。",
         "Resend（以 SMTP 中继作为备用）负责发送邮件，只接收你的邮箱地址和邮件内容。",
         "由 Apple、Google 或 Mozilla 运营的浏览器推送服务，将通知转发到你的设备。",
         "Telegram，向我们的管理员发送内部提醒；提醒绝不包含你的邮箱。",
@@ -441,7 +441,7 @@ const ZH = {
         "你删除账户后，个人数据将被删除或不可逆地匿名化，法律要求我们保留的除外。",
       ] },
       { h: "7. 你的权利", p: [
-        `你可以访问、更正或删除个人数据，索取可携带格式的副本，撤回对通知的同意，并反对或限制某些处理。大部分控制项位于个人资料中；你可以在 设置 →「删除 Education Hugo 账户」中删除 Education Hugo 账户及全部学习数据（Hugo Studio 登录账户需在 Hugo Studio 账户设置中另行删除），其他请求可发送至 ${CONTACT}。我们将在法定期限内答复，并可能先核实你的身份。`,
+        `你可以访问、更正或删除个人数据，索取可携带格式的副本，撤回对通知的同意，并反对或限制某些处理。大部分控制项位于个人资料中；你可以在 设置 →「删除 Education Hugo 账户」中删除 Education Hugo 账户及全部学习数据（如需同时撤销授权，请在 Google 或 Discord 账户的已连接应用中移除 Education Hugo），其他请求可发送至 ${CONTACT}。我们将在法定期限内答复，并可能先核实你的身份。`,
       ] },
       { h: "8. 未满 18 岁的学员", p: [
         "Education Hugo 面向 14 岁及以上人群。14–15 岁学员必须提供父母或监护人电话号码并确认已获许可；该号码为私密数据，仅用于证明或核实监护人参与，以及处理安全或数据权利请求。我们绝不公开未成年人的真实身份。父母或监护人可联系我们查看或删除未成年人的数据。",

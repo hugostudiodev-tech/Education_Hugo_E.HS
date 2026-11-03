@@ -2,6 +2,7 @@
  * Đăng nhập Education Hugo (Better Auth, collection user/session/account/passkey):
  *   - Google: nút Google Identity gửi ID token (sign-in/social + idToken)
  *   - Hugo Studio: OAuth 2 + PKCE với máy chủ Hugo Studio (www.hugowishpax.studio)
+ *   - Discord, Facebook: OAuth chuyển trang (chỉ bật khi có DISCORD_CLIENT_ID / FACEBOOK_CLIENT_ID trong env)
  *   - Passkey: Face ID / vân tay. rpID = tên miền gốc nên passkey tạo ở Hugo Studio vẫn dùng được.
  * Cùng email = cùng một tài khoản, đăng nhập đường nào cũng vào đúng người học đó.
  * Admin: hệ riêng /api/admin-auth (cookie edu-admin.*, collection admin_*), mã 6 số gửi
@@ -87,7 +88,10 @@ export function initAuth() {
     advanced: advanced('edu'),
     socialProviders: {
       google: { clientId: process.env.GOOGLE_CLIENT_ID || '', clientSecret: process.env.GOOGLE_CLIENT_SECRET || '' },
+      ...(process.env.DISCORD_CLIENT_ID ? { discord: { clientId: process.env.DISCORD_CLIENT_ID, clientSecret: process.env.DISCORD_CLIENT_SECRET || '' } } : {}),
+      ...(process.env.FACEBOOK_CLIENT_ID ? { facebook: { clientId: process.env.FACEBOOK_CLIENT_ID, clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '' } } : {}),
     },
+    // Discord/Facebook KHÔNG nằm trong trustedProviders: chỉ gộp vào tài khoản cũ khi nhà cung cấp báo email đã xác minh.
     account: { accountLinking: { enabled: true, trustedProviders: ['google', 'hugo-studio'] } },
     plugins: [
       passkey({

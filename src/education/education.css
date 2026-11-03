@@ -254,6 +254,12 @@
 .edu-login-card h1 { margin: 0; font-size: 24px; font-weight: 800; }
 .edu-login-card > p { margin: 0; color: var(--edu-muted); font-size: 15px; line-height: 1.5; }
 .edu-google { min-height: 44px; }
+.edu-signin-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+.edu-faceid { min-height: 40px; border-radius: 999px; }
+.edu-signin-more { width: 100%; }
+.edu-signin-more summary { cursor: pointer; color: var(--edu-muted); font-size: 14px; font-weight: 600; list-style: none; padding: 6px; }
+.edu-signin-more summary::-webkit-details-marker { display: none; }
+.edu-signin-more[open] summary { margin-bottom: 8px; }
 .edu-note { margin: 0; color: var(--edu-muted); font-size: 13px; line-height: 1.5; }
 .edu-alert { margin: 0; padding: 10px 12px; border-radius: 12px; background: #ffdfe0; color: #c62828; font-size: 14px; font-weight: 700; }
 

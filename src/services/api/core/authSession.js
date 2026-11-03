@@ -1,6 +1,6 @@
 // Phiên người học Education Hugo. Phiên thật là cookie HttpOnly của Better Auth (máy chủ
 // riêng, server/lib/auth.js); localStorage chỉ giữ tên + email để vẽ giao diện ngay.
-// Ba cách đăng nhập: Google (ID token), tài khoản Hugo Studio (OAuth), passkey.
+// Cách đăng nhập: Google (ID token), passkey, và OAuth chuyển trang (Discord, Facebook, Hugo Studio).
 import { API_BASE } from "../../../config/apiBase";
 
 const KEY = "price-doc-member-session";
@@ -68,19 +68,19 @@ export async function loginMemberWithPasskey() {
   return { session: loginMember(user, "passkey"), error: null };
 }
 
-/** Hugo Studio: chuyển sang trang đồng ý của Hugo Studio, quay về `next` với ?signedin=hugo. */
-export async function loginMemberWithHugoStudio(next = "/learn") {
+/** OAuth chuyển trang (discord, facebook, hugo-studio): sang trang đồng ý của nhà cung cấp, quay về `next` với ?signedin=<provider>. */
+export async function loginMemberWithRedirect(provider, next = "/learn") {
   const back = new URL(next, window.location.origin);
-  back.searchParams.set("signedin", "hugo");
+  back.searchParams.set("signedin", provider);
   try {
     const res = await fetch(`${API_BASE}/auth/sign-in/social`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider: "hugo-studio", callbackURL: back.href, errorCallbackURL: `${window.location.origin}/login?error=hugo` }),
+      body: JSON.stringify({ provider, callbackURL: back.href, errorCallbackURL: `${window.location.origin}/login?error=${provider}` }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.url) return { error: data.message || "Chưa mở được trang đăng nhập Hugo Studio." };
+    if (!res.ok || !data.url) return { error: data.message || "Chưa mở được trang đăng nhập." };
     window.location.assign(data.url);
     return { error: null };
   } catch {
@@ -88,11 +88,11 @@ export async function loginMemberWithHugoStudio(next = "/learn") {
   }
 }
 
-/** Sau khi quay về từ Hugo Studio: đọc phiên cookie vừa tạo, ghi vào máy. */
-export async function restoreMemberSession() {
+/** Sau khi quay về từ trang đồng ý: đọc phiên cookie vừa tạo, ghi vào máy. */
+export async function restoreMemberSession(provider = "hugo-studio") {
   const client = await authClient();
   const user = (await client.getSession()).data?.user;
-  return user ? loginMember(user, "hugo-studio") : null;
+  return user ? loginMember(user, provider) : null;
 }
 
 export async function logoutAuth() {
