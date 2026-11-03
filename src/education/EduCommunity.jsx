@@ -100,7 +100,7 @@ function Ad({ post, onChange }) {
       <div className="comm-post-main">
         <header><b>Education Hugo</b><span className="comm-admin">Admin</span><time dateTime={post.createdAt}>{ago(post.createdAt, lang)}</time>{translation.from && <span className="comm-lang">{langName(translation.from)}</span>}</header>
         {post.title && <h2 className="comm-title">{post.title}</h2>}
-        <RichText text={shown} />
+        <RichText text={preview?.kind === "image" ? shown.replace(preview.url, "").trim() : shown} />
         {translation.busy && <small className="comm-tr is-busy">{t("community.translating")}</small>}
         {translation.text && <button type="button" className="comm-tr" onClick={toggleOriginal}><AnimIcon name="sparkles" size={16} />{translation.original ? t("community.showTranslation", { lang: langName(lang) }) : t("community.translatedFrom", { lang: langName(translation.from) })}</button>}
         {preview && <Preview link={preview} />}
