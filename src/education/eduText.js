@@ -1,4 +1,4 @@
-import { createElement, Fragment } from "react";
+import { createElement, Fragment, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { EDU_COPY } from "./eduCopy";
 import { partner } from "../config/partner";
@@ -29,7 +29,7 @@ export function rich(text) {
 export function useEduText() {
   const { i18n } = useTranslation();
   const lang = eduLang(partner.lang || i18n?.resolvedLanguage || i18n?.language);
-  return { lang, t: (key, vars) => eduT(lang, key, vars) };
+  return useMemo(() => ({ lang, t: (key, vars) => eduT(lang, key, vars) }), [lang]);
 }
 
 /**
