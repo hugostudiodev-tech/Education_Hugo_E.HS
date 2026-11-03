@@ -15,6 +15,7 @@ const EN = {
         h: "1. Who we are",
         p: [
           "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. It has its own accounts, servers and data. You may sign in with Google, with your Hugo Studio account (www.hugowishpax.studio) or with a passkey; signing in with Hugo Studio only shares your name, email and profile picture with us, and no other Hugo Studio data.",
+          "Education Hugo was conceived and built by Hugo, a student at the University of Greenwich (Vietnam), as a non-profit contribution to the community. Its source code, lessons, characters and artwork belong to the author unless stated otherwise; do not copy or republish them without permission.",
           `Questions about these Terms may be addressed to ${CONTACT}.`,
         ],
       },
@@ -130,7 +131,7 @@ const EN = {
           "Google, solely for sign-in when you choose it.",
           "Resend (with an SMTP relay as fallback), which delivers our emails; it receives your email address and the message content only.",
           "Browser push services operated by Apple, Google or Mozilla, which relay notifications to your device.",
-          "Telegram, which delivers internal alerts to our administrators; a report alert contains the reported learner's nickname and friend code, never an email address.",
+          "Telegram, which delivers internal alerts to our administrators; alerts never contain your email address.",
         ],
       },
       {
@@ -187,7 +188,7 @@ const EN = {
       {
         h: "Be kind and constructive",
         list: [
-          "Critique code, never the person who wrote it. Beginners are welcome, and every question deserves a courteous answer.",
+          "Keep feedback about the lesson or the problem, never about a person. Courteous wording helps us act on it faster.",
           "Harassment, bullying, threats, hate speech and discrimination on any ground are prohibited.",
         ],
       },
@@ -203,15 +204,15 @@ const EN = {
         h: "Be honest",
         list: [
           "Do not cheat on quizzes, automate submissions or exploit defects to inflate gems, XP or streaks, and do not trade store items for money.",
-          "Share work you created or are entitled to share; credit the sources you rely on. Do not post pirated material or links to malware or phishing.",
-          "No spam, advertising, referral schemes or repeated identical posts.",
+          "Do not include pirated material or links to malware or phishing in anything you submit.",
+          "No spam, advertising, referral schemes or repeated identical submissions.",
         ],
       },
       {
         h: "Reporting and enforcement",
         p: [
-          "If something breaches these Guidelines, use “Report user” on the learner's profile or contact us. Reports are confidential: the person reported is not told who reported them. Every report is reviewed by people.",
-          "Depending on severity and recurrence, we may hide content, reset a nickname or character, revoke illegitimate rewards, or suspend or close an account. Knowingly false reports are themselves a breach.",
+          "If you see something that breaches these Guidelines, contact us or use the feedback form. Every report is kept confidential and reviewed by people.",
+          "Depending on severity and recurrence, we may reset a nickname or character, revoke illegitimate rewards, or suspend or close an account.",
         ],
       },
     ],
@@ -225,6 +226,7 @@ const VI = {
     sections: [
       { h: "1. Chúng tôi là ai", p: [
         "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, bằng tài khoản Hugo Studio (www.hugowishpax.studio) hoặc bằng passkey; đăng nhập bằng Hugo Studio chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của Hugo Studio.",
+        "Education Hugo do Hugo, sinh viên Đại học Greenwich (Việt Nam), lên ý tưởng và xây dựng như một dự án phi lợi nhuận đóng góp cho cộng đồng. Mã nguồn, bài học, nhân vật và hình ảnh thuộc quyền của tác giả, trừ khi ghi khác; không sao chép hay đăng lại khi chưa được phép.",
         `Mọi câu hỏi về Điều khoản xin gửi tới ${CONTACT}.`,
       ] },
       { h: "2. Điều kiện sử dụng", p: [
@@ -295,7 +297,7 @@ const VI = {
         "Google, chỉ cho việc đăng nhập khi bạn chọn.",
         "Resend (kèm máy chủ SMTP dự phòng) để gửi email; bên này chỉ nhận địa chỉ email của bạn và nội dung thư.",
         "Dịch vụ thông báo đẩy của trình duyệt do Apple, Google hoặc Mozilla vận hành, chuyển thông báo tới thiết bị của bạn.",
-        "Telegram, chuyển cảnh báo nội bộ tới quản trị viên; cảnh báo báo cáo chỉ chứa biệt danh và mã bạn của người bị báo cáo, không bao giờ có email.",
+        "Telegram, chuyển cảnh báo nội bộ tới quản trị viên; cảnh báo không bao giờ chứa email của bạn.",
       ] },
       { h: "5. Nội dung bên thứ ba trong Ads", p: [
         "Bản xem trước liên kết được dựng trong trình duyệt của bạn từ chính địa chỉ đó. Khi bài đăng có liên kết ảnh, ảnh được tải trực tiếp từ máy chủ lưu nó; YouTube chỉ được gọi khi bạn bấm phát, qua tên miền tăng cường quyền riêng tư. Vì vậy các bên thứ ba này có thể nhận địa chỉ IP của bạn theo chính sách riêng của họ. Hugo chỉ lưu chữ và địa chỉ, không bao giờ lưu bản sao nội dung đa phương tiện.",
@@ -327,7 +329,7 @@ const VI = {
     lead: "Quy tắc này áp dụng cho thông tin hồ sơ, góp ý bài học, yêu cầu hỗ trợ và mọi thông tin bạn gửi tới Education Hugo. Quy tắc là một phần của Điều khoản sử dụng.",
     sections: [
       { h: "Tử tế và mang tính xây dựng", list: [
-        "Góp ý về đoạn mã, đừng nhắm vào người viết nó. Người mới luôn được chào đón, và câu hỏi nào cũng xứng đáng nhận câu trả lời lịch sự.",
+        "Góp ý về bài học hoặc vấn đề, đừng nhắm vào cá nhân. Lời lẽ lịch sự giúp chúng tôi xử lý nhanh hơn.",
         "Cấm quấy rối, bắt nạt, đe doạ, phát ngôn thù ghét và phân biệt đối xử dưới mọi hình thức.",
       ] },
       { h: "An toàn và phù hợp", list: [
@@ -337,12 +339,12 @@ const VI = {
       ] },
       { h: "Trung thực", list: [
         "Không gian lận trắc nghiệm, tự động nộp bài hay khai thác lỗi để thổi phồng Ngọc, XP hoặc chuỗi lửa, và không mua bán vật phẩm Cửa hàng bằng tiền.",
-        "Chỉ chia sẻ thứ bạn tự làm hoặc được phép chia sẻ; ghi nguồn bạn tham khảo. Không đăng nội dung vi phạm bản quyền hay liên kết tới mã độc, lừa đảo.",
-        "Không spam, quảng cáo, chương trình giới thiệu hay đăng lặp lại cùng một nội dung.",
+        "Không gửi nội dung vi phạm bản quyền hay liên kết tới mã độc, lừa đảo.",
+        "Không spam, quảng cáo, chương trình giới thiệu hay gửi lặp lại cùng một nội dung.",
       ] },
       { h: "Báo cáo và xử lý", p: [
-        "Nếu thấy điều gì vi phạm Quy tắc, hãy dùng “Báo cáo người dùng” trên hồ sơ người học hoặc liên hệ chúng tôi. Báo cáo được giữ kín: người bị báo cáo không biết ai đã báo cáo. Mọi báo cáo đều do con người xem xét.",
-        "Tuỳ mức độ và tần suất, chúng tôi có thể ẩn nội dung, đặt lại biệt danh hoặc nhân vật, thu hồi phần thưởng trái phép, hoặc tạm khoá hay đóng tài khoản. Cố ý báo cáo sai cũng là vi phạm.",
+        "Nếu thấy điều gì vi phạm Quy tắc, hãy liên hệ chúng tôi hoặc dùng mẫu góp ý. Mọi báo cáo đều được giữ kín và do người thật xem xét.",
+        "Tuỳ mức độ và tần suất, chúng tôi có thể đặt lại biệt danh hoặc nhân vật, thu hồi phần thưởng trái phép, hoặc tạm khoá hay đóng tài khoản.",
       ] },
     ],
   },
@@ -355,6 +357,7 @@ const ZH = {
     sections: [
       { h: "1. 我们是谁", p: [
         "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。项目拥有独立的账户、服务器和数据。你可以使用 Google、Hugo Studio 账户（www.hugowishpax.studio）或通行密钥登录；使用 Hugo Studio 登录时，我们只会获得你的姓名、邮箱和头像，不会获得 Hugo Studio 的其他数据。",
+        "Education Hugo 由格林威治大学（越南）学生 Hugo 构思并开发，是一个回馈社区的非营利项目。除另有说明外，源代码、课程、角色和美术作品归作者所有；未经许可不得复制或转载。",
         `有关本条款的问题，请发送至 ${CONTACT}。`,
       ] },
       { h: "2. 使用资格", p: [
@@ -425,7 +428,7 @@ const ZH = {
         "Google，仅在你选择时用于登录。",
         "Resend（以 SMTP 中继作为备用）负责发送邮件，只接收你的邮箱地址和邮件内容。",
         "由 Apple、Google 或 Mozilla 运营的浏览器推送服务，将通知转发到你的设备。",
-        "Telegram，向我们的管理员发送内部提醒；举报提醒只包含被举报学员的昵称和好友码，绝不包含邮箱。",
+        "Telegram，向我们的管理员发送内部提醒；提醒绝不包含你的邮箱。",
       ] },
       { h: "5. Ads 中的第三方内容", p: [
         "链接预览由你的浏览器根据链接地址本身生成。帖子包含图片链接时，图片直接从其托管服务器加载；只有在你点击播放时才会通过隐私增强域名连接 YouTube。因此这些第三方可能依据其自身政策获得你的 IP 地址。Hugo 只保存文字和地址，从不保存媒体副本。",
@@ -457,7 +460,7 @@ const ZH = {
     lead: "本准则适用于个人资料信息、课程反馈、支持请求以及你提交给 Education Hugo 的其他信息，是使用条款的组成部分。",
     sections: [
       { h: "友善且具建设性", list: [
-        "评论代码，而不是写代码的人。欢迎初学者，每个问题都值得礼貌的回答。",
+        "反馈请针对课程或问题本身，而不是针对个人。礼貌的措辞能帮助我们更快处理。",
         "禁止骚扰、欺凌、威胁、仇恨言论和任何形式的歧视。",
       ] },
       { h: "安全且得体", list: [
@@ -467,12 +470,12 @@ const ZH = {
       ] },
       { h: "诚实守信", list: [
         "不得在测验中作弊、自动提交或利用漏洞刷 宝石、XP 或连胜，也不得用金钱交易商店道具。",
-        "只分享你自己创作或有权分享的作品，并注明参考来源。不得发布盗版内容或指向恶意软件、钓鱼网站的链接。",
-        "禁止垃圾信息、广告、推荐计划或重复发布相同内容。",
+        "提交的任何内容中不得包含盗版内容或指向恶意软件、钓鱼网站的链接。",
+        "禁止垃圾信息、广告、推荐计划或重复提交相同内容。",
       ] },
       { h: "举报与处理", p: [
-        "如发现违反本准则的内容，请在该学员主页使用“举报用户”或联系我们。举报保密：被举报者不会知道是谁举报的。每份举报都由人工审核。",
-        "视严重程度和频率，我们可能隐藏内容、重置昵称或角色、收回不正当奖励，或暂停、关闭账户。故意虚假举报本身也属违规。",
+        "如发现违反本准则的内容，请联系我们或使用反馈表。每份举报都会保密并由人工审核。",
+        "视严重程度和频率，我们可能重置昵称或角色、收回不正当奖励，或暂停、关闭账户。",
       ] },
     ],
   },
