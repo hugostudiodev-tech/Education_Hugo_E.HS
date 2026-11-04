@@ -1516,3 +1516,19 @@ button.edu-pop-course:disabled { cursor: default; }
 /* Hai nút Đánh giá / Hỗ trợ: nhãn dài thì xuống dòng gọn trong nút, không bị cắt chữ. */
 .edu .edu-me-actions .edu-btn { white-space: normal; overflow: visible; text-overflow: clip; min-height: 52px; padding: 8px 12px; font-size: 14px; line-height: 1.2; letter-spacing: .02em; text-align: center; }
 .edu .edu-me-actions .edu-btn .material-symbols-outlined { flex: 0 0 auto; font-size: 22px; }
+/* Hỏi thông tin hồ sơ (EduProfileGate): mỗi bước một thông tin. */
+.pg-card { gap: 12px; }
+.pg-progress { display: block; width: 100%; height: 12px; border-radius: 6px; background: var(--edu-soft); overflow: hidden; }
+.pg-progress i { display: block; height: 100%; border-radius: inherit; background: var(--edu-green); transition: width .3s ease; }
+.pg-count { color: var(--edu-muted); font-weight: 800; }
+.persona-nick select { min-height: 56px; border-radius: 16px; border: 2px solid var(--edu-line); background: var(--edu-soft); color: var(--edu-ink); font: inherit; font-size: 18px; text-align: center; padding: 0 14px; }
+.persona-nick input[type="date"] { font-family: inherit; }
+.pg-chips { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); max-height: none; }
+.pg-chips button { min-height: 56px; font: inherit; font-weight: 800; color: var(--edu-ink); }
+.pg-chips button.is-on { color: var(--edu-blue); }
+.pg-why { display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px; border-radius: 14px; background: var(--edu-soft); font-size: 14px; text-align: left; }
+.pg-why .material-symbols-outlined { font-size: 20px; color: var(--edu-blue); }
+.pg-hobbies { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.pg-hobbies button { display: grid; gap: 4px; min-height: 76px; padding: 8px 4px; font-size: 13px; line-height: 1.15; }
+.pg-hobbies button span { font-size: 26px; line-height: 1; }
+.pg-hobbies button.is-on { box-shadow: 0 3px 0 var(--edu-blue); }

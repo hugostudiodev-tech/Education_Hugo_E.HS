@@ -46,8 +46,9 @@ export class PersonaClient {
   }
 
   /** Lưu một hoặc cả hai phần; phần không gửi thì giữ nguyên. */
-  save({ nickname, avatar, intro } = {}) {
+  save({ nickname, avatar, intro, profile } = {}) {
     const body = {};
+    if (profile !== undefined) body.profile = profile; // máy chủ kiểm (packages/persona/profile.js)
     if (nickname !== undefined) {
       const checked = checkNickname(nickname);
       if (!checked.ok) return Promise.reject(new PersonaError(checked.code, 400));

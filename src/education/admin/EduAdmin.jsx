@@ -255,6 +255,7 @@ function LearnerDetail({ email, onClose }) {
         <Btn tone="ghost" onClick={onClose}>Đóng</Btn>
       </div>
       <p className="text-[14px] text-muted-foreground">Biệt danh: {l.nickname || "—"} · Ngọc: {l.gems ?? 0} · Mã bạn: {l.friendCode || "—"} · Tạo: {fmt(l.createdAt)}{l.bannedAt ? ` · Khoá từ ${fmt(l.bannedAt)}` : ""}</p>
+      {l.profile && <p className="text-[14px] text-muted-foreground">Ngày sinh: {l.profile.birthDate || "—"} · Tỉnh/thành: {l.profile.province || "—"} · Giới tính: {l.profile.gender || "—"} · Sở thích: {(l.profile.hobbies || []).join(", ") || "—"}{l.ageMismatch ? <b className="text-red-600"> · Ngày sinh dưới 16 nhưng đã chọn 16+ (thiếu xác nhận phụ huynh)</b> : null}</p>}
       {Object.values(l.links || {}).some(Boolean) && (
         <ul className="space-y-1 text-[14px]">
           {Object.entries(l.links).filter(([, v]) => v).map(([k, v]) => (

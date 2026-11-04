@@ -1,0 +1,118 @@
+import { useState } from "react";
+import { notify } from "../lib/notify";
+import { persona } from "./EduPersona";
+import { useEduText } from "./eduText";
+import { playEduSound } from "./eduSound";
+import { HOBBIES, MAX_HOBBIES, MIN_AGE, PROVINCES, profileDone } from "../../packages/persona/profile.js";
+
+/**
+ * Hỏi thông tin hồ sơ riêng tư — MỖI BƯỚC MỘT THÔNG TIN, chỉ hỏi những bước còn thiếu:
+ *   ngày sinh (bắt buộc) → tỉnh/thành (bắt buộc) → sở thích (bỏ qua được) → giới tính (bỏ qua được).
+ * Thành viên mới: ngay sau tạo nhân vật. Thành viên cũ: lần mở app tiếp theo.
+ * Mỗi bước có dòng "Vì sao hỏi" (minh bạch mục đích — Luật BVDLCN 2025). Không công khai trên hồ sơ.
+ */
+const PROVINCE_NAMES = {
+  "ha-noi": "Hà Nội", hue: "Huế", "lai-chau": "Lai Châu", "dien-bien": "Điện Biên", "son-la": "Sơn La", "lang-son": "Lạng Sơn", "quang-ninh": "Quảng Ninh",
+  "thanh-hoa": "Thanh Hoá", "nghe-an": "Nghệ An", "ha-tinh": "Hà Tĩnh", "cao-bang": "Cao Bằng", "tuyen-quang": "Tuyên Quang", "lao-cai": "Lào Cai",
+  "thai-nguyen": "Thái Nguyên", "phu-tho": "Phú Thọ", "bac-ninh": "Bắc Ninh", "hung-yen": "Hưng Yên", "hai-phong": "Hải Phòng", "ninh-binh": "Ninh Bình",
+  "quang-tri": "Quảng Trị", "da-nang": "Đà Nẵng", "quang-ngai": "Quảng Ngãi", "gia-lai": "Gia Lai", "khanh-hoa": "Khánh Hoà", "lam-dong": "Lâm Đồng",
+  "dak-lak": "Đắk Lắk", "ho-chi-minh": "TP. Hồ Chí Minh", "dong-nai": "Đồng Nai", "tay-ninh": "Tây Ninh", "can-tho": "Cần Thơ", "vinh-long": "Vĩnh Long",
+  "dong-thap": "Đồng Tháp", "ca-mau": "Cà Mau", "an-giang": "An Giang",
+};
+const HOBBY_ICON = {
+  games: "🎮", esports: "🏆", anime: "🍥", manga: "📚", kpop: "🎤", music: "🎧", singing: "🎙️", instrument: "🎸", dance: "💃", football: "⚽",
+  basketball: "🏀", badminton: "🏸", gym: "💪", swimming: "🏊", cycling: "🚴", drawing: "🎨", photo: "📷", video: "🎬", design: "✏️", reading: "📖",
+  writing: "📝", movies: "🍿", travel: "✈️", cooking: "🍳", coding: "💻", robotics: "🤖", science: "🔬", pets: "🐶", chess: "♟️", languages: "🌏",
+};
+const GENDER_OPTIONS = ["male", "female", "other", "private"];
+
+function missingSteps(p) {
+  return [
+    !p?.birthDate && "birth",
+    !p?.province && "province",
+    !Array.isArray(p?.hobbies) && "hobbies",
+    !p?.gender && "gender",
+  ].filter(Boolean);
+}
+
+export default function ProfileGate({ current, onDone }) {
+  const { t } = useEduText();
+  const [steps] = useState(() => missingSteps(current?.profile));
+  const [index, setIndex] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [birth, setBirth] = useState("");
+  const [province, setProvince] = useState("");
+  const [hobbies, setHobbies] = useState([]);
+  const [gender, setGender] = useState("");
+  const step = steps[index];
+  const optional = step === "hobbies" || step === "gender";
+  const today = new Date();
+  const maxBirth = new Date(Date.UTC(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())).toISOString().slice(0, 10);
+
+  const save = async (patch) => {
+    setBusy(true);
+    try {
+      const saved = await persona.save({ profile: patch });
+      if (index + 1 < steps.length && !profileDone(saved.profile)) { setIndex(index + 1); return; }
+      playEduSound("success");
+      notify.success(t("friends.pg.done"));
+      onDone(saved);
+    } catch (error) {
+      const key = `friends.pg.err.${error.code}`;
+      notify.error(t(key) === key ? t("persona.failed") : t(key));
+    } finally { setBusy(false); }
+  };
+  const value = { birth: birth && { birthDate: birth }, province: province && { province }, hobbies: { hobbies }, gender: gender && { gender } }[step];
+  const skip = { hobbies: { hobbies: [] }, gender: { gender: "skip" } }[step];
+  if (!step) return null;
+  const toggleHobby = (h) => setHobbies((list) => (list.includes(h) ? list.filter((x) => x !== h) : list.length < MAX_HOBBIES ? [...list, h] : list));
+
+  return (
+    <div className="persona-gate" role="dialog" aria-modal="true" aria-labelledby="pg-title">
+      <form className="persona-card pg-card" onSubmit={(e) => { e.preventDefault(); if (value) save(value); }}>
+        <span className="pg-progress" aria-hidden="true"><i style={{ width: `${((index + 1) / steps.length) * 100}%` }} /></span>
+        <small className="pg-count">{index + 1}/{steps.length}{optional ? ` · ${t("friends.pg.optional")}` : ""}</small>
+        <h2 id="pg-title">{t(`friends.pg.${step}.title`)}</h2>
+        <p>{t(`friends.pg.${step}.body`)}{step === "hobbies" && ` (${hobbies.length}/${MAX_HOBBIES})`}</p>
+
+        {step === "birth" && (
+          <div className="persona-nick">
+            <input type="date" required value={birth} max={maxBirth} min="1926-01-01" onChange={(e) => setBirth(e.target.value)} aria-label={t("friends.pg.birth.title")} />
+          </div>
+        )}
+        {step === "province" && (
+          <div className="persona-nick">
+            <select required value={province} onChange={(e) => setProvince(e.target.value)} aria-label={t("friends.pg.province.title")}>
+              <option value="" disabled>{t("friends.pg.province.pick")}</option>
+              {PROVINCES.map((code) => <option key={code} value={code}>{code === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[code]}</option>)}
+            </select>
+          </div>
+        )}
+        {step === "hobbies" && (
+          <div className="persona-grid pg-chips pg-hobbies" role="group" aria-label={t("friends.pg.hobbies.title")}>
+            {HOBBIES.map((h) => (
+              <button key={h} type="button" aria-pressed={hobbies.includes(h)} className={hobbies.includes(h) ? "is-on" : ""} onClick={() => toggleHobby(h)}>
+                <span aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}
+              </button>
+            ))}
+          </div>
+        )}
+        {step === "gender" && (
+          <div className="persona-grid pg-chips" role="radiogroup" aria-label={t("friends.pg.gender.title")}>
+            {GENDER_OPTIONS.map((g) => (
+              <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g ? "is-on" : ""} onClick={() => setGender(g)}>
+                {t(`friends.pg.gender.list.${g}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p className="pg-why"><span className="material-symbols-outlined" aria-hidden="true">info</span>{t(`friends.pg.${step}.why`)}</p>
+        <div className="persona-actions">
+          {optional && <button type="button" className="edu-btn edu-btn--ghost" disabled={busy} onClick={() => save(skip)}>{t("friends.pg.skip")}</button>}
+          <button type="submit" className="edu-btn" disabled={busy || !value || (step === "hobbies" && !hobbies.length)}>{t("friends.pg.next")}</button>
+        </div>
+      </form>
+    </div>
+  );
+}

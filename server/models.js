@@ -40,7 +40,11 @@ const learnerSchema = new Schema({
   nickname: { type: String, default: '' },
   avatar: { type: Mixed, default: null },
   intro: { type: String, default: '' },
-  links: { type: Mixed, default: undefined }, // MXH công khai, tuỳ chọn (packages/persona/links.js)
+  links: { type: Mixed, default: undefined },
+  // Hồ sơ riêng tư (không công khai): { birthDate, province, hobbies[], gender } — packages/persona/profile.js
+  profile: { type: Mixed, default: undefined },
+  ageMismatch: Boolean, // ngày sinh cho 14–15 tuổi nhưng lời đồng ý chọn 16+ → admin xem lại
+ // MXH công khai, tuỳ chọn (packages/persona/links.js)
   // Bạn bè + thi đua tuần
   friendCode: String,
   // Tài khoản chính thức Education Hugo (tick vàng): theo dõi là thành bạn ngay, nhận thông báo admin gửi.

@@ -8,6 +8,7 @@ import { checkNickname } from '../../packages/persona/nickname.js';
 import { checkAvatar } from '../../packages/persona/avatar.js';
 import { checkIntro } from '../../packages/persona/intro.js';
 import { checkLinks } from '../../packages/persona/links.js';
+import { ageOn, checkProfile, profileDone } from '../../packages/persona/profile.js';
 import { cleanFeedback } from '../../packages/shared/eduFeedback.js';
 import { eraseLearner } from '../services/erase.js';
 import { addGems } from '../services/gems.js';
@@ -86,8 +87,8 @@ router.post('/learn/quiz', limit(20), handle(async (req, res) => {
 }));
 
 // Persona công khai: biệt danh + nhân vật pixel + lời giới thiệu (packages/persona kiểm luật).
-const personaView = (d) => ({ nickname: d?.nickname || '', avatar: d?.avatar || null, intro: d?.intro || '', links: d?.links || {}, complete: Boolean(d?.nickname && d?.avatar) });
-router.get('/persona', handle(async (req) => personaView(await Learner.findOne({ email: req.email }).select('nickname avatar intro links').lean())));
+const personaView = (d) => ({ nickname: d?.nickname || '', avatar: d?.avatar || null, intro: d?.intro || '', links: d?.links || {}, profile: d?.profile || {}, profileDone: profileDone(d?.profile), complete: Boolean(d?.nickname && d?.avatar) });
+router.get('/persona', handle(async (req) => personaView(await Learner.findOne({ email: req.email }).select('nickname avatar intro links profile').lean())));
 router.put('/persona', limit(10), handle(async (req) => {
   const set = {};
   for (const [field, check] of [['nickname', checkNickname], ['avatar', checkAvatar], ['intro', checkIntro], ['links', checkLinks]]) {
@@ -95,6 +96,17 @@ router.put('/persona', limit(10), handle(async (req) => {
     const checked = check(req.body[field]);
     if (!checked.ok) throw fail(400, checked.code, checked.code);
     set[field] = checked.value;
+  }
+  // Hồ sơ riêng tư: gộp từng trường (mỗi bước gửi một trường).
+  if (req.body?.profile !== undefined) {
+    const checked = checkProfile(req.body.profile);
+    if (!checked.ok) throw fail(400, checked.code, checked.code);
+    for (const [k, v] of Object.entries(checked.value)) set[`profile.${k}`] = v;
+    if (checked.value.birthDate) {
+      const age = ageOn(checked.value.birthDate);
+      const consent = (await Learner.findOne({ email: req.email }).select('consent').lean())?.consent;
+      set.ageMismatch = age < 16 && consent?.ageGroup === '16+';
+    }
   }
   if (!Object.keys(set).length) throw fail(400, 'PERSONA_EMPTY');
   return personaView(await Learner.findOneAndUpdate({ email: req.email }, { $set: set }, { upsert: true, new: true }).lean());

@@ -48,6 +48,7 @@ const EduCommunity = lazy(PAGES.community);
 const EduFeedback = lazy(PAGES.feedback);
 const EduFriends = lazy(PAGES.friends);
 const EduFindFriends = lazy(() => PAGES.friends().then((m) => ({ default: m.EduFindFriends })));
+const ProfileGate = lazy(() => import("./EduProfileGate"));
 const CommunityInvite = lazy(() => PAGES.friends().then((m) => ({ default: m.CommunityInvite })));
 const EduPublicProfile = lazy(() => PAGES.friends().then((m) => ({ default: m.EduPublicProfile })));
 const EduLegal = lazy(PAGES.legal);
@@ -216,13 +217,15 @@ export default function EducationApp() {
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
   const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/") || location.pathname.startsWith("/u/");
   const gated = phoneWeb && !publicPage;
-  const showInvite = signedIn && !inviteSeen && !welcome && !gated && persona?.complete && !celebration.event
+  const showInvite = signedIn && !inviteSeen && !welcome && !gated && persona?.complete && persona.profileDone !== false && !celebration.event
     && (me?.completedLessons?.length || 0) >= 1 && !me?.communityJoined && !/^\/learn\/./.test(location.pathname);
   return (
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
       {gated && <EduInstallGate />}
       {welcome && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
       {!welcome && !gated && persona && !persona.complete && <PersonaGate current={persona} onDone={setPersona} />}
+      {/* Hồ sơ riêng tư (ngày sinh, tỉnh/thành, sở thích, giới tính): mới đăng ký thì hỏi ngay sau tạo nhân vật; thành viên cũ hỏi lần mở app tới. */}
+      {!welcome && !gated && persona?.complete && persona.profileDone === false && <Suspense fallback={null}><ProfileGate current={persona} onDone={setPersona} /></Suspense>}
       {showInvite && <Suspense fallback={null}><CommunityInvite onLearnerUpdate={mergeLearner} onClose={closeInvite} /></Suspense>}
       {celebration.event && <StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} />}
       {!gated && <EduErrorBoundary><Suspense fallback={<Loading />}><Routes>
