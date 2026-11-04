@@ -147,7 +147,7 @@ export default function EduSettings({ learner, onLearnerUpdate, embedded = false
   const Wrap = embedded ? "div" : "section";
   return (
     <Wrap className={embedded ? "edu-settings-embedded" : "edu-page"}>
-      {embedded ? <h2 className="edu-page-title">{t("settings.title")}</h2> : <h1 className="edu-page-title">{t("settings.title")}</h1>}
+      {embedded ? null : <h1 className="edu-page-title">{t("settings.title")}</h1>}
 
       <div className="edu-set">
         <h2>{t("settings.study")}</h2>

@@ -1249,7 +1249,7 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu-me-hero p { margin: 0; max-width: 36ch; color: var(--edu-ink, inherit); line-height: 1.5; }
 .edu-me-hero small { color: var(--edu-muted); font-size: 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edu-settings-screen { min-height: 100dvh; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); background: var(--edu-bg, #fff); }
-.edu-settings-screen .edu-page { margin: 0 auto; }
+.edu-settings-screen .edu-page { width: 100%; max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
 
 /* Hugo Developer — thẻ quảng cáo kiểu "Super" trong Hồ sơ + trang /developer-team. */
 .edu-dev-badge { display: inline-block; padding: 4px 14px; border-radius: 8px; background: #ffc800; color: #1a3b8f; font-size: 13px; font-weight: 900; font-style: italic; letter-spacing: .08em; transform: skewX(-12deg); box-shadow: 0 3px 0 #e0a800; }

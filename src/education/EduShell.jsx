@@ -399,7 +399,8 @@ function Stat({ icon, tone, value, label }) {
 
 /** Hồ sơ: trang thông tin của người học. Cài đặt nằm ở trang riêng (bánh răng góc phải). */
 export function EduProfile({ learner, persona, onPersona }) {
-  const { t } = useEduText();
+  const { t, lang } = useEduText();
+  const support = supportMailUrl({ lang, nickname: persona?.nickname });
   const [editing, setEditing] = useState(false);
   const stats = useLearnerStats(learner);
   const name = persona?.nickname || learner?.displayName || t("profile.learner");
@@ -428,6 +429,10 @@ export function EduProfile({ learner, persona, onPersona }) {
         <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
       </div>
+      {/* Phản hồi + hỗ trợ: thư soạn sẵn tới support@hugowishpax.studio. */}
+      <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
+        <span className="material-symbols-outlined" aria-hidden="true">support_agent</span> {t("common.support")}
+      </a>
     </section>
   );
 }
