@@ -33,7 +33,30 @@ const GENDER_AVATARS = {
   male: { ...base, hair: "short05", clothes: "variant01", hat: "none", hairColor: "#603a14", clothingColor: "#ffc425", backgroundColor: "#dbeafe" },
   female: { ...base, hair: "long03", clothes: "variant05", hat: "none", hairColor: "#cab188", clothingColor: "#ff6f69", backgroundColor: "#fde2e4" },
   other: { ...base, hair: "short12", clothes: "variant09", hat: "variant02", hairColor: "#7e57c2", clothingColor: "#44c585", backgroundColor: "#ede9fe" },
+  lesbian: { ...base, hair: "long03", clothes: "variant05", hat: "none", hairColor: "#cab188", clothingColor: "#44c585", backgroundColor: "#dcfce7" },
+  gay: { ...base, hair: "short05", clothes: "variant01", hat: "none", hairColor: "#603a14", clothingColor: "#f48fb1", backgroundColor: "#fde2e4" },
 };
+const CLEAR = "#00000000"; // nền trong suốt khi ghép hai nhân vật trên một khung
+const clear = (a) => ({ ...a, backgroundColor: CLEAR });
+
+/**
+ * Ảnh trong vòng tròn giới tính:
+ *  - lesbian: nữ áo/nền xanh lá · gay: nam áo/nền hồng
+ *  - bisexual: nam + nữ chung một khung
+ *  - transgender: hoạt cảnh lặp — nam nắm tay kéo bạn nữ ra, nữ thành nhân vật chính (nam chuyển giới nữ)
+ */
+function GenderArt({ kind, size, label }) {
+  if (kind === "bisexual" || kind === "transgender") {
+    return (
+      <span className={`pg-duo is-${kind}`} style={{ width: size, height: size }} role="img" aria-label={label}>
+        <span className="pg-duo-a"><PersonaAvatar avatar={clear(GENDER_AVATARS.male)} name="" size={Math.round(size * 0.78)} /></span>
+        <span className="pg-duo-b"><PersonaAvatar avatar={clear(GENDER_AVATARS.female)} name="" size={Math.round(size * 0.78)} /></span>
+        {kind === "transgender" && <i className="material-symbols-outlined pg-duo-hand" aria-hidden="true">handshake</i>}
+      </span>
+    );
+  }
+  return <PersonaAvatar avatar={GENDER_AVATARS[kind] || GENDER_AVATARS.other} name={label} size={size} />;
+}
 
 function missingSteps(p) {
   return [
@@ -111,10 +134,10 @@ export default function ProfileGate({ current, onDone }) {
         )}
         {step === "gender" && (
           <div className="pg-gender" role="radiogroup" aria-label={t("friends.pg.gender.title")}>
-            {Object.entries(GENDER_AVATARS).map(([g, avatar]) => (
+            {["male", "female", "other"].map((g) => (
               <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g || (g === "other" && otherFamily) ? "is-on" : ""} onClick={() => { setGender(g); setConsent(false); }}>
                 <span className="pg-gender-art">
-                  <PersonaAvatar avatar={avatar} name={t(`friends.pg.gender.list.${g}`)} size={112} />
+                  <GenderArt kind={g === "other" && SENSITIVE_GENDERS.includes(gender) ? gender : g} label={t(`friends.pg.gender.list.${g === "other" && otherFamily ? (gender === "other" ? "other" : gender) : g}`)} size={112} />
                   {(gender === g || (g === "other" && otherFamily)) && <i className="material-symbols-outlined" aria-hidden="true">check</i>}
                 </span>
                 <span>{t(`friends.pg.gender.list.${g}`)}</span>

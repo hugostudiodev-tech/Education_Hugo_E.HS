@@ -1538,14 +1538,14 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-gender { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 8px; width: 100%; justify-items: center; }
 .pg-gender > button { display: grid; gap: 8px; justify-items: center; padding: 0; border: 0; background: none; color: var(--edu-muted); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; }
 .pg-gender-art { position: relative; display: block; border-radius: 50%; box-shadow: 0 0 0 3px transparent; transition: box-shadow .15s, transform .15s; }
-.pg-gender-art img, .pg-gender-art > * { border-radius: 50%; }
+.pg-gender-art > .persona-avatar, .pg-gender-art > .pg-duo { border-radius: 50%; }
 .pg-gender > button:active .pg-gender-art { transform: scale(.96); }
 .pg-gender > button.is-on { color: var(--edu-ink); }
 .pg-gender > button.is-on .pg-gender-art { box-shadow: 0 0 0 4px var(--edu-green); }
 .pg-gender-art i { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--edu-green); color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 0 0 3px var(--edu-bg); }
 .pg-gender .pg-gender-private { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 18px; border: 2px solid var(--edu-line); border-radius: 999px; font-size: 15px; }
 .pg-gender .pg-gender-private.is-on { border-color: var(--edu-green); color: var(--edu-green); }
-@media (max-width: 420px) { .pg-gender .pg-gender-art > * { width: 88px !important; height: 88px !important; } }
+@media (max-width: 420px) { .pg-gender .pg-gender-art > .persona-avatar, .pg-gender .pg-gender-art > .pg-duo { width: 88px !important; height: 88px !important; } }
 /* Nhân vật đẹp hơn: nét pixel sắc, vòng nền, bóng đổ, nhún nhẹ khi chọn. */
 .pg-gender-art img { display: block; image-rendering: pixelated; box-shadow: 0 6px 0 var(--edu-line); }
 .pg-gender > button:hover .pg-gender-art { transform: translateY(-2px); }
@@ -1559,3 +1559,32 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-sub > button.is-on { border-color: var(--edu-green); color: var(--edu-green); }
 .pg-consent { display: flex; gap: 10px; align-items: flex-start; width: 100%; margin-top: 4px; font-size: 13px; text-align: left; color: var(--edu-ink); cursor: pointer; }
 .pg-consent input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--edu-green); }
+/* Hai nhân vật chung một khung (Bisexual) và hoạt cảnh Transgender. */
+.pg-duo { position: relative; display: block; overflow: hidden; border-radius: 50%; box-shadow: 0 6px 0 var(--edu-line); }
+.pg-duo .persona-avatar { border-radius: 0 !important; box-shadow: none !important; image-rendering: pixelated; }
+.pg-duo-a, .pg-duo-b { position: absolute; bottom: -4%; left: 50%; translate: -50% 0; }
+.pg-duo.is-bisexual { background: linear-gradient(135deg, #dbeafe 0 50%, #fde2e4 50% 100%); }
+.pg-duo.is-bisexual .pg-duo-a { translate: -82% 0; }
+.pg-duo.is-bisexual .pg-duo-b { translate: -18% 0; }
+.pg-duo.is-transgender { background: linear-gradient(180deg, #c7ecfd 0 30%, #fde2e4 30% 45%, #fff 45% 55%, #fde2e4 55% 70%, #c7ecfd 70% 100%); }
+.pg-duo.is-transgender .pg-duo-a { animation: pg-trans-a 4.2s ease-in-out infinite; }
+.pg-duo.is-transgender .pg-duo-b { animation: pg-trans-b 4.2s ease-in-out infinite; }
+.pg-duo-hand { position: absolute; left: 50%; bottom: 18%; translate: -50% 0; color: #e8799a; font-size: 22px; font-variation-settings: "FILL" 1; opacity: 0; animation: pg-trans-hand 4.2s ease-in-out infinite; }
+/* 0–20%: nam ở giữa · 20–45%: nam lùi trái, nắm tay kéo nữ ra từ phía sau · 45–65%: nam lui hẳn, nữ vào giữa · 65–100%: nữ là nhân vật chính */
+@keyframes pg-trans-a {
+  0%, 20% { translate: -50% 0; opacity: 1; }
+  45% { translate: -88% 0; opacity: 1; }
+  65%, 92% { translate: -170% 0; opacity: 0; }
+  100% { translate: -50% 0; opacity: 0; }
+}
+@keyframes pg-trans-b {
+  0%, 20% { translate: -50% 0; opacity: 0; scale: .9; }
+  45% { translate: -12% 0; opacity: 1; scale: .95; }
+  65%, 92% { translate: -50% 0; opacity: 1; scale: 1.05; }
+  100% { translate: -50% 0; opacity: 0; scale: 1; }
+}
+@keyframes pg-trans-hand { 0%, 25% { opacity: 0; } 35%, 48% { opacity: 1; } 58%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .pg-duo.is-transgender .pg-duo-a, .pg-duo-hand { animation: none; opacity: 0; }
+  .pg-duo.is-transgender .pg-duo-b { animation: none; opacity: 1; }
+}
