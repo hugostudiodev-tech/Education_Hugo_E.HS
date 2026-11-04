@@ -1506,3 +1506,13 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .fr-links-form > small { color: var(--edu-muted); }
 .edu .fr-links-form label { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 2px solid var(--edu-line); border-radius: 14px; }
 .edu .fr-links-form input { flex: 1; min-width: 0; min-height: 36px; border: 0; background: none; color: inherit; font: inherit; outline: none; }
+.edu .fr-invite { justify-items: center; text-align: center; gap: 10px; }
+.edu .fr-invite h2 { margin: 0; font-size: 21px; font-weight: 900; }
+.edu .fr-invite p { margin: 0; color: var(--edu-muted); line-height: 1.5; }
+.edu .fr-invite > small { color: var(--edu-muted); font-size: 12px; }
+.edu .fr-invite-reward { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: var(--edu-sky); color: var(--edu-primary-edge); font-weight: 900; }
+.edu .fr-invite-reward span { font-size: 20px; font-variation-settings: "FILL" 1; }
+.edu .fr-invite .edu-btn { width: 100%; }
+/* Hai nút Đánh giá / Hỗ trợ: nhãn dài thì xuống dòng gọn trong nút, không bị cắt chữ. */
+.edu .edu-me-actions .edu-btn { white-space: normal; overflow: visible; text-overflow: clip; min-height: 52px; padding: 8px 12px; font-size: 14px; line-height: 1.2; letter-spacing: .02em; text-align: center; }
+.edu .edu-me-actions .edu-btn .material-symbols-outlined { flex: 0 0 auto; font-size: 22px; }

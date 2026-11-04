@@ -44,6 +44,7 @@ export const EDU_COPY = {
         { title: "4 khoá miễn phí", body: "Lập trình web, Python, Python nâng cao và SQL. Một tài khoản dùng cho mọi khoá." },
       ],
       links: { title: "Mạng xã hội", nudge: "Gắn link mạng xã hội để bạn bè dễ tìm và kết nối với bạn.", add: "Thêm liên kết", edit: "Sửa liên kết", save: "Lưu", saved: "Đã lưu liên kết", bad: "Link không đúng nền tảng — kiểm tra lại nhé.", hint: "Không bắt buộc · hiện công khai trên hồ sơ · xoá được bất cứ lúc nào" },
+      community: { title: "Tham gia cộng đồng Education Hugo", body: "Bạn vừa xong bài đầu tiên! Vào cộng đồng để hỏi bài, nhận mẹo học và tin sự kiện.", reward: "Bấm tham gia lần đầu: +{n} Ngọc", later: "Để sau", got: "+{n} Ngọc — cảm ơn bạn đã tham gia!", note: "Không bắt buộc. Kênh WhatsApp không hiển thị số điện thoại của bạn." },
       findTitle: "Tìm bạn bè", shareLink: "Chia sẻ đường dẫn kết bạn", shareShort: "Chia sẻ đường dẫn", copyLink: "Sao chép đường dẫn", suggest: "Gợi ý kết bạn", addFriends: "Thêm bạn bè", overview: "Tổng quan", friendStreak: "Streak bạn bè", achievements: "Thành tích", days: "{n} ngày", rank: "Hạng tuần #{n}", noRank: "Chưa xếp hạng", stepsN: "{n} step", tabRequests: "Lời mời", myQr: "Mã QR của tôi", level: "Cấp {n}", ach: { streak: "Lửa bền", steps: "Chăm học", friends: "Kết nối", gems: "Nhà sưu tầm" }, achHint: { streak: "Chuỗi dài nhất {cur}/{goal} ngày", steps: "Qua {cur}/{goal} step", friends: "{cur}/{goal} bạn bè", gems: "{cur}/{goal} Ngọc" },
     },
     topbar: {
@@ -295,6 +296,7 @@ export const EDU_COPY = {
         { title: "4 free courses", body: "Web development, Python, Advanced Python and SQL. One account for every course." },
       ],
       links: { title: "Social links", nudge: "Add your social links so friends can find and connect with you.", add: "Add links", edit: "Edit links", save: "Save", saved: "Links saved", bad: "That link doesn't match the platform — please check it.", hint: "Optional · shown publicly on your profile · remove anytime" },
+      community: { title: "Join the Education Hugo community", body: "You finished your first lesson! Join the community to ask questions, get study tips and event news.", reward: "Join for the first time: +{n} gems", later: "Maybe later", got: "+{n} gems — thanks for joining!", note: "Optional. The WhatsApp channel never shows your phone number." },
       findTitle: "Find friends", shareLink: "Share invite link", shareShort: "Share link", copyLink: "Copy link", suggest: "Suggestions", addFriends: "Add friends", overview: "Overview", friendStreak: "Friend streaks", achievements: "Achievements", days: "{n} days", rank: "Weekly #{n}", noRank: "Not ranked", stepsN: "{n} steps", tabRequests: "Requests", myQr: "My QR code", level: "Level {n}", ach: { streak: "Wildfire", steps: "Scholar", friends: "Friendly", gems: "Collector" }, achHint: { streak: "Best streak {cur}/{goal} days", steps: "{cur}/{goal} steps passed", friends: "{cur}/{goal} friends", gems: "{cur}/{goal} gems" },
     },
     topbar: {
@@ -633,6 +635,7 @@ export const EDU_COPY = {
         { title: "4 门免费课程", body: "网页开发、Python、Python 进阶和 SQL。一个账号学所有课程。" },
       ],
       links: { title: "社交链接", nudge: "添加你的社交链接，方便朋友找到你。", add: "添加链接", edit: "编辑链接", save: "保存", saved: "链接已保存", bad: "链接与平台不符，请检查。", hint: "可选 · 在个人资料公开显示 · 随时可删除" },
+      community: { title: "加入 Education Hugo 社区", body: "你完成了第一课！加入社区提问、获取学习技巧和活动消息。", reward: "首次加入：+{n} 宝石", later: "以后再说", got: "+{n} 宝石 — 感谢加入！", note: "非强制。WhatsApp 频道不会显示你的电话号码。" },
       findTitle: "查找好友", shareLink: "分享好友链接", shareShort: "分享链接", copyLink: "复制链接", suggest: "好友推荐", addFriends: "添加好友", overview: "概览", friendStreak: "好友连胜", achievements: "成就", days: "{n} 天", rank: "本周第 {n} 名", noRank: "未上榜", stepsN: "{n} 步", tabRequests: "请求", myQr: "我的二维码", level: "等级 {n}", ach: { streak: "野火", steps: "学霸", friends: "好友达人", gems: "收藏家" }, achHint: { streak: "最长连胜 {cur}/{goal} 天", steps: "已过 {cur}/{goal} 步", friends: "{cur}/{goal} 位好友", gems: "{cur}/{goal} 宝石" },
     },
     topbar: {

@@ -45,6 +45,8 @@ const learnerSchema = new Schema({
   friendCode: String,
   // Tài khoản chính thức Education Hugo (tick vàng): theo dõi là thành bạn ngay, nhận thông báo admin gửi.
   official: Boolean,
+  // Thưởng một lần khi bấm tham gia cộng đồng (WhatsApp/Discord). Không kiểm chứng được việc tham gia thật.
+  communityRewardAt: Date,
   friends: { type: [String], default: [] },
   requestsIn: { type: [String], default: [] },
   requestsOut: { type: [String], default: [] },

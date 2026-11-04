@@ -46,6 +46,7 @@ export async function snapshot(email, user) {
       scores: doc.scores || {},
       gems: doc.gems || 0,
       consentV: doc.consent?.v || 0,
+      communityJoined: Boolean(doc.communityRewardAt),
     },
   };
 }

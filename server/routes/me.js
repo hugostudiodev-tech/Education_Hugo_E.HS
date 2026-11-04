@@ -10,6 +10,9 @@ import { checkIntro } from '../../packages/persona/intro.js';
 import { checkLinks } from '../../packages/persona/links.js';
 import { cleanFeedback } from '../../packages/shared/eduFeedback.js';
 import { eraseLearner } from '../services/erase.js';
+import { addGems } from '../services/gems.js';
+
+export const COMMUNITY_REWARD = 50;
 
 const router = express.Router();
 router.use(['/me', '/learn', '/persona', '/feedback', '/developer'], requireUser);
@@ -47,6 +50,13 @@ router.post('/me/consent', limit(10), handle(async (req) => {
   const at = new Date(req.body?.at);
   await Learner.updateOne({ email: req.email }, { $set: { consent: { v, at: Number.isNaN(at.getTime()) ? new Date() : at, savedAt: new Date(), terms: true, age: true, ageGroup, guardianConsent: needsGuardian || undefined, guardianPhone: needsGuardian ? guardianPhone : undefined } } });
   return { success: true };
+}));
+// Thưởng một lần khi bấm tham gia cộng đồng. Cờ đặt nguyên tử trước khi cộng → bấm nhiều lần/nhiều máy cũng chỉ một lần.
+router.post('/me/community/claim', limit(10), handle(async (req) => {
+  const first = await Learner.updateOne({ email: req.email, communityRewardAt: null }, { $set: { communityRewardAt: new Date() } });
+  if (!first.modifiedCount) return { success: true, claimed: false };
+  const { balance } = await addGems(req.email, COMMUNITY_REWARD, 'community_join', { note: 'Tham gia cộng đồng', refId: 'community-join' });
+  return { success: true, claimed: true, amount: COMMUNITY_REWARD, balance };
 }));
 // Xoá tài khoản Education Hugo: xoá hết dữ liệu học, không khôi phục được.
 router.delete('/me', limit(3), handle(async (req) => {

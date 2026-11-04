@@ -48,6 +48,7 @@ const EduCommunity = lazy(PAGES.community);
 const EduFeedback = lazy(PAGES.feedback);
 const EduFriends = lazy(PAGES.friends);
 const EduFindFriends = lazy(() => PAGES.friends().then((m) => ({ default: m.EduFindFriends })));
+const CommunityInvite = lazy(() => PAGES.friends().then((m) => ({ default: m.CommunityInvite })));
 const EduPublicProfile = lazy(() => PAGES.friends().then((m) => ({ default: m.EduPublicProfile })));
 const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
@@ -204,6 +205,9 @@ export default function EducationApp() {
       }).catch(() => {});
   }, [signedIn, consentV]);
 
+  // Mời tham gia cộng đồng: một lần, sau bài học đầu tiên, không chen vào màn học/onboarding.
+  const [inviteSeen, setInviteSeen] = useState(() => { try { return Boolean(localStorage.getItem("edu.communityInvite")); } catch { return true; } });
+  const closeInvite = useCallback(() => { setInviteSeen(true); try { localStorage.setItem("edu.communityInvite", "1"); } catch { /* riêng tư */ } }, []);
   const location = useLocation();
   // Giữ trang đang mở (vd. /feedback từ thư) để đăng nhập xong quay lại đúng chỗ.
   const needsLogin = <Navigate to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
@@ -212,11 +216,14 @@ export default function EducationApp() {
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
   const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/") || location.pathname.startsWith("/u/");
   const gated = phoneWeb && !publicPage;
+  const showInvite = signedIn && !inviteSeen && !welcome && !gated && persona?.complete && !celebration.event
+    && (me?.completedLessons?.length || 0) >= 1 && !me?.communityJoined && !/^\/learn\/./.test(location.pathname);
   return (
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
       {gated && <EduInstallGate />}
       {welcome && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
       {!welcome && !gated && persona && !persona.complete && <PersonaGate current={persona} onDone={setPersona} />}
+      {showInvite && <Suspense fallback={null}><CommunityInvite onLearnerUpdate={mergeLearner} onClose={closeInvite} /></Suspense>}
       {celebration.event && <StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} />}
       {!gated && <EduErrorBoundary><Suspense fallback={<Loading />}><Routes>
         <Route path="/" element={signedIn ? <Navigate to="/learn" replace /> : standalone ? <EduOnboard /> : <EduLanding />} />

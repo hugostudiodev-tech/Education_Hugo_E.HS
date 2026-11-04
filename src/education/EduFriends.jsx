@@ -80,6 +80,48 @@ function LinksEditor({ links, onSaved, onClose }) {
   );
 }
 
+const COMMUNITY_REWARD = 50; // khớp server/routes/me.js
+const COMMUNITY_KEYS = new Set(["whatsapp", "discord"]);
+
+/** Bấm tham gia cộng đồng → thưởng một lần (máy chủ chặn nhận lại). */
+export async function claimCommunity(t, onLearnerUpdate) {
+  try {
+    const response = await fetch(`${API_BASE}/me/community/claim`, { method: "POST", credentials: "include" });
+    const body = await response.json().catch(() => ({}));
+    if (!body.claimed) return;
+    onLearnerUpdate?.({ gems: body.balance, communityJoined: true });
+    playEduSound("success");
+    notify.success(t("friends.community.got", { n: body.amount }));
+  } catch { /* mạng lỗi: lần bấm sau nhận tiếp */ }
+}
+
+/** Thẻ mời tham gia cộng đồng: hiện MỘT lần sau bài học đầu tiên. Không bắt buộc. */
+export function CommunityInvite({ onLearnerUpdate, onClose }) {
+  const { t } = useEduText();
+  const links = OFFICIAL_LINKS.filter((l) => COMMUNITY_KEYS.has(l.key) && l.href);
+  return (
+    <div className="fr-sheet-backdrop" role="presentation" onClick={onClose}>
+      <div className="fr-sheet fr-invite" role="dialog" aria-modal="true" aria-labelledby="fr-invite-title" onClick={(e) => e.stopPropagation()}>
+        <img src="/edu/buddy-done.svg" alt="" width="120" height="120" />
+        <h2 id="fr-invite-title">{t("friends.community.title")}</h2>
+        <p>{t("friends.community.body")}</p>
+        <b className="fr-invite-reward"><GemDot />{t("friends.community.reward", { n: COMMUNITY_REWARD })}</b>
+        <div className="fr-socials">
+          {links.map((l) => (
+            <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer" style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }}
+              onClick={() => { claimCommunity(t, onLearnerUpdate); onClose(); }}>
+              <i aria-hidden="true" /><span>{l.label}</span>
+            </a>
+          ))}
+        </div>
+        <small>{t("friends.community.note")}</small>
+        <button type="button" className="edu-btn edu-btn--ghost" onClick={onClose}>{t("friends.community.later")}</button>
+      </div>
+    </div>
+  );
+}
+const GemDot = () => <span className="material-symbols-outlined" aria-hidden="true">diamond</span>;
+
 /** Tick vàng cạnh tên tài khoản chính thức. */
 export function Verified() {
   const { t } = useEduText();
@@ -95,7 +137,8 @@ function OfficialBody() {
     <>
       <div className="fr-socials">
         {OFFICIAL_LINKS.filter((l) => l.href).map((l) => (
-          <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer" style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }} aria-label={l.label}>
+          <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer" style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }} aria-label={l.label}
+            onClick={COMMUNITY_KEYS.has(l.key) ? () => claimCommunity(t) : undefined}>
             <i aria-hidden="true" /><span>{l.label}</span>
           </a>
         ))}
