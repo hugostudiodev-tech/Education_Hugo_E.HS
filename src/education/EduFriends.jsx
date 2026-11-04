@@ -20,6 +20,66 @@ const OFFICIAL_LINKS = [
 ];
 const FEATURE_ART = ["/edu/mail/hero-code.png", "/edu/mail/quick-minutes.png", "/edu/mail/buddy-cozy.png", "/edu/cast-5.svg", "/edu/buddy-practice.svg", "/edu/buddy-done.svg"];
 
+const MEMBER_LINKS = [
+  { key: "facebook", label: "Facebook", color: "#0866ff" },
+  { key: "instagram", label: "Instagram", color: "#e4405f" },
+  { key: "tiktok", label: "TikTok", color: "#000000" },
+  { key: "github", label: "GitHub", color: "#181717" },
+  { key: "youtube", label: "YouTube", color: "#ff0000" },
+];
+
+/** Nút link MXH của member (chỉ những link đã gắn). */
+function LinkButtons({ links }) {
+  const items = MEMBER_LINKS.filter((l) => links?.[l.key]);
+  if (!items.length) return null;
+  return (
+    <div className="fr-socials">
+      {items.map((l) => (
+        <a key={l.key} href={links[l.key]} target="_blank" rel="noopener noreferrer nofollow" style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }} aria-label={l.label}>
+          <i aria-hidden="true" /><span>{l.label}</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/** Sửa link MXH: mỗi nền tảng một ô, để trống = không hiện. Máy chủ kiểm tên miền (packages/persona/links.js). */
+function LinksEditor({ links, onSaved, onClose }) {
+  const { t } = useEduText();
+  const [form, setForm] = useState(() => ({ ...links }));
+  const [busy, setBusy] = useState(false);
+  const save = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const response = await fetch(`${API_BASE}/persona`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ links: form }) });
+      if (!response.ok) throw new Error();
+      onSaved(await response.json());
+      notify.success(t("friends.links.saved"));
+      onClose();
+    } catch { notify.error(t("friends.links.bad")); } finally { setBusy(false); }
+  };
+  return (
+    <div className="fr-sheet-backdrop" role="presentation" onClick={onClose}>
+      <form className="fr-sheet fr-links-form" role="dialog" aria-modal="true" aria-labelledby="fr-links-title" onSubmit={save} onClick={(e) => e.stopPropagation()}>
+        <h2 id="fr-links-title">{t("friends.links.title")}</h2>
+        <small>{t("friends.links.hint")}</small>
+        {MEMBER_LINKS.map((l) => (
+          <label key={l.key} style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }}>
+            <i aria-hidden="true" />
+            <input type="url" inputMode="url" autoComplete="off" spellCheck={false} maxLength={200} placeholder={`${l.key === "youtube" ? "youtube.com/@" : `${l.key}.com/`}…`} aria-label={l.label}
+              value={form[l.key] || ""} onChange={(e) => setForm({ ...form, [l.key]: e.target.value })} />
+          </label>
+        ))}
+        <div className="fr-cta">
+          <button type="button" className="edu-btn edu-btn--ghost" onClick={onClose}>{t("common.close")}</button>
+          <button type="submit" className="edu-btn" disabled={busy}>{t("friends.links.save")}</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 /** Tick vàng cạnh tên tài khoản chính thức. */
 export function Verified() {
   const { t } = useEduText();
@@ -165,10 +225,11 @@ function Overview({ streak, xp, rank, steps }) {
 }
 
 /** Phần mạng xã hội trong Hồ sơ của chính mình (gắn dưới ảnh nhân vật). */
-export function ProfileSocial({ learner, name, steps, children }) {
+export function ProfileSocial({ learner, name, steps, links, onPersona, children }) {
   const { t } = useEduText();
   const { data } = useSocial();
   const [qr, setQr] = useState(false);
+  const [editLinks, setEditLinks] = useState(false);
   if (!data) return <>{children}<div className="fr-skel"><span className="edu-skel is-line" /><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div></>;
   const friends = (data.friends || []).filter((r) => !r.me);
   const rankIndex = (data.league || []).findIndex((r) => r.me);
@@ -181,6 +242,17 @@ export function ProfileSocial({ learner, name, steps, children }) {
         <Link to="/friends"><b>{friends.length}</b><small>{t("friends.title")}</small></Link>
         <Link to="/friends?tab=requests" className={data.requestsIn?.length ? "is-new" : ""}><b>{data.requestsIn?.length || 0}</b><small>{t("friends.tabRequests")}</small></Link>
       </div>
+      {/* MXH tuỳ chọn: chưa gắn thì nhắc nổi bật, gắn rồi thì hiện nút + bút sửa. */}
+      {Object.values(links || {}).some(Boolean) ? (
+        <div className="fr-links-row"><LinkButtons links={links} />{onPersona && <button type="button" className="fr-links-edit" onClick={() => setEditLinks(true)} aria-label={t("friends.links.edit")}><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>}</div>
+      ) : onPersona && (
+        <button type="button" className="fr-nudge" onClick={() => setEditLinks(true)}>
+          <span className="fr-nudge-logos" aria-hidden="true">{MEMBER_LINKS.slice(0, 3).map((l) => <i key={l.key} style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }} />)}</span>
+          <span><b>{t("friends.links.add")}</b><small>{t("friends.links.nudge")}</small></span>
+          <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </button>
+      )}
+      {editLinks && <LinksEditor links={links || {}} onSaved={onPersona} onClose={() => setEditLinks(false)} />}
       <div className="fr-cta">
         <Link to="/friends/find" className="edu-btn"><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.addFriends")}</Link>
         {data.code && <button type="button" className="edu-btn edu-btn--ghost fr-qr-btn" onClick={() => setQr(true)} aria-label={t("friends.myQr")}><span className="material-symbols-outlined" aria-hidden="true">qr_code_2</span></button>}
@@ -452,6 +524,7 @@ export function EduPublicProfile() {
         {p.joined && <small>{t("friends.joined", { date: new Date(p.joined).toLocaleDateString(lang, { month: "long", year: "numeric" }) })} · {t(p.official ? "friends.followers" : "friends.friendCount", { n: p.friends })}</small>}
         {p.intro && <p>{p.intro}</p>}
       </div>
+      {!p.official && <LinkButtons links={p.links} />}
       <div className="fr-cta">{button}</div>
       {p.official ? <OfficialBody /> : <>
         <Overview streak={p.streak} xp={p.xp} rank={0} steps={p.steps} />

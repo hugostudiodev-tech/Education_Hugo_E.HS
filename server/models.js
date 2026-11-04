@@ -40,6 +40,7 @@ const learnerSchema = new Schema({
   nickname: { type: String, default: '' },
   avatar: { type: Mixed, default: null },
   intro: { type: String, default: '' },
+  links: { type: Mixed, default: undefined }, // MXH công khai, tuỳ chọn (packages/persona/links.js)
   // Bạn bè + thi đua tuần
   friendCode: String,
   // Tài khoản chính thức Education Hugo (tick vàng): theo dõi là thành bạn ngay, nhận thông báo admin gửi.

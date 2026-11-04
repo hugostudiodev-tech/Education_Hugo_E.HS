@@ -420,7 +420,7 @@ export function EduProfile({ learner, persona, onPersona }) {
       </header>
       {/* Kiểu Duolingo: dải Mã bạn | Bạn bè | Lời mời, Thêm bạn + QR, Tổng quan, Streak bạn bè, Thành tích (EduFriends, tải lười). */}
       <Suspense fallback={<>{hero}<div className="fr-skel"><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div></>}>
-        <ProfileSocial learner={learner} name={name} steps={stats.done}>{hero}</ProfileSocial>
+        <ProfileSocial learner={learner} name={name} steps={stats.done} links={persona?.links} onPersona={onPersona}>{hero}</ProfileSocial>
       </Suspense>
       {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
       <div className="edu-me-actions">

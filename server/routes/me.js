@@ -7,6 +7,7 @@ import { DevSignup, Feedback, Promo, GemTxn, Learner, LessonFeedback, Receipt, R
 import { checkNickname } from '../../packages/persona/nickname.js';
 import { checkAvatar } from '../../packages/persona/avatar.js';
 import { checkIntro } from '../../packages/persona/intro.js';
+import { checkLinks } from '../../packages/persona/links.js';
 import { cleanFeedback } from '../../packages/shared/eduFeedback.js';
 import { eraseLearner } from '../services/erase.js';
 
@@ -75,11 +76,11 @@ router.post('/learn/quiz', limit(20), handle(async (req, res) => {
 }));
 
 // Persona công khai: biệt danh + nhân vật pixel + lời giới thiệu (packages/persona kiểm luật).
-const personaView = (d) => ({ nickname: d?.nickname || '', avatar: d?.avatar || null, intro: d?.intro || '', complete: Boolean(d?.nickname && d?.avatar) });
-router.get('/persona', handle(async (req) => personaView(await Learner.findOne({ email: req.email }).select('nickname avatar intro').lean())));
+const personaView = (d) => ({ nickname: d?.nickname || '', avatar: d?.avatar || null, intro: d?.intro || '', links: d?.links || {}, complete: Boolean(d?.nickname && d?.avatar) });
+router.get('/persona', handle(async (req) => personaView(await Learner.findOne({ email: req.email }).select('nickname avatar intro links').lean())));
 router.put('/persona', limit(10), handle(async (req) => {
   const set = {};
-  for (const [field, check] of [['nickname', checkNickname], ['avatar', checkAvatar], ['intro', checkIntro]]) {
+  for (const [field, check] of [['nickname', checkNickname], ['avatar', checkAvatar], ['intro', checkIntro], ['links', checkLinks]]) {
     if (req.body?.[field] === undefined) continue;
     const checked = check(req.body[field]);
     if (!checked.ok) throw fail(400, checked.code, checked.code);

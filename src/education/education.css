@@ -1493,3 +1493,16 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .fr-features b { font-size: 16px; font-weight: 900; }
 .edu .fr-features small { color: var(--edu-muted); font-size: 14px; line-height: 1.45; }
 @media (min-width: 768px) { .edu .fr-features { grid-template-columns: 1fr 1fr; } }
+/* Link MXH của member */
+.edu .fr-links-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.edu .fr-links-edit { display: grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--edu-line); border-radius: 50%; background: none; color: var(--edu-muted); cursor: pointer; }
+.edu .fr-nudge { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border: 2px dashed var(--edu-primary-strong); border-radius: 18px; background: var(--edu-sky); color: var(--edu-ink); font: inherit; text-align: left; cursor: pointer; }
+.edu .fr-nudge > span:nth-child(2) { flex: 1; display: grid; gap: 2px; }
+.edu .fr-nudge small { color: var(--edu-muted); }
+.edu .fr-nudge-logos { display: flex; }
+.edu .fr-nudge-logos i, .edu .fr-links-form label i { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: var(--brand); position: relative; }
+.edu .fr-nudge-logos i + i { margin-left: -10px; box-shadow: 0 0 0 2px var(--edu-sky); }
+.edu .fr-nudge-logos i::after, .edu .fr-links-form label i::after { content: ""; position: absolute; inset: 0; background: #fff; -webkit-mask: var(--logo) center / 18px no-repeat; mask: var(--logo) center / 18px no-repeat; }
+.edu .fr-links-form > small { color: var(--edu-muted); }
+.edu .fr-links-form label { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 2px solid var(--edu-line); border-radius: 14px; }
+.edu .fr-links-form input { flex: 1; min-width: 0; min-height: 36px; border: 0; background: none; color: inherit; font: inherit; outline: none; }

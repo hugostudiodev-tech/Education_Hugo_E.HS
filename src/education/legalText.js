@@ -104,6 +104,7 @@ const EN = {
         h: "2. Data we process",
         list: [
           "Account data — your email address, display name and profile picture from Google or Discord sign-in; for passkeys, a public key and device label (the biometric itself never leaves your device).",
+          "Social links — optional links to your Facebook, Instagram, TikTok, GitHub or YouTube profile that you choose to add; they are shown publicly on your Education Hugo profile and you can remove them at any time.",
           "Profile identity (Persona) — nickname, pixel-art character and short introduction. These are used within your own account; your real name, email and photograph are not displayed on the Ads page.",
           "Learning data — completed steps and lessons, quiz answers and scores, streak calendar, XP, daily goals and personal settings. SQL exercises run entirely inside your browser; what you type there is kept only on your device as a draft and is never sent to us.",
           "Store data — items you have bought, the badge you wear, remaining Streak Shields and Double XP time, together with the gem transactions that paid for them.",
@@ -278,6 +279,7 @@ const VI = {
       ] },
       { h: "2. Dữ liệu chúng tôi xử lý", list: [
         "Dữ liệu tài khoản — email, tên hiển thị và ảnh đại diện từ đăng nhập Google hoặc Discord; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
+        "Liên kết mạng xã hội — link tới trang Facebook, Instagram, TikTok, GitHub hoặc YouTube mà bạn tự chọn thêm (không bắt buộc); hiển thị công khai trên hồ sơ Education Hugo và bạn xoá được bất cứ lúc nào.",
         "Danh tính hồ sơ (Persona) — biệt danh, nhân vật pixel và lời giới thiệu ngắn. Các thông tin này được dùng trong tài khoản của bạn; tên thật, email và ảnh của bạn không hiển thị trên trang Ads.",
         "Dữ liệu học tập — step và bài đã học, câu trả lời và điểm trắc nghiệm, lịch chuỗi lửa, XP, mục tiêu ngày và cài đặt cá nhân. Bài tập SQL chạy hoàn toàn trong trình duyệt; những gì bạn gõ ở đó chỉ lưu nháp trên thiết bị của bạn và không bao giờ gửi về chúng tôi.",
         "Dữ liệu Cửa hàng — vật phẩm đã mua, huy hiệu đang đeo, số Khiên lửa và thời gian Nhân đôi XP còn lại, cùng các giao dịch Ngọc đã thanh toán.",
