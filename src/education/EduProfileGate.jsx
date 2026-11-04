@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { notify } from "../lib/notify";
-import { persona } from "./EduPersona";
+import { persona, PersonaAvatar } from "./EduPersona";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 import { HOBBIES, MAX_HOBBIES, MIN_AGE, PROVINCES, profileDone } from "../../packages/persona/profile.js";
@@ -27,7 +27,13 @@ const HOBBY_ICON = {
   design: "design_services", reading: "auto_stories", writing: "edit_note", movies: "theaters", travel: "flight", cooking: "restaurant",
   coding: "code", robotics: "smart_toy", science: "science", pets: "pets", chess: "extension", languages: "translate",
 };
-const GENDER_OPTIONS = ["male", "female", "other", "private"];
+// Lựa chọn giới tính vẽ bằng nhân vật pixel của Education Hugo (packages/persona/avatar.js).
+const base = { eyes: "variant04", mouth: "happy01", glasses: "none", beard: "none", accessories: "none", skinColor: "#f5cfa0" };
+const GENDER_AVATARS = {
+  male: { ...base, hair: "short05", clothes: "variant01", hat: "none", hairColor: "#603a14", clothingColor: "#ffc425", backgroundColor: "#dbeafe" },
+  female: { ...base, hair: "long03", clothes: "variant05", hat: "none", hairColor: "#cab188", clothingColor: "#ff6f69", backgroundColor: "#fde2e4" },
+  other: { ...base, hair: "short12", clothes: "variant09", hat: "variant02", hairColor: "#7e57c2", clothingColor: "#44c585", backgroundColor: "#ede9fe" },
+};
 
 function missingSteps(p) {
   return [
@@ -101,12 +107,19 @@ export default function ProfileGate({ current, onDone }) {
           </div>
         )}
         {step === "gender" && (
-          <div className="persona-grid pg-chips" role="radiogroup" aria-label={t("friends.pg.gender.title")}>
-            {GENDER_OPTIONS.map((g) => (
+          <div className="pg-gender" role="radiogroup" aria-label={t("friends.pg.gender.title")}>
+            {Object.entries(GENDER_AVATARS).map(([g, avatar]) => (
               <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g ? "is-on" : ""} onClick={() => setGender(g)}>
-                {t(`friends.pg.gender.list.${g}`)}
+                <span className="pg-gender-art">
+                  <PersonaAvatar avatar={avatar} name={t(`friends.pg.gender.list.${g}`)} size={112} />
+                  {gender === g && <i className="material-symbols-outlined" aria-hidden="true">check</i>}
+                </span>
+                <span>{t(`friends.pg.gender.list.${g}`)}</span>
               </button>
             ))}
+            <button type="button" role="radio" aria-checked={gender === "private"} className={`pg-gender-private${gender === "private" ? " is-on" : ""}`} onClick={() => setGender("private")}>
+              {gender === "private" && <span className="material-symbols-outlined" aria-hidden="true">check</span>}{t("friends.pg.gender.list.private")}
+            </button>
           </div>
         )}
 
