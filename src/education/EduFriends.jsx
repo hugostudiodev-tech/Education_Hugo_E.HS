@@ -126,8 +126,7 @@ export function ProfileSocial({ learner, name, steps }) {
   const slots = [...friends].sort((a, b) => b.streak - a.streak).slice(0, 5);
   return (
     <>
-      {data.code && <small className="fr-handle" translate="no">@{data.code}</small>}
-      <Link to="/friends" className="fr-count">{t("friends.friendCount", { n: friends.length })}{data.requestsIn?.length > 0 && <i>{data.requestsIn.length}</i>}</Link>
+      <p className="fr-meta">{data.code && <span translate="no">@{data.code}</span>}<Link to="/friends" className="fr-count">{t("friends.friendCount", { n: friends.length })}{data.requestsIn?.length > 0 && <i>{data.requestsIn.length}</i>}</Link></p>
       <div className="fr-cta">
         <Link to="/friends/find" className="edu-btn"><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.addFriends")}</Link>
         {data.code && <button type="button" className="edu-btn edu-btn--ghost fr-qr-btn" onClick={() => setQr(true)} aria-label={t("friends.myQr")}><span className="material-symbols-outlined" aria-hidden="true">qr_code_2</span></button>}
