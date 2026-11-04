@@ -478,7 +478,7 @@
    nền trắng như Duolingo web, băng chặng dính ở đầu khi cuộn qua vùng của nó,
    ô step màu đặc. Màu từng chặng/từng phần giữ nguyên để trang vẫn nhiều màu. */
 .edu .cmap { background: none; margin-bottom: 0; }
-.edu .cmap .cmap-zone { overflow: clip; }
+.edu .cmap .cmap-zone { overflow-x: clip; } /* chỉ cắt ngang: thẻ bài học tràn xuống không bị mất góc */
 .edu .cmap-banner { position: sticky; top: calc(max(10px, env(safe-area-inset-top)) + 56px); z-index: 5; margin-bottom: 48px; }
 /* ── Bản đồ Edu: nền cảnh vật như Hugo Coding — màu đặc (vạch cứng trời/đất, không chuyển màu mềm) ── */
 .edu .cmap .cmap-zone {
@@ -787,7 +787,13 @@
 .streak-goal .material-symbols-outlined { font-size: 28px; color: #a560f0; font-variation-settings: "FILL" 1; }
 .streak-goal p { margin: 0; display: grid; gap: 2px; } .streak-goal b { font-size: 15px; } .streak-goal small { font-size: 12.5px; color: var(--edu-muted); }
 .streak-rule { margin: 0; font-size: 12.5px; color: var(--edu-muted); line-height: 1.5; text-align: center; }
-@media (min-width: 768px) { .streak-band { justify-content: center; gap: 64px; } .streak-bar, .streak-tabs-line { padding-inline: max(8px, calc((100% - 520px) / 2)); } }
+/* Desktop: dải màu thành một thẻ bo góc cùng bề rộng với lịch, không kéo hết màn hình. */
+@media (min-width: 768px) {
+  .streak-bar, .streak-tabs-line, .streak-band { width: min(520px, calc(100% - 32px)); margin-inline: auto; box-sizing: border-box; }
+  .streak-bar { margin-top: 24px; border-radius: 24px 24px 0 0; padding-inline: 8px; }
+  .streak-band { justify-content: space-between; border-radius: 0 0 24px 24px; }
+  .streak-tabs-line + .streak-band, .streak-bar + .streak-band { border-radius: 0 0 24px 24px; }
+}
 /* Dải cam (đã giữ lửa): tab, tiêu đề, nút đóng chuyển trắng cho đủ tương phản. */
 .streak-page.is-lit .streak-bar h1, .streak-page.is-lit .streak-close, .streak-page.is-lit .streak-tabs-line button { color: rgb(255 255 255 / .85); }
 .streak-page.is-lit .streak-tabs-line button.is-on { color: #fff; border-bottom-color: #fff; }

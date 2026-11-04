@@ -8,6 +8,8 @@ import { addGems } from './gems.js';
 const SEED = [
   { slug: 'streak-shield', kind: 'streak_shield', value: 1, image: '/edu/cast-2.svg', price: 200, sort: 0, name: { vi: 'Khiên lửa', en: 'Streak Shield', zh: '火焰护盾' }, description: { vi: 'Lỡ học một ngày? 8 giờ sáng hôm sau khiên tự phá băng, chuỗi vẫn cháy. Giữ tối đa 5 khiên.', en: 'Missed a day? At 8am the next morning a shield thaws it automatically. Hold up to 5.', zh: '漏学一天？次日早上 8 点护盾自动破冰，连胜继续。最多持有 5 个。' } },
   { slug: 'xp-boost-24h', kind: 'xp_boost', value: 24, image: '/edu/cast-5.svg', price: 250, sort: 0, name: { vi: 'Nhân đôi XP 24 giờ', en: 'Double XP · 24h', zh: '双倍 XP · 24 小时' }, description: { vi: 'Mọi XP thi đua tuần nhân đôi trong 24 giờ, có hiệu lực ngay. Mua thêm là cộng dồn.', en: 'All league XP is doubled for 24 hours, starting now. Stacks if you buy more.', zh: '24 小时内每周排行 XP 翻倍，立即生效，可叠加。' } },
+  { slug: 'streak-shield-3', kind: 'streak_shield', value: 3, image: '/edu/cast-2.svg', price: 500, sort: 0, name: { vi: 'Gói 3 khiên lửa', en: '3 Streak Shields', zh: '3 个火焰护盾' }, description: { vi: 'Ba khiên vào túi ngay, rẻ hơn mua lẻ. Lỡ ngày nào, 8 giờ sáng hôm sau khiên tự giữ chuỗi.', en: 'Three shields at once, cheaper than one by one. Each auto-saves a missed day at 8am.', zh: '一次获得三个护盾，比单买便宜。漏学时次日早上 8 点自动保住连胜。' } },
+  { slug: 'xp-boost-72h', kind: 'xp_boost', value: 72, image: '/edu/cast-5.svg', price: 600, sort: 0, name: { vi: 'Nhân đôi XP 3 ngày', en: 'Double XP · 3 days', zh: '双倍 XP · 3 天' }, description: { vi: 'XP thi đua tuần nhân đôi trong 72 giờ, có hiệu lực ngay. Cộng dồn với gói đang chạy.', en: 'League XP doubled for 72 hours, starting now. Stacks with an active boost.', zh: '72 小时内每周排行 XP 翻倍，立即生效，可叠加。' } },
   { slug: 'sticker-hat', kind: 'badge', image: '/edu/cast-6.svg', price: 120, sort: 1, name: { vi: 'Nhãn dán Hạt', en: 'Hạt sticker', zh: 'Hạt 贴纸' }, description: { vi: 'Bạn đồng hành của khoá SQL, dán vào túi đồ.', en: 'Your SQL course buddy for your bag.', zh: 'SQL 课程的小伙伴。' } },
   { slug: 'sticker-nhip', kind: 'badge', image: '/edu/cast-1.svg', price: 120, sort: 2, name: { vi: 'Nhãn dán Nhịp', en: 'Nhịp sticker', zh: 'Nhịp 贴纸' }, description: { vi: 'Linh vật khoá Lập trình Web.', en: 'Mascot of the Web Programming course.', zh: '网页编程课程吉祥物。' } },
   { slug: 'badge-night-owl', kind: 'badge', image: '/edu/cast-8.svg', price: 300, sort: 3, name: { vi: 'Huy hiệu Cú đêm', en: 'Night Owl badge', zh: '夜猫子徽章' }, description: { vi: 'Cho người hay học sau 21 giờ.', en: 'For late-night learners.', zh: '献给夜间学习者。' } },
@@ -15,8 +17,13 @@ const SEED = [
   { slug: 'limited-founder', kind: 'badge', image: '/edu/cast-3.svg', price: 1500, stock: 100, sort: 5, name: { vi: 'Thẻ Người học khai trương', en: 'Founding Learner card', zh: '首批学员卡' }, description: { vi: 'Chỉ 100 thẻ cho những người học đầu tiên.', en: 'Only 100 for the first learners.', zh: '仅限首批 100 位学员。' } },
 ];
 
+// Chỉ bán vật phẩm có tác dụng thật trong hệ thống. Huy hiệu/nhãn dán trang trí không hiện ở đâu → ngừng bán.
+// ponytail: muốn bán lại thì phải hiện huy hiệu ở hồ sơ/cộng đồng/bảng xếp hạng trước, rồi bỏ khỏi RETIRED.
+const RETIRED = ['badge'];
+
 export async function seedProducts() {
-  await EduProduct.bulkWrite(SEED.map((p) => ({ updateOne: { filter: { slug: p.slug }, update: { $setOnInsert: p }, upsert: true } })));
+  await EduProduct.bulkWrite(SEED.filter((p) => !RETIRED.includes(p.kind)).map((p) => ({ updateOne: { filter: { slug: p.slug }, update: { $setOnInsert: p }, upsert: true } })));
+  await EduProduct.updateMany({ kind: { $in: RETIRED }, active: true }, { $set: { active: false } });
 }
 
 export async function listProducts(email) {
