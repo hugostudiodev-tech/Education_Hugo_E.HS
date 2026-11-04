@@ -3,7 +3,7 @@ import { notify } from "../lib/notify";
 import { persona, PersonaAvatar } from "./EduPersona";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
-import { HOBBIES, MAX_HOBBIES, MIN_AGE, PROVINCES, profileDone } from "../../packages/persona/profile.js";
+import { HOBBIES, MAX_HOBBIES, MIN_AGE, PROVINCES, SENSITIVE_GENDERS, profileDone } from "../../packages/persona/profile.js";
 
 /**
  * Hỏi thông tin hồ sơ riêng tư — MỖI BƯỚC MỘT THÔNG TIN, chỉ hỏi những bước còn thiếu:
@@ -53,6 +53,9 @@ export default function ProfileGate({ current, onDone }) {
   const [province, setProvince] = useState("");
   const [hobbies, setHobbies] = useState([]);
   const [gender, setGender] = useState("");
+  const [consent, setConsent] = useState(false);
+  const otherFamily = gender === "other" || SENSITIVE_GENDERS.includes(gender);
+  const sensitive = SENSITIVE_GENDERS.includes(gender);
   const step = steps[index];
   const optional = step === "hobbies" || step === "gender";
   const today = new Date();
@@ -71,7 +74,7 @@ export default function ProfileGate({ current, onDone }) {
       notify.error(t(key) === key ? t("persona.failed") : t(key));
     } finally { setBusy(false); }
   };
-  const value = { birth: birth && { birthDate: birth }, province: province && { province }, hobbies: { hobbies }, gender: gender && { gender } }[step];
+  const value = { birth: birth && { birthDate: birth }, province: province && { province }, hobbies: { hobbies }, gender: gender && (!sensitive || consent) && { gender, ...(sensitive ? { sensitiveConsent: true } : {}) } }[step];
   const skip = { hobbies: { hobbies: [] }, gender: { gender: "skip" } }[step];
   if (!step) return null;
   const toggleHobby = (h) => setHobbies((list) => (list.includes(h) ? list.filter((x) => x !== h) : list.length < MAX_HOBBIES ? [...list, h] : list));
@@ -109,14 +112,29 @@ export default function ProfileGate({ current, onDone }) {
         {step === "gender" && (
           <div className="pg-gender" role="radiogroup" aria-label={t("friends.pg.gender.title")}>
             {Object.entries(GENDER_AVATARS).map(([g, avatar]) => (
-              <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g ? "is-on" : ""} onClick={() => setGender(g)}>
+              <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g || (g === "other" && otherFamily) ? "is-on" : ""} onClick={() => { setGender(g); setConsent(false); }}>
                 <span className="pg-gender-art">
                   <PersonaAvatar avatar={avatar} name={t(`friends.pg.gender.list.${g}`)} size={112} />
-                  {gender === g && <i className="material-symbols-outlined" aria-hidden="true">check</i>}
+                  {(gender === g || (g === "other" && otherFamily)) && <i className="material-symbols-outlined" aria-hidden="true">check</i>}
                 </span>
                 <span>{t(`friends.pg.gender.list.${g}`)}</span>
               </button>
             ))}
+            {otherFamily && (
+              <div className="pg-sub" role="radiogroup" aria-label={t("friends.pg.gender.list.other")}>
+                {["other", ...SENSITIVE_GENDERS].map((g) => (
+                  <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g ? "is-on" : ""} onClick={() => { setGender(g); setConsent(false); }}>
+                    {t(`friends.pg.gender.list.${g === "other" ? "otherAll" : g}`)}
+                  </button>
+                ))}
+                {sensitive && (
+                  <label className="pg-consent">
+                    <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                    <span>{t("friends.pg.gender.consent")}</span>
+                  </label>
+                )}
+              </div>
+            )}
             <button type="button" role="radio" aria-checked={gender === "private"} className={`pg-gender-private${gender === "private" ? " is-on" : ""}`} onClick={() => setGender("private")}>
               {gender === "private" && <span className="material-symbols-outlined" aria-hidden="true">check</span>}{t("friends.pg.gender.list.private")}
             </button>

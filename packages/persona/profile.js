@@ -4,7 +4,10 @@ export const PROVINCES = ['ha-noi', 'hue', 'lai-chau', 'dien-bien', 'son-la', 'l
 // 30 sở thích phổ biến tuổi 14+ (thẻ nhỏ, chọn tối đa MAX_HOBBIES).
 export const HOBBIES = ['games', 'esports', 'anime', 'manga', 'kpop', 'music', 'singing', 'instrument', 'dance', 'football', 'basketball', 'badminton', 'gym', 'swimming', 'cycling', 'drawing', 'photo', 'video', 'design', 'reading', 'writing', 'movies', 'travel', 'cooking', 'coding', 'robotics', 'science', 'pets', 'chess', 'languages'];
 export const MAX_HOBBIES = 8;
-export const GENDERS = ['male', 'female', 'other', 'private', 'skip'];
+// 'other' mở thêm các lựa chọn bên dưới — DỮ LIỆU NHẠY CẢM (xu hướng tính dục / bản dạng giới):
+// chỉ nhận khi kèm sensitiveConsent === true (đồng ý riêng, rõ ràng — Luật BVDLCN 2025).
+export const SENSITIVE_GENDERS = ['lesbian', 'gay', 'bisexual', 'transgender'];
+export const GENDERS = ['male', 'female', 'other', ...SENSITIVE_GENDERS, 'private', 'skip'];
 export const MIN_AGE = 14;
 
 export function ageOn(birthDate, today = new Date()) {
@@ -37,7 +40,9 @@ export function checkProfile(raw, today = new Date()) {
   }
   if (raw.gender !== undefined) {
     if (!GENDERS.includes(raw.gender)) return { ok: false, code: 'GENDER_BAD' };
+    if (SENSITIVE_GENDERS.includes(raw.gender) && raw.sensitiveConsent !== true) return { ok: false, code: 'CONSENT_NEEDED' };
     value.gender = raw.gender;
+    value.sensitiveConsentAt = SENSITIVE_GENDERS.includes(raw.gender) ? today.toISOString() : null;
   }
   return Object.keys(value).length ? { ok: true, value } : { ok: false, code: 'PROFILE_BAD' };
 }

@@ -1546,3 +1546,16 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-gender .pg-gender-private { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 18px; border: 2px solid var(--edu-line); border-radius: 999px; font-size: 15px; }
 .pg-gender .pg-gender-private.is-on { border-color: var(--edu-green); color: var(--edu-green); }
 @media (max-width: 420px) { .pg-gender .pg-gender-art > * { width: 88px !important; height: 88px !important; } }
+/* Nhân vật đẹp hơn: nét pixel sắc, vòng nền, bóng đổ, nhún nhẹ khi chọn. */
+.pg-gender-art img { display: block; image-rendering: pixelated; box-shadow: 0 6px 0 var(--edu-line); }
+.pg-gender > button:hover .pg-gender-art { transform: translateY(-2px); }
+.pg-gender > button.is-on .pg-gender-art { animation: persona-bob 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pg-gender > button.is-on .pg-gender-art { animation: none; } }
+/* Không tiết lộ: nhỏ gọn. */
+.pg-gender .pg-gender-private { min-height: 34px; padding: 0 12px; border-width: 1.5px; font-size: 13px; color: var(--edu-muted); }
+/* Lựa chọn thêm khi chọn "Khác". */
+.pg-sub { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: 16px; background: var(--edu-soft); }
+.pg-sub > button { min-height: 40px; padding: 0 14px; border: 2px solid var(--edu-line); border-radius: 999px; background: var(--edu-card, #fff); color: var(--edu-ink); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.pg-sub > button.is-on { border-color: var(--edu-green); color: var(--edu-green); }
+.pg-consent { display: flex; gap: 10px; align-items: flex-start; width: 100%; margin-top: 4px; font-size: 13px; text-align: left; color: var(--edu-ink); cursor: pointer; }
+.pg-consent input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--edu-green); }
