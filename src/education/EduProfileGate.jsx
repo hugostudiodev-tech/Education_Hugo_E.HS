@@ -49,8 +49,8 @@ function GenderArt({ kind, size, label }) {
   if (kind === "bisexual" || kind === "transgender") {
     return (
       <span className={`pg-duo is-${kind}`} style={{ width: size, height: size }} role="img" aria-label={label}>
-        <span className="pg-duo-a"><PersonaAvatar avatar={clear(GENDER_AVATARS.male)} name="" size={Math.round(size * 0.78)} /></span>
-        <span className="pg-duo-b"><PersonaAvatar avatar={clear(GENDER_AVATARS.female)} name="" size={Math.round(size * 0.78)} /></span>
+        <span className="pg-duo-a"><PersonaAvatar avatar={clear(GENDER_AVATARS.male)} name="" size={size} /></span>
+        <span className="pg-duo-b"><PersonaAvatar avatar={clear(GENDER_AVATARS.female)} name="" size={size} /></span>
         {kind === "transgender" && <i className="material-symbols-outlined pg-duo-hand" aria-hidden="true">handshake</i>}
       </span>
     );
