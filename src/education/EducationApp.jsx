@@ -210,7 +210,7 @@ export default function EducationApp() {
   const device = detectInstallTarget();
   const phoneWeb = (device.iOS || device.android) && !standalone;
   // Trang công khai (chia sẻ, Google đọc) mở được cả trên trình duyệt điện thoại; còn lại mời cài app.
-  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/");
+  const publicPage = ["/", "/en", "/zh", "/terms", "/privacy", "/guidelines", "/partners", "/developers"].includes(location.pathname) || location.pathname.startsWith("/courses/") || location.pathname.startsWith("/u/");
   const gated = phoneWeb && !publicPage;
   return (
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
@@ -244,7 +244,7 @@ export default function EducationApp() {
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
           <Route path="/friends/find" element={signedIn ? <EduFindFriends /> : needsLogin} />
-          <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />
+          <Route path="/u/:code" element={<EduPublicProfile />} />
           <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} onPersona={setPersona} /> : needsLogin} />
         </Route>
         {/* PWA cài lúc manifest của www còn hiệu lực sẽ mở /member/today — ở Edu không có trang đó.

@@ -150,10 +150,10 @@ export async function learnerProfile(email, rawCode) {
   if (!target) throw fail('NOT_FOUND');
   const persona = { nickname: target.nickname, avatar: target.avatar, intro: target.intro, createdAt: target.createdAt };
   if (!persona.nickname) throw fail('NOT_FOUND');
-  const me = await meDoc(email);
+  const me = email ? await meDoc(email) : null;
   const done = new Set(target.completed || []);
   const { day } = vnClock();
-  const relation = target.email === email ? 'self'
+  const relation = !me ? 'guest' : target.email === email ? 'self'
     : (me.friends || []).includes(code) ? 'friend'
       : (me.requestsIn || []).includes(code) ? 'in'
         : (me.requestsOut || []).includes(code) ? 'out' : 'none';

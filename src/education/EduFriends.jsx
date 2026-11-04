@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { notify } from "../lib/notify";
@@ -212,6 +212,50 @@ export default function EduFriends() {
   );
 }
 
+/**
+ * Quét QR ngay trong app (camera hệ thống luôn mở trình duyệt, không mở PWA).
+ * BarcodeDetector nếu có (Android), không thì jsQR (iOS) — chỉ tải khi mở máy quét.
+ */
+function Scanner({ onCode, onClose }) {
+  const { t } = useEduText();
+  const video = useRef(null);
+  useEffect(() => {
+    let stream; let stop = false;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    (async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.current.srcObject = stream;
+        await video.current.play();
+        const native = "BarcodeDetector" in window ? new window.BarcodeDetector({ formats: ["qr_code"] }) : null;
+        const jsQR = native ? null : (await import("jsqr")).default;
+        while (!stop) {
+          let raw = "";
+          const v = video.current;
+          if (native) raw = (await native.detect(v).catch(() => []))[0]?.rawValue || "";
+          else if (v.videoWidth) {
+            canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+            ctx.drawImage(v, 0, 0);
+            raw = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height)?.data || "";
+          }
+          const code = raw.match(/\/u\/([A-Z0-9]{6})/i)?.[1] || (/^[A-Z0-9]{6}$/i.test(raw) ? raw : null);
+          if (code) { playEduSound("success"); onCode(code.toUpperCase()); return; }
+          await new Promise((r) => setTimeout(r, 250));
+        }
+      } catch { notify.error(t("friends.scanFailed")); onClose(); }
+    })();
+    return () => { stop = true; stream?.getTracks().forEach((track) => track.stop()); };
+  }, [onCode, onClose, t]);
+  return (
+    <div className="fr-scan" role="dialog" aria-modal="true" aria-label={t("friends.scan")}>
+      <video ref={video} playsInline muted />
+      <span className="fr-scan-frame" aria-hidden="true" />
+      <button type="button" className="edu-btn" onClick={onClose}>{t("common.close")}</button>
+    </div>
+  );
+}
+
 const HIDDEN = "edu.suggestHidden";
 const readHidden = () => { try { return JSON.parse(localStorage.getItem(HIDDEN) || "[]"); } catch { return []; } };
 
@@ -222,6 +266,10 @@ export function EduFindFriends() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState(null);
   const [hidden, setHidden] = useState(readHidden);
+  const [scanning, setScanning] = useState(false);
+  const navigate = useNavigate();
+  const onScanned = useCallback((code) => { setScanning(false); navigate(`/u/${code}`); }, [navigate]);
+  const closeScan = useCallback(() => setScanning(false), []);
   useEffect(() => {
     const query = q.trim();
     if (query.length < 2) { setResults(null); return undefined; }
@@ -252,6 +300,13 @@ export function EduFindFriends() {
           ))}
         </ul>
       ) : <p className="fr-empty">{t("friends.noResults")}</p>)}
+      {navigator.mediaDevices?.getUserMedia && (
+        <button type="button" className="fr-option" onClick={() => setScanning(true)}>
+          <span className="material-symbols-outlined is-search" aria-hidden="true">qr_code_scanner</span>
+          <b>{t("friends.scan")}</b>
+        </button>
+      )}
+      {scanning && <Scanner onCode={onScanned} onClose={closeScan} />}
       {data?.code && (
         <button type="button" className="fr-option" onClick={() => shareLink(data.code, t)}>
           <span className="fr-option-art"><PersonaAvatar avatar={data.me?.avatar} name={data.me?.name} size={48} /><i className="material-symbols-outlined" aria-hidden="true">ios_share</i></span>
@@ -332,6 +387,7 @@ export function EduPublicProfile() {
     out: <button type="button" className="edu-btn edu-btn--ghost" onClick={() => act(`friends/${p.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>,
     in: <button type="button" className="edu-btn" onClick={() => act(`friends/${p.code}/accept`, { method: "POST" })}>{t("friends.accept")}</button>,
     none: <button type="button" className="edu-btn" onClick={() => act("friends", { method: "POST", body: JSON.stringify({ code: p.code }) })}><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.add")}</button>,
+    guest: <Link className="edu-btn" to={`/login?next=${encodeURIComponent(`/u/${p.code}`)}`}><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.add")}</Link>,
   }[p.relation];
   return (
     <section className="edu-page edu-me fr">
@@ -346,7 +402,7 @@ export function EduPublicProfile() {
       <div className="fr-cta">{button}</div>
       <Overview streak={p.streak} xp={p.xp} rank={0} steps={p.steps} />
       <Achievements values={{ streak: p.streak, steps: p.steps, friends: p.friends }} />
-      {p.relation !== "self" && (
+      {!["self", "guest"].includes(p.relation) && (
         <button type="button" className="fr-report" onClick={() => setReporting(true)}>
           <span className="material-symbols-outlined" aria-hidden="true">flag</span>{t("friends.report")}
         </button>
