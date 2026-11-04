@@ -17,6 +17,8 @@ export default function EduStatus({ kind = "loading", code, onRetry, compact = f
   const [pick] = useState(() => ({ cast: 1 + Math.floor(Math.random() * 8), tip: Math.floor(Math.random() * TIPS) }));
   useEffect(() => { if (kind !== "loading") playEduSound("thud"); }, [kind]);
 
+  // Đổi trang trong app: khung xương giống bố cục trang thật thay vì chữ "Đang tải".
+  if (kind === "loading" && compact) return <EduSkeleton />;
   if (kind === "loading") {
     return (
       <div className={`edu-status is-loading${compact ? " is-compact" : ""}`} role="status" aria-live="polite">
@@ -62,4 +64,15 @@ export class EduErrorBoundary extends Component {
     const code = offline ? null : `ED-${Date.now().toString(36).slice(-6).toUpperCase()}`;
     return <EduStatus kind={offline ? "offline" : "error"} code={code} onRetry={() => window.location.reload()} />;
   }
+}
+
+/** Khung xương chờ tải: thanh tiêu đề + vài thẻ, nhấp nháy nhẹ. rows = số thẻ. */
+export function EduSkeleton({ rows = 4, avatar = false }) {
+  return (
+    <div className="edu-page edu-skel-page" role="status" aria-busy="true" aria-label="Loading">
+      {avatar && <span className="edu-skel is-circle" />}
+      <span className="edu-skel is-title" />
+      {Array.from({ length: rows }, (_, i) => <span key={i} className="edu-skel is-card" />)}
+    </div>
+  );
 }

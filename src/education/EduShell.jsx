@@ -1,5 +1,5 @@
 import { clearCache } from "../lib/offlineCache";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { PersonaAvatar, PersonaGate, PersonaInfoForm } from "./EduPersona";
 import HugoLogo from "../components/HugoLogo";
 import { notify } from "../lib/notify";
@@ -388,16 +388,10 @@ export function EduStore({ learner, onLearnerUpdate }) {
   );
 }
 
-function Stat({ icon, tone, value, label }) {
-  return (
-    <div className="edu-stat">
-      {icon === "gem" ? <GemIcon size={32} /> : <span className={`material-symbols-outlined edu-tone-${tone}`} aria-hidden="true">{icon}</span>}
-      <div><b>{value}</b><small>{label}</small></div>
-    </div>
-  );
-}
 
 /** Hồ sơ: trang thông tin của người học. Cài đặt nằm ở trang riêng (bánh răng góc phải). */
+const ProfileSocial = lazy(() => import("./EduFriends").then((m) => ({ default: m.ProfileSocial })));
+
 export function EduProfile({ learner, persona, onPersona }) {
   const { t, lang } = useEduText();
   const support = supportMailUrl({ lang, nickname: persona?.nickname });
@@ -423,12 +417,10 @@ export function EduProfile({ learner, persona, onPersona }) {
         {persona?.intro && <p>{persona.intro}</p>}
         <small>{learner?.email}</small>
       </div>
-      <div className="edu-stats">
-        <Stat icon="local_fire_department" tone="orange" value={learner?.edu?.streak?.count ?? 0} label={t("streak.title")} />
-        <Stat icon="task_alt" tone="blue" value={`${stats.done}/${stats.total || 26}`} label={t("profile.steps")} />
-        <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
-        <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
-      </div>
+      {/* Kiểu Duolingo: @mã, số bạn, Thêm bạn + QR, Tổng quan, Streak bạn bè, Thành tích (EduFriends, tải lười). */}
+      <Suspense fallback={<div className="fr-skel"><span className="edu-skel is-line" /><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div>}>
+        <ProfileSocial learner={learner} name={name} steps={stats.done} />
+      </Suspense>
       {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
       <div className="edu-me-actions">
         <Link className="edu-btn edu-btn--ghost" to="/feedback">

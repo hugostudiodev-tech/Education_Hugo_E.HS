@@ -32,6 +32,7 @@ const PAGES = {
   hub: () => import("../components/member/hugoCoder/HugoCoderHub"),
   community: () => import("./EduCommunity"),
   feedback: () => import("./EduFeedback"),
+  friends: () => import("./EduFriends"),
   legal: () => import("./EduLegal.jsx"),
   developers: () => import("./EduDevelopers.jsx"),
   devTeam: () => import("./EduDeveloperTeam.jsx"),
@@ -45,6 +46,9 @@ const EduCourseIntro = lazy(PAGES.course);
 const HugoCoderHub = lazy(PAGES.hub);
 const EduCommunity = lazy(PAGES.community);
 const EduFeedback = lazy(PAGES.feedback);
+const EduFriends = lazy(PAGES.friends);
+const EduFindFriends = lazy(() => PAGES.friends().then((m) => ({ default: m.EduFindFriends })));
+const EduPublicProfile = lazy(() => PAGES.friends().then((m) => ({ default: m.EduPublicProfile })));
 const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
 const EduDeveloperTeam = lazy(PAGES.devTeam);
@@ -59,7 +63,7 @@ const Loading = () => <EduStatus kind="loading" />;
 
 // Khung chính (thanh trên, menu, cột phải, hộp thông báo) dựng MỘT lần cho mọi trang trong nó;
 // chuyển trang chỉ đổi phần nội dung, chờ tải thì quay nhỏ ngay trong vùng nội dung.
-const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team)/, "profile"],
+const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team|friends|u\/)/, "profile"],
   [/^\/(ads|community)/, "community"], [/^\/store/, "store"]];
 function ShellLayout({ learner, signedIn }) {
   const { pathname } = useLocation();
@@ -238,6 +242,9 @@ export default function EducationApp() {
           <Route path="/ads" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/community/*" element={<Navigate to="/ads" replace />} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
+          <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
+          <Route path="/friends/find" element={signedIn ? <EduFindFriends /> : needsLogin} />
+          <Route path="/u/:code" element={signedIn ? <EduPublicProfile /> : needsLogin} />
           <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} onPersona={setPersona} /> : needsLogin} />
         </Route>
         {/* PWA cài lúc manifest của www còn hiệu lực sẽ mở /member/today — ở Edu không có trang đó.
