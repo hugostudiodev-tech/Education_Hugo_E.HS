@@ -42,6 +42,8 @@ const learnerSchema = new Schema({
   intro: { type: String, default: '' },
   // Bạn bè + thi đua tuần
   friendCode: String,
+  // Tài khoản chính thức Education Hugo (tick vàng): theo dõi là thành bạn ngay, nhận thông báo admin gửi.
+  official: Boolean,
   friends: { type: [String], default: [] },
   requestsIn: { type: [String], default: [] },
   requestsOut: { type: [String], default: [] },

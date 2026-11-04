@@ -100,6 +100,14 @@ async function pushAll(email, textFor, url, tag) {
   }));
 }
 
+/** Thông báo soạn tay (admin) tới nhiều người: hộp thư + đẩy. Không gửi thư email. */
+export async function announceTo(emails, { title, body, url }) {
+  if (!emails.length) return;
+  await Notification.insertMany(emails.map((email) => ({ email, key: 'announce', category: 'general', title, message: body, actionUrl: url })));
+  // ponytail: đẩy tuần tự từng người; chia lô/hàng đợi khi người theo dõi lên hàng chục nghìn.
+  for (const email of emails) await pushAll(email, () => ({ title, body }), url, 'edu-announce').catch(() => {});
+}
+
 /** Gửi một thông báo theo khoá STREAK_PUSH tới người học. Không bao giờ ném lỗi ra ngoài. */
 export async function notify(email, { key, vars = {}, url = '/learn', tag } = {}) {
   try {

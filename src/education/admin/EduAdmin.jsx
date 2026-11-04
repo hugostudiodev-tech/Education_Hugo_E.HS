@@ -181,6 +181,29 @@ function Duplicates() {
   );
 }
 
+/** Gửi thông báo từ tài khoản chính thức Education Hugo tới mọi người đang theo dõi (hộp thư + đẩy). */
+function Announce() {
+  const [f, setF] = useState({ title: "", body: "", url: "/learn" });
+  const [busy, setBusy] = useState(false);
+  const send = async (e) => {
+    e.preventDefault();
+    if (!window.confirm("Gửi thông báo này tới mọi người theo dõi Education Hugo?")) return;
+    setBusy(true);
+    try { const r = await call("/admin/announce", { method: "POST", body: f }); window.alert(`Đã gửi tới ${r.sent} người.`); setF({ title: "", body: "", url: "/learn" }); }
+    catch (err) { window.alert(err.message); } finally { setBusy(false); }
+  };
+  const input = "w-full rounded-lg border border-border bg-background px-3 py-2 text-[15px]";
+  return (
+    <form onSubmit={send} className="max-w-xl space-y-3">
+      <p className="text-[14px] text-muted-foreground">Gửi dưới tên tài khoản chính thức (mã HUGOED) tới người đang theo dõi.</p>
+      <input className={input} placeholder="Tiêu đề" maxLength={120} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} required />
+      <textarea className={input} rows={4} placeholder="Nội dung" maxLength={500} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} required />
+      <input className={input} placeholder="Đường dẫn khi bấm (vd. /store)" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} />
+      <Btn type="submit" disabled={busy}>{busy ? "Đang gửi…" : "Gửi thông báo"}</Btn>
+    </form>
+  );
+}
+
 function LearnerDetail({ email, onClose }) {
   const [d, setD] = useState(null);
   const load = useCallback(() => { call(`/admin/learners/${encodeURIComponent(email)}`).then(setD).catch((e) => window.alert(e.message)); }, [email]);
@@ -523,6 +546,7 @@ const TABS = [
   ["articles", "Ads", "campaign", Articles],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["duplicates", "Nghi trùng", "group_off", Duplicates],
+  ["announce", "Thông báo", "campaign", Announce],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],
 ];

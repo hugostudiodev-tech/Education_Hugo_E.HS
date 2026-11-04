@@ -19,6 +19,7 @@ import admin from './routes/admin.js';
 import { inbox, push } from './routes/inbox.js';
 import { runReminders } from './services/learning.js';
 import { seedProducts } from './services/store.js';
+import { seedOfficial } from './services/social.js';
 
 for (const name of ['MONGODB_URI', 'BETTER_AUTH_SECRET']) {
   if (!process.env[name]) { console.error(`Thiếu biến môi trường ${name}.`); process.exit(1); }
@@ -65,6 +66,7 @@ app.use('/api', (_req, res) => res.status(404).json({ code: 'NOT_FOUND', error: 
 // Nhắc học theo giờ Việt Nam, phút 0 mỗi giờ.
 cron.schedule('0 * * * *', () => runReminders().catch((error) => console.error('[cron nhắc học]', error.message)), { timezone: 'Asia/Ho_Chi_Minh' });
 seedProducts().catch((error) => console.error('[seed cửa hàng]', error.message));
+seedOfficial().catch((error) => console.error('[seed tài khoản chính thức]', error.message));
 
 const PORT = Number(process.env.PORT || 8100);
 app.listen(PORT, () => console.log(`Education Hugo API chạy ở cổng ${PORT}`));

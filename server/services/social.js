@@ -6,7 +6,7 @@
 //    không tên thật, không ảnh thật, không email. Chưa có biệt danh thì hiện "Hugo learner".
 import { randomInt } from 'node:crypto';
 import { Learner as EduLearner, Report } from '../models.js';
-import { notify } from '../lib/notify.js';
+import { announceTo, notify } from '../lib/notify.js';
 import { STAGES } from '../../packages/courses/coding/index.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
 import { streakView } from '../../packages/shared/eduStreak.js';
@@ -66,7 +66,7 @@ async function ensureCode(doc) {
 
 const fail = (code, message) => Object.assign(new Error(message || code), { code, status: code === 'NOT_FOUND' ? 404 : 400 });
 const cleanCode = (raw) => String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-const FIELDS = 'email friendCode streak xpWeek xpWeekly friends requestsIn requestsOut createdAt badge nickname avatar intro completed';
+const FIELDS = 'email official friendCode streak xpWeek xpWeekly friends requestsIn requestsOut createdAt badge nickname avatar intro completed';
 
 /** Một hàng người học gửi xuống client: persona + chuỗi + XP tuần + mã (để mở hồ sơ). Không có email. */
 function row(doc, week, day, personas, myEmail) {
@@ -79,6 +79,7 @@ function row(doc, week, day, personas, myEmail) {
     xp: doc.xpWeek === week ? doc.xpWeekly || 0 : 0,
     me: doc.email === myEmail,
     badge: doc.badge || null,
+    official: Boolean(doc.official),
   };
 }
 
@@ -95,10 +96,10 @@ export async function socialView(email) {
   const codes = [...new Set([...(me.friends || []), ...(me.requestsIn || []), ...(me.requestsOut || [])])];
   const [people, topDocs, idleDocs] = await Promise.all([
     codes.length ? EduLearner.find({ friendCode: { $in: codes } }).select(FIELDS).lean() : [],
-    EduLearner.find({ xpWeek: week, xpWeekly: { $gt: 0 } }).sort({ xpWeekly: -1 }).limit(LEAGUE_SIZE).select(FIELDS).lean(),
+    EduLearner.find({ xpWeek: week, xpWeekly: { $gt: 0 }, official: { $ne: true } }).sort({ xpWeekly: -1 }).limit(LEAGUE_SIZE).select(FIELDS).lean(),
     // Bạn học chưa có XP tuần này: vẫn hiện dưới bảng (chưa xếp hạng), ai học gần đây lên trước.
     // ponytail: giới hạn CLASSMATES người, phân trang khi lớp đông hơn.
-    EduLearner.find({ $or: [{ xpWeek: { $ne: week } }, { xpWeekly: { $not: { $gt: 0 } } }] }).sort({ updatedAt: -1 }).limit(CLASSMATES).select(FIELDS).lean(),
+    EduLearner.find({ official: { $ne: true }, $or: [{ xpWeek: { $ne: week } }, { xpWeekly: { $not: { $gt: 0 } } }] }).sort({ updatedAt: -1 }).limit(CLASSMATES).select(FIELDS).lean(),
   ]);
   const personas = await PersonaService.forEmails([...new Set([email, ...people, ...topDocs, ...idleDocs].map((d) => d.email || d))]);
   const byCode = new Map(people.map((d) => [d.friendCode, d]));
@@ -110,7 +111,9 @@ export async function socialView(email) {
   league.sort((a, b) => b.xp - a.xp || b.streak - a.streak);
   const classmates = idleDocs.map((d) => row(d, week, day, personas, email));
   const friends = [mine, ...list(me.friends)].sort((a, b) => b.xp - a.xp || b.streak - a.streak);
-  return { code: me.friendCode, week, me: mine, league, classmates, friends, requestsIn: list(me.requestsIn), requestsOut: list(me.requestsOut) };
+  const officialDoc = (me.friends || []).includes(OFFICIAL.code) ? null : await EduLearner.findOne({ friendCode: OFFICIAL.code }).select(FIELDS).lean();
+  const official = officialDoc ? row(officialDoc, week, day, new Map([[officialDoc.email, { nickname: officialDoc.nickname, avatar: officialDoc.avatar }]]), email) : null;
+  return { code: me.friendCode, week, me: mine, official, league, classmates, friends, requestsIn: list(me.requestsIn), requestsOut: list(me.requestsOut) };
 }
 
 /** Tìm người học theo đúng mã, đúng email, hoặc tiền tố biệt danh. Trả hàng công khai (không email). */
@@ -170,6 +173,7 @@ export async function learnerProfile(email, rawCode) {
     steps: STAGES.reduce((sum, s) => sum + Array.from({ length: s.to - s.from }, (_, i) => `step${s.from + i + 1}`).filter((id) => done.has(id)).length, 0),
     stages: STAGES.map((s) => ({ code: s.code, total: s.to - s.from, done: Array.from({ length: s.to - s.from }, (_, i) => `step${s.from + i + 1}`).filter((id) => done.has(id)).length })),
     relation,
+    official: Boolean(target.official),
   };
 }
 
@@ -180,9 +184,15 @@ export async function requestFriend(email, rawCode) {
   if (!/^[A-Z0-9]{6}$/.test(code)) throw fail('BAD_CODE', 'Mã bạn gồm 6 ký tự.');
   const me = await meDoc(email);
   if (code === me.friendCode) throw fail('SELF', 'Đây là mã của bạn.');
-  const target = await EduLearner.findOne({ friendCode: code }).select('email requestsIn friends').lean();
+  const target = await EduLearner.findOne({ friendCode: code }).select('email official requestsIn friends').lean();
   if (!target) throw fail('NOT_FOUND', 'Không tìm thấy mã này.');
   if ((me.friends || []).includes(code)) return;
+  // Tài khoản chính thức: theo dõi là thành bạn ngay, không chờ duyệt.
+  if (target.official) {
+    await EduLearner.updateOne({ _id: me._id }, { $addToSet: { friends: code }, $pull: { requestsOut: code } });
+    await EduLearner.updateOne({ _id: target._id }, { $addToSet: { friends: me.friendCode } }); // ponytail: mảng lớn dần theo số người theo dõi; tách collection khi vượt ~100k
+    return;
+  }
   if ((me.requestsIn || []).includes(code)) return respondFriend(email, code, true);
   if ((me.friends || []).length >= MAX_FRIENDS) throw fail('TOO_MANY', `Tối đa ${MAX_FRIENDS} bạn.`);
   if ((target.requestsIn || []).length >= MAX_PENDING) throw fail('TOO_MANY', 'Người này đang có quá nhiều lời mời.');
@@ -215,6 +225,30 @@ export async function removeFriend(email, rawCode) {
   const me = await meDoc(email);
   await EduLearner.updateOne({ _id: me._id }, { $pull: { friends: code, requestsOut: code } });
   await EduLearner.updateOne({ friendCode: code }, { $pull: { friends: me.friendCode, requestsIn: me.friendCode } });
+}
+
+/** Tài khoản chính thức: tạo/cập nhật khi máy chủ khởi động. Nhân vật pixel tông xanh Hugo. */
+export const OFFICIAL = { code: 'HUGOED', email: 'official@hugowishpax.studio' };
+export async function seedOfficial() {
+  await EduLearner.updateOne({ email: OFFICIAL.email }, {
+    $set: {
+      official: true, friendCode: OFFICIAL.code, nickname: 'Education Hugo',
+      intro: 'Tài khoản chính thức của Education Hugo. Theo dõi để nhận tin mới, sự kiện và mẹo học.',
+      avatar: { hair: 'short05', eyes: 'variant04', mouth: 'happy01', clothes: 'variant01', glasses: 'none', hat: 'none', beard: 'none', accessories: 'none', skinColor: '#ffdbac', hairColor: '#009bbd', clothingColor: '#5bc0de', backgroundColor: '#e0f2fe' },
+    },
+    $setOnInsert: { email: OFFICIAL.email },
+  }, { upsert: true });
+}
+
+/** Admin gửi thông báo tới mọi người đang theo dõi tài khoản chính thức (hộp thư + đẩy). */
+export async function announce({ title, body, url }) {
+  const t = String(title || '').trim().slice(0, 120);
+  const b = String(body || '').trim().slice(0, 500);
+  if (!t || !b) throw fail('EMPTY', 'Cần tiêu đề và nội dung.');
+  const link = /^\/[^/]/.test(url || '') ? url : '/learn';
+  const fans = await EduLearner.find({ friends: OFFICIAL.code, official: { $ne: true } }).select('email').lean();
+  await announceTo(fans.map((f) => f.email), { title: t, body: b, url: link });
+  return { sent: fans.length };
 }
 
 export const REPORT_REASONS = ['nickname', 'avatar', 'intro', 'harassment', 'cheating', 'other'];

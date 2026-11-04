@@ -8,6 +8,55 @@ import { PersonaAvatar } from "./EduPersona";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 import { EduSkeleton } from "./EduStatus";
+import { supportMailUrl } from "./eduSupport";
+
+// Tài khoản chính thức Education Hugo: nút theo dõi mạng xã hội. href rỗng = ẩn nút (điền sau).
+const OFFICIAL_LINKS = [
+  { key: "facebook", label: "Facebook", color: "#0866ff", href: "https://www.facebook.com/share/19wAV6tJAi/?mibextid=wwXIfr" },
+  { key: "instagram", label: "Instagram", color: "#e4405f", href: "https://www.instagram.com/hugostudio.vn" },
+  { key: "tiktok", label: "TikTok", color: "#000000", href: "https://www.tiktok.com/@hugo.studiotiktok" },
+  { key: "discord", label: "Discord", color: "#5865f2", href: "https://discord.gg/mAMtkmKnt" },
+  { key: "whatsapp", label: "WhatsApp", color: "#25d366", href: "https://whatsapp.com/channel/0029Vb8rLtrBlHpeCjY4LH3n" },
+];
+const FEATURE_ART = ["/edu/mail/hero-code.png", "/edu/mail/quick-minutes.png", "/edu/mail/buddy-cozy.png", "/edu/cast-5.svg", "/edu/buddy-practice.svg", "/edu/buddy-done.svg"];
+
+/** Tick vàng cạnh tên tài khoản chính thức. */
+export function Verified() {
+  const { t } = useEduText();
+  return <span className="material-symbols-outlined fr-verified" role="img" aria-label={t("friends.verified")} title={t("friends.verified")}>verified</span>;
+}
+
+/** Hồ sơ chính thức: nút theo dõi mạng xã hội, giới thiệu tính năng có hình, hỗ trợ + đánh giá. */
+function OfficialBody() {
+  const { t, lang } = useEduText();
+  const support = supportMailUrl({ lang });
+  const features = t("friends.features");
+  return (
+    <>
+      <div className="fr-socials">
+        {OFFICIAL_LINKS.filter((l) => l.href).map((l) => (
+          <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer" style={{ "--brand": l.color, "--logo": `url(/edu/brand/${l.key}.svg)` }} aria-label={l.label}>
+            <i aria-hidden="true" /><span>{l.label}</span>
+          </a>
+        ))}
+      </div>
+      <h2 className="fr-h">{t("friends.officialTitle")}</h2>
+      <ul className="fr-features">
+        {(Array.isArray(features) ? features : []).map((f, i) => (
+          <li key={f.title}>
+            <img src={FEATURE_ART[i]} alt="" loading="lazy" width="96" height="96" />
+            <span><b>{f.title}</b><small>{f.body}</small></span>
+          </li>
+        ))}
+      </ul>
+      <h2 className="fr-h">{t("friends.contact")}</h2>
+      <div className="edu-me-actions">
+        <Link className="edu-btn edu-btn--ghost" to="/feedback"><span className="material-symbols-outlined" aria-hidden="true">star</span> {t("history.write")}</Link>
+        <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener"><span className="material-symbols-outlined" aria-hidden="true">support_agent</span> {t("common.support")}</a>
+      </div>
+    </>
+  );
+}
 
 /**
  * Bạn bè kiểu Duolingo (API /api/social, services/social.js — kết bạn hai chiều có duyệt):
@@ -154,7 +203,7 @@ function PersonRow({ row, children }) {
     <li className="fr-row">
       <Link to={`/u/${row.code}`} className="fr-row-main">
         <PersonaAvatar avatar={row.avatar} name={row.name} size={56} />
-        <span><b className="nick-font">{row.name}</b><small><i className="material-symbols-outlined" aria-hidden="true">local_fire_department</i>{row.streak} · {row.xp} XP</small></span>
+        <span><b className="nick-font">{row.name}{row.official && <Verified />}</b><small><i className="material-symbols-outlined" aria-hidden="true">local_fire_department</i>{row.streak} · {row.xp} XP</small></span>
       </Link>
       {children || <span className="material-symbols-outlined fr-chev" aria-hidden="true">chevron_right</span>}
     </li>
@@ -284,8 +333,8 @@ export function EduFindFriends() {
   const hide = (code) => { const next = [...hidden, code]; setHidden(next); try { localStorage.setItem(HIDDEN, JSON.stringify(next)); } catch { /* bỏ qua */ } };
   const known = new Set([...(data?.friends || []), ...(data?.requestsOut || []), ...(data?.requestsIn || [])].map((r) => r.code));
   const seen = new Set();
-  const suggestions = [...(data?.league || []), ...(data?.classmates || [])]
-    .filter((r) => r.code && !r.me && !known.has(r.code) && !hidden.includes(r.code) && r.name !== "Hugo learner" && !seen.has(r.code) && seen.add(r.code))
+  const suggestions = [...(data?.official ? [data.official] : []), ...(data?.league || []), ...(data?.classmates || [])]
+    .filter((r) => r.code && !r.me && !known.has(r.code) && !hidden.includes(r.code) && (r.official || r.name !== "Hugo learner") && !seen.has(r.code) && seen.add(r.code))
     .slice(0, 12);
   return (
     <section className="edu-page fr">
@@ -324,8 +373,8 @@ export function EduFindFriends() {
             {suggestions.map((row) => (
               <li key={row.code}>
                 <button type="button" className="fr-suggest-x" onClick={() => hide(row.code)} aria-label={t("common.close")}><span className="material-symbols-outlined" aria-hidden="true">close</span></button>
-                <Link to={`/u/${row.code}`}><PersonaAvatar avatar={row.avatar} name={row.name} size={64} /><b className="nick-font">{row.name}</b><small>{row.xp} XP</small></Link>
-                <button type="button" className="edu-btn" onClick={() => add(row.code)}>{t("friends.add")}</button>
+                <Link to={`/u/${row.code}`}><PersonaAvatar avatar={row.avatar} name={row.name} size={64} /><b className="nick-font">{row.name}{row.official && <Verified />}</b><small>{row.official ? t("friends.verified") : `${row.xp} XP`}</small></Link>
+                <button type="button" className="edu-btn" onClick={() => add(row.code)}>{t(row.official ? "friends.follow" : "friends.add")}</button>
               </li>
             ))}
           </ul>
@@ -387,10 +436,10 @@ export function EduPublicProfile() {
   if (p.failed) return <section className="edu-page fr"><PageHead title="" /><p className="fr-empty">{t(p.missing ? "friends.notFound" : "friends.failed")}</p></section>;
   const button = {
     self: <Link className="edu-btn edu-btn--ghost" to="/profile">{t("friends.editMine")}</Link>,
-    friend: <button type="button" className="edu-btn edu-btn--ghost" onClick={async () => { if (await notify.confirm({ title: t("friends.removeAsk") })) act(`friends/${p.code}`, { method: "DELETE" }); }}><span className="material-symbols-outlined" aria-hidden="true">how_to_reg</span>{t("friends.isFriend")}</button>,
+    friend: <button type="button" className="edu-btn edu-btn--ghost" onClick={async () => { if (await notify.confirm({ title: p.official ? t("friends.following") : t("friends.removeAsk") })) act(`friends/${p.code}`, { method: "DELETE" }); }}><span className="material-symbols-outlined" aria-hidden="true">how_to_reg</span>{t(p.official ? "friends.following" : "friends.isFriend")}</button>,
     out: <button type="button" className="edu-btn edu-btn--ghost" onClick={() => act(`friends/${p.code}`, { method: "DELETE" })}>{t("friends.cancel")}</button>,
     in: <button type="button" className="edu-btn" onClick={() => act(`friends/${p.code}/accept`, { method: "POST" })}>{t("friends.accept")}</button>,
-    none: <button type="button" className="edu-btn" onClick={() => act("friends", { method: "POST", body: JSON.stringify({ code: p.code }) })}><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.add")}</button>,
+    none: <button type="button" className="edu-btn" onClick={() => act("friends", { method: "POST", body: JSON.stringify({ code: p.code }) })}><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t(p.official ? "friends.follow" : "friends.add")}</button>,
     guest: <Link className="edu-btn" to={`/login?next=${encodeURIComponent(`/u/${p.code}`)}`}><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.add")}</Link>,
   }[p.relation];
   return (
@@ -398,15 +447,17 @@ export function EduPublicProfile() {
       <PageHead title={p.name} />
       <div className="edu-me-hero">
         <span className="edu-me-avatar"><PersonaAvatar avatar={p.avatar} name={p.name} size={112} /></span>
-        <b className="nick-font">{p.name}</b>
+        <b className="nick-font">{p.name}{p.official && <Verified />}</b>
         <small className="fr-handle" translate="no">@{p.code}</small>
-        {p.joined && <small>{t("friends.joined", { date: new Date(p.joined).toLocaleDateString(lang, { month: "long", year: "numeric" }) })} · {t("friends.friendCount", { n: p.friends })}</small>}
+        {p.joined && <small>{t("friends.joined", { date: new Date(p.joined).toLocaleDateString(lang, { month: "long", year: "numeric" }) })} · {t(p.official ? "friends.followers" : "friends.friendCount", { n: p.friends })}</small>}
         {p.intro && <p>{p.intro}</p>}
       </div>
       <div className="fr-cta">{button}</div>
-      <Overview streak={p.streak} xp={p.xp} rank={0} steps={p.steps} />
-      <Achievements values={{ streak: p.streak, steps: p.steps, friends: p.friends }} />
-      {!["self", "guest"].includes(p.relation) && (
+      {p.official ? <OfficialBody /> : <>
+        <Overview streak={p.streak} xp={p.xp} rank={0} steps={p.steps} />
+        <Achievements values={{ streak: p.streak, steps: p.steps, friends: p.friends }} />
+      </>}
+      {!["self", "guest"].includes(p.relation) && !p.official && (
         <button type="button" className="fr-report" onClick={() => setReporting(true)}>
           <span className="material-symbols-outlined" aria-hidden="true">flag</span>{t("friends.report")}
         </button>

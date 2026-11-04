@@ -44,6 +44,11 @@ router.get('/learners', handle(async (req) => {
   return { items: items.map(({ completed, streak, ...d }) => ({ ...d, steps: completed?.length || 0, streak: streak?.count || 0 })) };
 }));
 // Nghi một người nhiều tài khoản: nhóm phiên Better Auth theo IP + trình duyệt.
+// Thông báo từ tài khoản chính thức tới người theo dõi.
+router.post('/announce', handle(async (req) => {
+  const { announce } = await import('../services/social.js');
+  return announce(req.body || {});
+}));
 router.get('/duplicates', handle(async () => {
   const groups = await mongoose.connection.db.collection('session').aggregate([
     { $match: { ipAddress: { $nin: [null, ''] } } },
