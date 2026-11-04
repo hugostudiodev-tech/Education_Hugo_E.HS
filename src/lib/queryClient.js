@@ -24,7 +24,11 @@ export const queryClient = new QueryClient({
 // Danh mục + nội dung bài học: lưu xuống máy, mở app là có ngay (kể cả offline), rồi tải mới nền.
 const KEY = "queries:v1";
 const persisted = (query) => query.queryKey[0] === "coder-lessons" && query.state.status === "success";
-hydrate(queryClient, readCache(KEY));
+// Bản lưu hỏng / chưa có (lần đầu mở, sau đăng xuất) thì bỏ qua — không bao giờ được làm trắng màn.
+try {
+  const saved = readCache(KEY);
+  if (saved && Array.isArray(saved.queries)) hydrate(queryClient, { mutations: [], ...saved });
+} catch { writeCache(KEY, null); }
 let timer;
 queryClient.getQueryCache().subscribe(() => {
   clearTimeout(timer);
