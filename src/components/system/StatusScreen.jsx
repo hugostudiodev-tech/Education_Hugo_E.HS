@@ -21,6 +21,7 @@ const DEFAULTS = {
   offline: { title: "Mất kết nối mạng", body: "Kiểm tra Wi-Fi hoặc dữ liệu di động. Trang sẽ tự kết nối lại khi có mạng." },
   server: { title: "Máy chủ đang khởi động", body: "Máy chủ miễn phí tạm nghỉ khi vắng người và thường sẵn sàng sau 30–60 giây. Trang sẽ tự thử lại." },
   notFound: { title: "Không tìm thấy trang này", body: "Đường dẫn có thể đã đổi hoặc gõ chưa đúng." },
+  updated: { title: "Đã có phiên bản mới", body: "Education Hugo vừa được cập nhật. Bấm để dùng bản mới nhất — dữ liệu vẫn giữ nguyên." },
   crash: { title: "Đã xảy ra sự cố", body: "Trang này tạm thời chưa dùng được. Bạn có thể báo cho quản trị viên rồi quay lại." },
 };
 
@@ -43,6 +44,11 @@ export default function StatusScreen({ kind = "loading", status, code, detail, i
 
         {(kind === "offline" || kind === "server") && <AutoRetry kind={kind} onRetry={retry} />}
         {kind === "notFound" && <NotFoundActions />}
+        {kind === "updated" && (
+          <div className="hs-actions">
+            <button type="button" className="hs-btn hs-btn--primary" onClick={retry}>{t("system.status.updateNow", { defaultValue: "Cập nhật ngay" })}</button>
+          </div>
+        )}
         {kind === "crash" && <CrashBlock code={code} detail={detail} />}
       </div>
     </div>

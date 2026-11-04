@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { EduSkeleton } from "./EduStatus";
 import gsap from "gsap";
 import confetti from "canvas-confetti";
 import { notify } from "../lib/notify";
@@ -74,8 +75,6 @@ export function StreakScreen({ streak, onUpdate }) {
   const { t } = useEduText();
   const [month, setMonth] = useState(streak.today.slice(0, 7));
   const [busy, setBusy] = useState(false);
-  const [riveFailed, setRiveFailed] = useState(false);
-  const onRiveFail = useCallback(() => setRiveFailed(true), []);
   const frozen = streak.frozenNow && !streak.studiedToday;
 
   const shiftMonth = (by) => {
@@ -123,7 +122,8 @@ export function StreakScreen({ streak, onUpdate }) {
               <small className="streak-band-note">{frozen ? t("streak.frozenNow") : streak.studiedToday ? t("streak.today") : t("streak.notToday")}</small>
             </div>
             <span className={`streak-band-flame${frozen ? " is-frozen" : streak.count ? "" : " is-ember"}`}>
-              {riveFailed ? <FlameBuddy stage={streak.count ? streak.stage : "ember"} frozen={frozen} size={150} /> : <RiveFlame onFail={onRiveFail} className="band-rive" />}
+              {/* Ảnh động sprite (cắt từ chính hoạt cảnh Rive): hiện ngay, nhẹ máy. Rive WebGL (~1 MB) chỉ dùng ở màn mừng thắp lửa. */}
+              <FlameBuddy stage={streak.count ? streak.stage : "ember"} frozen={frozen} size={150} />
             </span>
           </div>
           <div className="streak-body">
@@ -251,7 +251,7 @@ export function StreakCelebration({ count, stage, joy, onClose }) {
 /** Trang /streak: lấy chuỗi của người học; phá băng xong thì cập nhật số dư + mốc. */
 export function StreakView({ learner, onLearnerUpdate }) {
   const streak = learner?.edu?.streak;
-  if (!streak) return <section className="streak-page" aria-busy="true" />;
+  if (!streak) return <EduSkeleton rows={5} avatar />;
   const onUpdate = (data) => {
     onLearnerUpdate?.({ edu: { ...learner.edu, streak: data.streak }, ...(Number.isFinite(data.balance) ? { gems: data.balance } : {}) });
     if (data.milestone) window.dispatchEvent(new CustomEvent("edu:streak-milestone", { detail: { count: data.milestone.day, joy: data.milestone.gems, stage: data.streak.stage } }));

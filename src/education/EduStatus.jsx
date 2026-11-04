@@ -1,3 +1,5 @@
+import StatusScreen from "../components/system/StatusScreen";
+import { isChunkLoadError, tryChunkReload } from "../components/ErrorBoundary";
 import { Component, useEffect, useState } from "react";
 import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
@@ -56,9 +58,14 @@ export default function EduStatus({ kind = "loading", code, onRetry, compact = f
 export class EduErrorBoundary extends Component {
   state = { error: null };
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error) { console.error("[edu]", error); }
+  componentDidCatch(error) {
+    console.error("[edu]", error);
+    // Bản mới vừa deploy (file JS cũ đã bị thay): tải lại sang bản mới, không báo lỗi.
+    if (isChunkLoadError(error)) this.setState({ update: tryChunkReload() ? "updating" : "updated" });
+  }
   render() {
     if (!this.state.error) return this.props.children;
+    if (this.state.update) return <StatusScreen kind={this.state.update} onRetry={() => { try { sessionStorage.clear(); } catch { /* ignore */ } window.location.reload(); }} />;
     const offline = typeof navigator !== "undefined" && navigator.onLine === false;
     // Mã ngắn để người học báo lại cho hỗ trợ.
     const code = offline ? null : `ED-${Date.now().toString(36).slice(-6).toUpperCase()}`;

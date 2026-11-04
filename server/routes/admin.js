@@ -96,8 +96,23 @@ router.post('/learners/:email/ban', handle(async (req) => {
 }));
 router.post('/learners/:email/reset-persona', handle(async (req) => {
   const email = String(req.params.email).toLowerCase();
-  await Learner.updateOne({ email }, { $set: { nickname: '', intro: '', avatar: null } });
+  await Learner.updateOne({ email }, { $set: { nickname: '', intro: '', avatar: null }, $unset: { links: 1 } });
   await log(req, 'reset_persona', email);
+  return { success: true };
+}));
+
+// ── Link mạng xã hội của member: xem tất cả, gỡ từng link hoặc cả bộ (chặn link quảng cáo/độc hại) ──
+const LINK_KEYS = ['facebook', 'instagram', 'tiktok', 'github', 'youtube'];
+router.get('/links', handle(async () => ({
+  items: await Learner.find({ $or: LINK_KEYS.map((k) => ({ [`links.${k}`]: { $type: 'string' } })) })
+    .select('email nickname friendCode links updatedAt -_id').sort({ updatedAt: -1 }).limit(500).lean(),
+})));
+router.post('/learners/:email/links', handle(async (req) => {
+  const email = String(req.params.email).toLowerCase();
+  const key = req.body?.key;
+  if (key && !LINK_KEYS.includes(key)) throw fail(400, 'BAD_KEY', 'Không có loại link này.');
+  await Learner.updateOne({ email }, { $unset: key ? { [`links.${key}`]: 1 } : { links: 1 } });
+  await log(req, 'remove_links', email, key || 'all');
   return { success: true };
 }));
 

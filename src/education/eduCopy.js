@@ -21,7 +21,7 @@ export const EDU_COPY = {
     nav: { learn: "Học", progress: "Tiến độ", store: "Cửa hàng", profile: "Hồ sơ", community: "Ads", settings: "Cài đặt" },
     rail: { today: "Mục tiêu hôm nay", stage: "Chặng hiện tại", streak: "Lửa tới mốc", score: "Điểm trắc nghiệm" },
     friends: {
-      report: "Báo cáo người dùng", reportTitle: "Báo cáo {name}", reportBody: "Báo cáo được gửi kín tới đội ngũ Education Hugo. Người bị báo cáo không biết ai đã báo.", reportNote: "Mô tả thêm (không bắt buộc)", reportSend: "Gửi báo cáo", reportSent: "Đã gửi báo cáo. Cảm ơn bạn giữ cộng đồng an toàn.", reasons: { nickname: "Biệt danh không phù hợp", avatar: "Nhân vật không phù hợp", intro: "Giới thiệu không phù hợp", harassment: "Quấy rối hoặc bắt nạt", cheating: "Gian lận điểm / XP", other: "Lý do khác" },
+      report: "Báo cáo người dùng", reportTitle: "Báo cáo {name}", reportBody: "Báo cáo được gửi kín tới đội ngũ Education Hugo. Người bị báo cáo không biết ai đã báo.", reportNote: "Mô tả thêm (không bắt buộc)", reportSend: "Gửi báo cáo", reportSent: "Đã gửi báo cáo. Cảm ơn bạn giữ cộng đồng an toàn.", reasons: { nickname: "Biệt danh không phù hợp", avatar: "Nhân vật không phù hợp", intro: "Giới thiệu không phù hợp", links: "Link mạng xã hội quảng cáo / không phù hợp", harassment: "Quấy rối hoặc bắt nạt", cheating: "Gian lận điểm / XP", other: "Lý do khác" },
       title: "Bạn bè", tab: { league: "Thi đua", friends: "Bạn bè", add: "Thêm bạn" },
       league: "Thi đua tuần", live: "Trực tiếp", leagueHint: "Xếp theo XP tuần này · làm mới 00:00 thứ Hai", leagueEmpty: "Tuần này chưa ai có XP. Học một bài để lên bảng!",
       xp: "{n} XP", you: "Bạn", requests: "Lời mời kết bạn", accept: "Đồng ý", decline: "Từ chối",

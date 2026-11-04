@@ -2,7 +2,7 @@ import React from 'react';
 import { reportIncident } from '../lib/incident';
 import StatusScreen from './system/StatusScreen';
 
-const CHUNK_ERROR_PATTERN = /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i;
+const CHUNK_ERROR_PATTERN = /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module|unable to preload css|loading (css )?chunk|is not a valid javascript mime type|expected a javascript.*module script/i;
 const RELOAD_FLAG = 'chunk_reload_attempted';
 // componentDidMount can't clear the guard: the boundary mounts (Suspense
 // fallback) before the lazy chunk fails, so a cleared flag meant reload loops.
@@ -27,8 +27,25 @@ async function hardResetAndReload() {
   window.location.reload();
 }
 
-function isChunkLoadError(error) {
+export function isChunkLoadError(error) {
   return CHUNK_ERROR_PATTERN.test(error?.message || '');
+}
+
+/** Tải lại sang bản mới: lần 1 tải lại thường, lần 2 xoá service worker + cache. Hết lượt → false. */
+export function tryChunkReload() {
+  let last = 0;
+  try { last = Number(sessionStorage.getItem(RELOAD_FLAG) || 0); } catch { /* ignore */ }
+  if (Date.now() - last > RELOAD_COOLDOWN_MS) {
+    try { sessionStorage.setItem(RELOAD_FLAG, String(Date.now())); } catch { /* ignore */ }
+    window.location.reload();
+    return true;
+  }
+  let hardResetDone = true;
+  try { hardResetDone = sessionStorage.getItem(HARD_RESET_FLAG) === '1'; } catch { /* ignore */ }
+  if (hardResetDone) return false;
+  try { sessionStorage.setItem(HARD_RESET_FLAG, '1'); } catch { /* ignore */ }
+  hardResetAndReload();
+  return true;
 }
 
 export class ErrorBoundary extends React.Component {
@@ -53,22 +70,10 @@ export class ErrorBoundary extends React.Component {
     // hard reload fetches the current index.html + matching chunks. Guarded
     // by a timestamp so a genuinely broken deploy doesn't reload forever — and
     // only that case is worth reporting; a stale tab after deploy is expected.
+    // Hết lượt tự tải lại thì vẫn KHÔNG phải sự cố: hiện "Đã có phiên bản mới" + nút cập nhật.
     if (isChunkLoadError(error)) {
-      const last = Number(sessionStorage.getItem(RELOAD_FLAG) || 0);
-      if (Date.now() - last > RELOAD_COOLDOWN_MS) {
-        sessionStorage.setItem(RELOAD_FLAG, String(Date.now()));
-        this.setState({ autoReloading: true });
-        window.location.reload();
-        return;
-      }
-      let hardResetDone = true;
-      try { hardResetDone = sessionStorage.getItem(HARD_RESET_FLAG) === '1'; } catch { /* ignore */ }
-      if (!hardResetDone) {
-        try { sessionStorage.setItem(HARD_RESET_FLAG, '1'); } catch { /* ignore */ }
-        this.setState({ autoReloading: true });
-        hardResetAndReload();
-        return;
-      }
+      this.setState(tryChunkReload() ? { autoReloading: true } : { updateReady: true });
+      return;
     }
 
     // Mã HG-XXXXXX: người dùng thấy trên màn lỗi, admin thấy cùng mã trong
@@ -87,6 +92,7 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       if (this.state.autoReloading) return <StatusScreen kind="updating" />;
+      if (this.state.updateReady) return <StatusScreen kind="updated" onRetry={hardResetAndReload} />;
       const { error, code, where, at, componentStack } = this.state;
       return (
         <>

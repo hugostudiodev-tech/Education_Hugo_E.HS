@@ -11,7 +11,7 @@ import { installApiAuthInterceptor } from "./services/api/core/authInterceptor";
 import { liquidPress } from "./lib/liquidGlass/LiquidPressEngine";
 import { queryClient } from "./lib/queryClient";
 import { isStandalone, subscribeDisplayMode } from "./config/platform";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary, { tryChunkReload } from "./components/ErrorBoundary";
 import StatusScreen from "./components/system/StatusScreen";
 import ServerStatusBanner from "./components/system/ServerStatusBanner";
 import PWAUpdatePrompt from "./components/ui/PWAUpdatePrompt";
@@ -31,13 +31,11 @@ const syncStandaloneMode = () => {
 syncStandaloneMode();
 subscribeDisplayMode(syncStandaloneMode);
 
-window.addEventListener("vite:preload-error", (event) => {
+// Bản mới vừa deploy: file JS cũ đã bị thay → tải lại sang bản mới thay vì báo lỗi.
+// (Tên sự kiện đúng của Vite là "vite:preloadError" — tên cũ "vite:preload-error" không bao giờ chạy.)
+window.addEventListener("vite:preloadError", (event) => {
   event.preventDefault();
-  const last = Number(sessionStorage.getItem("edu_chunk_reload") || 0);
-  if (Date.now() - last > 8000) {
-    sessionStorage.setItem("edu_chunk_reload", String(Date.now()));
-    window.location.reload();
-  }
+  tryChunkReload();
 });
 
 installApiAuthInterceptor();

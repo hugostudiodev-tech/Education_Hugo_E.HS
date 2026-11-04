@@ -252,7 +252,7 @@ export async function announce({ title, body, url }) {
   return { sent: fans.length };
 }
 
-export const REPORT_REASONS = ['nickname', 'avatar', 'intro', 'harassment', 'cheating', 'other'];
+export const REPORT_REASONS = ['nickname', 'avatar', 'intro', 'links', 'harassment', 'cheating', 'other'];
 
 /** Báo cáo một người học. Mỗi người chỉ có MỘT báo cáo đang chờ cho cùng một người (gửi lại = cập nhật). */
 export async function reportLearner(email, rawCode, { reason, note } = {}) {

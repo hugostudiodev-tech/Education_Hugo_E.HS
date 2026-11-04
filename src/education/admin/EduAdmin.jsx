@@ -181,6 +181,29 @@ function Duplicates() {
   );
 }
 
+/** Link MXH member tự gắn: admin xem hết (mới sửa lên trước), gỡ từng link hoặc cả bộ. */
+function MemberLinks() {
+  const list = useList("/admin/links");
+  const remove = async (email, key) => {
+    if (!window.confirm(key ? `Gỡ link ${key} của ${email}?` : `Gỡ TẤT CẢ link của ${email}?`)) return;
+    try { await call(`/admin/learners/${encodeURIComponent(email)}/links`, { method: "POST", body: { key } }); list.reload(); }
+    catch (e) { window.alert(e.message); }
+  };
+  return (
+    <div className="space-y-3">
+      <p className="text-[14px] text-muted-foreground">Link hiện công khai trên hồ sơ member. Gỡ link quảng cáo, lừa đảo, nội dung xấu; member cũng báo cáo được với lý do "Link mạng xã hội".</p>
+      <Table list={list} head={["Người học", "Link", "Sửa lúc", ""]} row={(l) => [
+        <span key="n">{l.nickname || "—"}<br /><small className="text-muted-foreground">{l.email}</small></span>,
+        <ul key="l" className="space-y-1">{Object.entries(l.links || {}).filter(([, v]) => v).map(([k, v]) => (
+          <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a><Btn tone="ghost" onClick={() => remove(l.email, k)}>Gỡ</Btn></li>
+        ))}</ul>,
+        fmt(l.updatedAt),
+        <Btn key="x" tone="danger" onClick={() => remove(l.email)}>Gỡ hết</Btn>,
+      ]} />
+    </div>
+  );
+}
+
 /** Gửi thông báo từ tài khoản chính thức Education Hugo tới mọi người đang theo dõi (hộp thư + đẩy). */
 function Announce() {
   const [f, setF] = useState({ title: "", body: "", url: "/learn" });
@@ -221,6 +244,7 @@ function LearnerDetail({ email, onClose }) {
     if (on && !reason) return;
     await call(`${path}/ban`, { method: "POST", body: { ban: on, reason } });
   }, load);
+  const removeLink = act(async (key) => { if (window.confirm(`Gỡ link ${key}?`)) await call(`${path}/links`, { method: "POST", body: { key } }); }, load);
   const reset = act(async () => { if (window.confirm("Xoá biệt danh, giới thiệu và nhân vật của người này?")) await call(`${path}/reset-persona`, { method: "POST" }); }, load);
   if (!d) return <Card>Đang tải…</Card>;
   const l = d.learner;
@@ -231,6 +255,14 @@ function LearnerDetail({ email, onClose }) {
         <Btn tone="ghost" onClick={onClose}>Đóng</Btn>
       </div>
       <p className="text-[14px] text-muted-foreground">Biệt danh: {l.nickname || "—"} · Ngọc: {l.gems ?? 0} · Mã bạn: {l.friendCode || "—"} · Tạo: {fmt(l.createdAt)}{l.bannedAt ? ` · Khoá từ ${fmt(l.bannedAt)}` : ""}</p>
+      {Object.values(l.links || {}).some(Boolean) && (
+        <ul className="space-y-1 text-[14px]">
+          {Object.entries(l.links).filter(([, v]) => v).map(([k, v]) => (
+            <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a>
+              <Btn tone="ghost" onClick={() => removeLink(k)}>Gỡ</Btn></li>
+          ))}
+        </ul>
+      )}
       <div className="flex flex-wrap gap-2">
         <Btn onClick={gems}>Điều chỉnh Ngọc</Btn>
         <Btn tone="ghost" onClick={reset}>Xoá hồ sơ công khai</Btn>
@@ -547,6 +579,7 @@ const TABS = [
   ["moderation", "Kiểm duyệt", "shield", Moderation],
   ["duplicates", "Nghi trùng", "group_off", Duplicates],
   ["announce", "Thông báo", "campaign", Announce],
+  ["links", "Link MXH", "link", MemberLinks],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],
 ];

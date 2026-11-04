@@ -499,7 +499,7 @@ export function EduFindFriends() {
   );
 }
 
-const REPORT_REASONS = ["nickname", "avatar", "intro", "harassment", "cheating", "other"];
+const REPORT_REASONS = ["nickname", "avatar", "intro", "links", "harassment", "cheating", "other"];
 
 function ReportSheet({ code, name, onClose }) {
   const { t } = useEduText();
