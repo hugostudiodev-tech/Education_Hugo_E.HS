@@ -429,10 +429,15 @@ export function EduProfile({ learner, persona, onPersona }) {
         <Stat icon="gem" tone="blue" value={gemText(learner?.gems || 0, { unit: false })} label={gemText(0).replace(/^0 /, "")} />
         <Stat icon="military_tech" tone="green" value={stats.average === null ? "—" : `${stats.average}%`} label={t("profile.average")} />
       </div>
-      {/* Phản hồi + hỗ trợ: thư soạn sẵn tới support@hugowishpax.studio. */}
-      <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
-        <span className="material-symbols-outlined" aria-hidden="true">support_agent</span> {t("common.support")}
-      </a>
+      {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
+      <div className="edu-me-actions">
+        <Link className="edu-btn edu-btn--ghost" to="/feedback">
+          <span className="material-symbols-outlined" aria-hidden="true">star</span> {t("history.write")}
+        </Link>
+        <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">
+          <span className="material-symbols-outlined" aria-hidden="true">support_agent</span> {t("common.support")}
+        </a>
+      </div>
     </section>
   );
 }
