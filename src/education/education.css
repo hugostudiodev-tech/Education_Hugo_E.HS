@@ -2,6 +2,8 @@
    nút "nổi" có gờ dưới. Mọi biến nằm dưới .edu nên không lọt ra Hugo Studio. */
 :root { --edu-page-bg: #ffffff; }
 :root.dark { --edu-page-bg: #131f24; }
+/* Vuốt quá đầu/cuối trang: không kéo giãn, nền trùng màu app — không lộ dải hở trên/dưới. */
+html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: none; }
 .edu {
   /* Màu chủ đạo = xanh giọt nước của Hugo Studio (hsl 194 100% 58%). Nút dùng
      sắc đậm hơn một chút để chữ trắng còn đọc được; xanh lá chỉ còn cho "đúng". */
