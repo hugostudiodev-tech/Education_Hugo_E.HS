@@ -34,6 +34,8 @@ export default defineConfig({
         globPatterns: ["**/*.{html,svg,png,woff2}", "assets/index-*.{js,css}"],
         globIgnores: ["**/image/**", "**/edu/video/**", "**/edu/mail/**"],
         runtimeCaching: [
+          // Nội dung bài + quảng cáo: công khai, như nhau với mọi người → trả cache ngay, cập nhật nền.
+          { urlPattern: /\/api\/(lessons|promo)(\/|\?|$)/, method: "GET", handler: "StaleWhileRevalidate", options: { cacheName: "edu-api-public", expiration: { maxEntries: 300, maxAgeSeconds: 7 * 86400 }, cacheableResponse: { statuses: [200] } } },
           { urlPattern: /\/api(?:\/|$)/, handler: "NetworkOnly" },
           { urlPattern: /\/assets\/.*\.(js|css)$/, handler: "StaleWhileRevalidate", options: { cacheName: "edu-assets", expiration: { maxEntries: 120, maxAgeSeconds: 30 * 86400 } } },
         ],

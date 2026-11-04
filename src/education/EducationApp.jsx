@@ -4,6 +4,7 @@ import { useEduCourse } from "./useEduCourse";
 import DevSite from "./DevTop";
 import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { clearMemberSession, getMemberSession, logoutAuth, restoreMemberSession } from "../services/api/core/authSession";
+import { clearCache, readCache, writeCache } from "../lib/offlineCache";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useEduHead } from "./eduHead";
 import { needsWelcome, readConsent, rememberAccount, takePendingGoal } from "./eduAccounts";
@@ -91,8 +92,11 @@ function LangLanding({ lang, signedIn }) {
 export default function EducationApp() {
   useEduHead();
   const [session, setSession] = useState(() => getMemberSession());
-  const [learner, setLearner] = useState(null);
   const signedIn = Boolean(session?.email);
+  // Hồ sơ lần trước trên máy này: hiện ngay khi mở app, /me trả về thì thay.
+  const meKey = signedIn ? `me:${session.email}` : null;
+  const [learner, setLearner] = useState(() => readCache(meKey));
+  useEffect(() => { if (meKey && learner) writeCache(meKey, learner); }, [meKey, learner]);
 
   const refresh = useCallback(() => {
     if (!getMemberSession()?.email) return Promise.resolve();
@@ -157,6 +161,7 @@ export default function EducationApp() {
   }), []);
   const signOut = async () => {
     await logoutAuth();
+    clearCache();
     setSession(null);
     setLearner(null);
   };
@@ -168,7 +173,7 @@ export default function EducationApp() {
   useEffect(() => installEduTapSounds(), []);
   const celebration = useStreakCelebration();
   // Biệt danh + nhân vật bắt buộc (sau bước chào/điều khoản): chưa xong thì không vào học được.
-  const [persona, setPersona] = usePersona(signedIn);
+  const [persona, setPersona] = usePersona(signedIn ? session.email : null);
 
   // Điện thoại chưa cài app: chỉ trang giới thiệu, mọi trang học → video cài đặt.
   const standalone = useStandalone();
@@ -233,7 +238,7 @@ export default function EducationApp() {
           <Route path="/ads" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/community/*" element={<Navigate to="/ads" replace />} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
-          <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} /> : needsLogin} />
+          <Route path="/profile" element={signedIn ? <EduProfile learner={me} persona={persona} onPersona={setPersona} /> : needsLogin} />
         </Route>
         {/* PWA cài lúc manifest của www còn hiệu lực sẽ mở /member/today — ở Edu không có trang đó.
             Đường dẫn kiểu www về /learn (giữ query, vd. ?source=pwa); trong app đã cài, đường lạ cũng về /learn thay vì 404. */}
@@ -252,7 +257,7 @@ function LearnMap({ learner, onLearnerUpdate }) {
   const course = useEduCourse();
   return (
     <Suspense fallback={<EduStatus kind="loading" compact />}>
-      <HugoCoderHub key={course} framed course={course} bio={learner} onBioUpdate={onLearnerUpdate} onLessonChange={(id) => navigate(id ? `/learn/${id}` : "/learn")} />
+      <HugoCoderHub key={course} framed course={course} bio={learner} onBioUpdate={onLearnerUpdate} onLessonChange={(id, part) => navigate(id ? `/learn/${id}` : "/learn", { state: { part } })} />
     </Suspense>
   );
 }
@@ -267,7 +272,7 @@ function LessonView({ learner, onLearnerUpdate }) {
         onBioUpdate={onLearnerUpdate}
         urlLessonId={lessonId}
         onBack={() => navigate("/learn")}
-        onLessonChange={(id) => navigate(id ? `/learn/${id}` : "/learn")}
+        onLessonChange={(id, part) => navigate(id ? `/learn/${id}` : "/learn", { state: { part } })}
       />
     </Suspense>
   );

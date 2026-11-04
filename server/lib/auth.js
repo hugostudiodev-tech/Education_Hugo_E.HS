@@ -53,7 +53,7 @@ export function initAuth() {
     basePath: '/api/admin-auth',
     advanced: advanced('edu-admin'),
     // 30 ngày, tự gia hạn mỗi lần vào trang (updateAge): admin dùng thường xuyên gần như không phải xin mã lại.
-    session: { expiresIn: 30 * DAY, updateAge: DAY, modelName: 'admin_session' },
+    session: { expiresIn: 30 * DAY, updateAge: DAY, modelName: 'admin_session', cookieCache: { enabled: true, maxAge: 5 * 60 } },
     user: { modelName: 'admin_user' },
     account: { modelName: 'admin_account' },
     verification: { modelName: 'admin_verification' },

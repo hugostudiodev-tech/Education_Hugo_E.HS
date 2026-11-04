@@ -184,6 +184,14 @@ function Unit({ unit, lessons, currentIndex, completedSet, onOpenLesson, focusId
                   <button type="button" onClick={() => onOpenLesson(course.id)} disabled={course.draft}>
                     {course.draft ? t("map.soon") : done ? t("map.review") : `${t("map.start")} ${t("map.xp", { n: 10 })}`}
                   </button>
+                  {/* Xem lại một bài nhỏ đã học (step đã qua: mọi bài; step đang học: các bài đã xong). */}
+                  {course.lessons > 1 && (done || partsDone > 0) && (
+                    <div className="cmap-pop-parts">
+                      {Array.from({ length: done ? course.lessons : partsDone }, (_, i) => (
+                        <button type="button" key={i} onClick={() => onOpenLesson(course.id, i)} aria-label={t("player.lessonOf", { n: i + 1, total: course.lessons })}>{i + 1}</button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               {index === mascotAt && (

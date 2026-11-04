@@ -1,3 +1,4 @@
+import { clearCache } from "../lib/offlineCache";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PersonaAvatar, PersonaGate, PersonaInfoForm } from "./EduPersona";
 import HugoLogo from "../components/HugoLogo";
@@ -397,8 +398,9 @@ function Stat({ icon, tone, value, label }) {
 }
 
 /** Hồ sơ: trang thông tin của người học. Cài đặt nằm ở trang riêng (bánh răng góc phải). */
-export function EduProfile({ learner, persona }) {
+export function EduProfile({ learner, persona, onPersona }) {
   const { t } = useEduText();
+  const [editing, setEditing] = useState(false);
   const stats = useLearnerStats(learner);
   const name = persona?.nickname || learner?.displayName || t("profile.learner");
   return (
@@ -410,7 +412,12 @@ export function EduProfile({ learner, persona }) {
         </Link>
       </header>
       <div className="edu-me-hero">
-        <PersonaAvatar avatar={persona?.avatar} name={name} size={112} />
+        {/* Sửa nhân vật: nút bút nhỏ ở góc ảnh nhân vật. */}
+        <span className="edu-me-avatar">
+          <PersonaAvatar avatar={persona?.avatar} name={name} size={112} />
+          {onPersona && <button type="button" className="edu-me-avatar-edit" onClick={() => setEditing(true)} aria-label={t("persona.edit")}><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>}
+        </span>
+        {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
         <b className={persona?.nickname ? "nick-font" : ""}>{name}</b>
         {persona?.intro && <p>{persona.intro}</p>}
         <small>{learner?.email}</small>
@@ -431,7 +438,6 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
   const navigate = useNavigate();
   const legal = legalFor(lang);
   const support = supportMailUrl({ lang, nickname: persona?.nickname });
-  const [editing, setEditing] = useState(false);
   const [installable, setInstallable] = useState(false);
   useEffect(() => {
     const on = () => setInstallable(true);
@@ -447,6 +453,7 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
       const response = await fetch(`${API_BASE}/me`, { method: "DELETE", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: "DELETE" }) });
       if (!response.ok) throw new Error();
       try { localStorage.removeItem("edu.accounts"); } catch { /* bỏ qua */ }
+      clearCache();
       notify.success(t("profile.deleteDone"));
       await onSignOut();
     } catch {
@@ -462,8 +469,6 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
           <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </header>
-      <button type="button" className="edu-btn is-ghost" onClick={() => setEditing(true)}>{t("persona.edit")}</button>
-      {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
       <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
       <EduSettings embedded learner={learner} onLearnerUpdate={onLearnerUpdate} />
       <dl className="edu-facts">
@@ -471,8 +476,7 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
         <dd>{t("profile.accountBody")}</dd>
       </dl>
       {(installable || detectInstallTarget().iOS) && <EduInstall />}
-      <Link className="edu-btn edu-btn--ghost" to="/feedback">{t("history.write")}</Link>
-      {/* Hỗ trợ: mở app Mail (điện thoại) hoặc Gmail web (máy tính) với thư soạn sẵn thông tin thành viên. */}
+      {/* Phản hồi + hỗ trợ: mở app Mail (điện thoại) hoặc Gmail web (máy tính) với thư soạn sẵn thông tin thành viên. */}
       <a className="edu-btn edu-btn--ghost" href={support} target={support.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">{t("common.support")}</a>
       <FeedbackHistory />
       <button type="button" className="edu-btn edu-btn--ghost" onClick={onSignOut}>{t("profile.signOut")}</button>

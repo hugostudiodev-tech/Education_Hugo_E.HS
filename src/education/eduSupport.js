@@ -1,4 +1,4 @@
-import { CONTACT } from "./legalText";
+const CONTACT = "support@hugowishpax.studio";
 import { getMemberSession } from "../services/api/core/authSession";
 import { detectInstallTarget } from "../config/platform";
 

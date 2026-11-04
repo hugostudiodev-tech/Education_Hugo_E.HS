@@ -43,6 +43,17 @@ router.get('/learners', handle(async (req) => {
   const items = await Learner.find(filter).select('email name nickname gems completed streak lastActiveAt createdAt bannedAt friendCode').sort({ lastActiveAt: -1 }).limit(100).lean();
   return { items: items.map(({ completed, streak, ...d }) => ({ ...d, steps: completed?.length || 0, streak: streak?.count || 0 })) };
 }));
+// Nghi một người nhiều tài khoản: nhóm phiên Better Auth theo IP + trình duyệt.
+router.get('/duplicates', handle(async () => {
+  const groups = await mongoose.connection.db.collection('session').aggregate([
+    { $match: { ipAddress: { $nin: [null, ''] } } },
+    { $group: { _id: { ip: '$ipAddress', ua: '$userAgent' }, users: { $addToSet: '$userId' }, lastAt: { $max: '$updatedAt' } } },
+    { $match: { 'users.1': { $exists: true } } },
+    { $sort: { lastAt: -1 } }, { $limit: 200 },
+    { $lookup: { from: 'user', localField: 'users', foreignField: '_id', as: 'u' } },
+  ]).toArray();
+  return { items: groups.map((g) => ({ ip: g._id.ip, emails: g.u.map((u) => u.email), lastAt: g.lastAt })).filter((g) => g.emails.length > 1) };
+}));
 router.get('/learners/:email', handle(async (req) => {
   const email = String(req.params.email).toLowerCase();
   const learner = await Learner.findOne({ email }).lean();

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Award, Braces, ChevronLeft, GraduationCap, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { notify } from "../../../lib/notify";
 import { useCoderLessons } from "../../../hooks/useCoderLessons";
 import { CODER_STORAGE_KEYS, GUEST_LESSONS, readGuestLessons } from "./workspaceUtils";
@@ -117,7 +117,10 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
   const { courses: allCourses, stages, loading, detailReady, detailError } = useCoderLessons(selectedLessonId, { program, course: selectedLessonId ? undefined : course });
   const courses = maxSteps ? allCourses.slice(0, maxSteps) : allCourses;
   const progressBio = program === "hugoteam" ? { ...bio, completedLessons: programProgress || [] } : bio;
-  const openLesson = (lessonId) => onLessonChange ? onLessonChange(lessonId) : navigate(`${basePath}/${lessonId}`);
+  // `part` = bài nhỏ muốn mở (xem lại); bỏ trống thì vào bài chưa học.
+  // Đi qua state của router: bản đồ và trình phát là hai route (hai instance) khác nhau.
+  const openLesson = (lessonId, part) => onLessonChange ? onLessonChange(lessonId, part) : navigate(`${basePath}/${lessonId}`, { state: { part } });
+  const askedPart = useLocation().state?.part;
   // Thoát step thì về BẢN ĐỒ khoá học, không văng ra ngoài app.
   const exitLesson = () => onLessonChange ? onLessonChange(null) : navigate(basePath);
 
@@ -209,7 +212,7 @@ export default function HugoCoderHub({ onBack, bio, onBioUpdate, urlLessonId, ba
   const lessonsDone = (id) => (getMemberSession()?.email ? bio?.edu?.lessons?.[id] : readGuestLessons()[id]) || [];
   const [picked, setPicked] = useState({});
   useEffect(() => setPicked({}), [selectedLessonId]);
-  const lessonAt = plan ? picked[currentCourse.id] ?? (progressBio?.completedLessons?.includes(currentCourse.id) ? 0 : nextLesson(plan.length, lessonsDone(currentCourse.id))) : 0;
+  const lessonAt = plan ? picked[currentCourse.id] ?? (Number.isInteger(askedPart) && askedPart < plan.length ? askedPart : null) ?? (progressBio?.completedLessons?.includes(currentCourse.id) ? 0 : nextLesson(plan.length, lessonsDone(currentCourse.id))) : 0;
 
   const finishLesson = async (course, lesson) => {
     if (!getMemberSession()?.email) {

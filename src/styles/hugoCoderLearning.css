@@ -2913,7 +2913,7 @@
 
 .cmap-zone {
   position: relative;
-  overflow: hidden;
+  overflow-x: clip; /* chỉ cắt cảnh trang trí hai bên; thẻ bài học được tràn xuống dưới */
   padding: 18px 16px 34px;
   background:
     radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .16) 0 2px, transparent 3px) 0 0 / 34px 34px,
@@ -3017,6 +3017,8 @@
 }
 /* Thẻ bật ra dưới nút (Duolingo): nảy lên từ nút, mũi nhọn chỉ vào nút. */
 .cmap-node.is-pop { z-index: 6; }
+.cmap-zone:has(.is-pop) { z-index: 3; } /* thẻ nằm trên chặng kế tiếp, không bị banner che */
+.cmap-node.is-pop .cmap-bubble { display: none; } /* thẻ mở thì ẩn nhãn "Bắt đầu" */
 .cmap-pop {
   position: absolute;
   top: calc(100% + 14px);
@@ -3054,6 +3056,8 @@
 }
 .cmap-pop button:active:not(:disabled) { translate: 0 4px; box-shadow: none; }
 .cmap-pop button:disabled { opacity: .6; cursor: default; }
+.cmap-pop-parts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.cmap-pop .cmap-pop-parts button { width: 40px; min-height: 40px; padding: 0; }
 @keyframes cmap-pop-in { from { opacity: 0; transform: scale(.6) translateY(-10px); } to { opacity: 1; transform: none; } }
 
 .cmap-bubble {

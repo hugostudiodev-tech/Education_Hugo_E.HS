@@ -1,0 +1,11 @@
+# Render free ngủ sau 15 phút không có request → lần gọi đầu chờ 30–60s. Gõ /health mỗi 10 phút để giữ máy thức.
+# ponytail: GitHub cron có thể trễ vài phút; cần chắc chắn 100% thì nâng Render lên gói Starter.
+name: Keep API awake
+on:
+  schedule: [{ cron: "*/10 * * * *" }]
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --max-time 90 https://education-hugo-api.onrender.com/api/health

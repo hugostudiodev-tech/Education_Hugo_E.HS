@@ -1,3 +1,4 @@
+import { readCache, writeCache } from "../lib/offlineCache";
 import { useEffect, useMemo, useState } from "react";
 import { notify } from "../lib/notify";
 import { API_BASE } from "../config/apiBase";
@@ -114,15 +115,17 @@ export function PersonaGate({ current, onDone, editOnly = false }) {
 }
 
 /** Tải Persona của người đang đăng nhập: null = đang tải, {complete:false} = phải qua cổng. */
-export function usePersona(signedIn) {
-  const [state, setState] = useState(null);
+export function usePersona(email) {
+  const key = email ? `persona:${email}` : null;
+  const [state, setState] = useState(() => readCache(key));
   useEffect(() => {
-    if (!signedIn) { setState(null); return undefined; }
+    if (!key) { setState(null); return undefined; }
     let alive = true;
-    // Lỗi mạng: đừng khoá người học ngoài cửa — coi như đủ, lần tải sau hỏi lại.
-    persona.get().then((p) => alive && setState(p)).catch(() => alive && setState({ complete: true, failed: true }));
+    // Lỗi mạng: dùng bản lưu trên máy; chưa có thì đừng khoá người học ngoài cửa — coi như đủ, lần tải sau hỏi lại.
+    persona.get().then((p) => alive && setState(p)).catch(() => alive && setState((s) => s || { complete: true, failed: true }));
     return () => { alive = false; };
-  }, [signedIn]);
+  }, [key]);
+  useEffect(() => { if (key && state && !state.failed) writeCache(key, state); }, [key, state]);
   return useMemo(() => [state, setState], [state]);
 }
 

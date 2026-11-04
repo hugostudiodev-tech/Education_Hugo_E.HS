@@ -26,11 +26,14 @@ const Btn = ({ tone, ...p }) => (
 const Input = (p) => <input {...p} className={`min-h-[40px] w-full rounded-lg border border-border bg-card px-3 text-[15px] text-foreground ${p.className || ""}`} />;
 const Card = ({ children, className = "" }) => <div className={`rounded-xl border border-border bg-card p-4 ${className}`}>{children}</div>;
 
+// ponytail: cache RAM theo path — đổi tab hiện ngay dữ liệu lần trước, rồi tải lại nền.
+const listCache = new Map();
 /** Tải một danh sách; reload() sau mỗi thao tác ghi. */
 function useList(path) {
-  const [state, setState] = useState({ items: null, error: "" });
+  const [state, setState] = useState(() => ({ items: listCache.get(path) ?? null, error: "" }));
   const reload = useCallback(() => {
-    call(path).then((d) => setState({ items: d.items ?? d, error: "" })).catch((e) => setState({ items: [], error: e.message }));
+    if (listCache.has(path)) setState({ items: listCache.get(path), error: "" });
+    call(path).then((d) => { const items = d.items ?? d; listCache.set(path, items); setState({ items, error: "" }); }).catch((e) => setState((s) => ({ items: s.items ?? [], error: e.message })));
   }, [path]);
   useEffect(reload, [reload]);
   return { ...state, reload };
@@ -160,6 +163,19 @@ function Learners() {
       <Table list={list} head={["Email", "Biệt danh", "Ngọc", "Bước", "Chuỗi", "Hoạt động", ""]} row={(l) => [
         l.email, l.nickname || l.name || "—", l.gems ?? 0, l.steps, l.streak, fmt(l.lastActiveAt),
         <span key="a" className="flex gap-2">{l.bannedAt && <span className="text-red-600">Đã khoá</span>}<Btn tone="ghost" onClick={() => setOpen(l.email)}>Mở</Btn></span>,
+      ]} />
+    </div>
+  );
+}
+
+/** Nhiều email đăng nhập từ cùng một máy (cùng IP + trình duyệt). Gợi ý thôi — trường học/gia đình dùng chung máy là bình thường. */
+function Duplicates() {
+  const list = useList("/admin/duplicates");
+  return (
+    <div className="space-y-3">
+      <p className="text-[14px] text-muted-foreground">Cùng IP + cùng trình duyệt, khác email. Kiểm tra kỹ trước khi khoá: máy dùng chung ở trường/nhà cũng hiện ở đây.</p>
+      <Table list={list} head={["Email", "Số tài khoản", "IP", "Lần cuối"]} row={(g) => [
+        <span key="e" className="whitespace-pre-line">{g.emails.join("\n")}</span>, g.emails.length, g.ip, fmt(g.lastAt),
       ]} />
     </div>
   );
@@ -506,6 +522,7 @@ const TABS = [
   ["promos", "Quảng cáo", "campaign", Promos],
   ["articles", "Ads", "campaign", Articles],
   ["moderation", "Kiểm duyệt", "shield", Moderation],
+  ["duplicates", "Nghi trùng", "group_off", Duplicates],
   ["feedback", "Góp ý", "rate_review", Feedback],
   ["log", "Nhật ký", "history", Log],
 ];
