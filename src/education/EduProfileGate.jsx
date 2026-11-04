@@ -19,10 +19,13 @@ const PROVINCE_NAMES = {
   "dak-lak": "Đắk Lắk", "ho-chi-minh": "TP. Hồ Chí Minh", "dong-nai": "Đồng Nai", "tay-ninh": "Tây Ninh", "can-tho": "Cần Thơ", "vinh-long": "Vĩnh Long",
   "dong-thap": "Đồng Tháp", "ca-mau": "Cà Mau", "an-giang": "An Giang",
 };
+// Icon đơn sắc Material Symbols (cùng bộ với cả app), không dùng emoji.
 const HOBBY_ICON = {
-  games: "🎮", esports: "🏆", anime: "🍥", manga: "📚", kpop: "🎤", music: "🎧", singing: "🎙️", instrument: "🎸", dance: "💃", football: "⚽",
-  basketball: "🏀", badminton: "🏸", gym: "💪", swimming: "🏊", cycling: "🚴", drawing: "🎨", photo: "📷", video: "🎬", design: "✏️", reading: "📖",
-  writing: "📝", movies: "🍿", travel: "✈️", cooking: "🍳", coding: "💻", robotics: "🤖", science: "🔬", pets: "🐶", chess: "♟️", languages: "🌏",
+  games: "sports_esports", esports: "emoji_events", anime: "animation", manga: "import_contacts", kpop: "mic_external_on", music: "headphones",
+  singing: "mic", instrument: "piano", dance: "nightlife", football: "sports_soccer", basketball: "sports_basketball", badminton: "sports_tennis",
+  gym: "fitness_center", swimming: "pool", cycling: "directions_bike", drawing: "palette", photo: "photo_camera", video: "movie",
+  design: "design_services", reading: "auto_stories", writing: "edit_note", movies: "theaters", travel: "flight", cooking: "restaurant",
+  coding: "code", robotics: "smart_toy", science: "science", pets: "pets", chess: "extension", languages: "translate",
 };
 const GENDER_OPTIONS = ["male", "female", "other", "private"];
 
@@ -92,7 +95,7 @@ export default function ProfileGate({ current, onDone }) {
           <div className="persona-grid pg-chips pg-hobbies" role="group" aria-label={t("friends.pg.hobbies.title")}>
             {HOBBIES.map((h) => (
               <button key={h} type="button" aria-pressed={hobbies.includes(h)} className={hobbies.includes(h) ? "is-on" : ""} onClick={() => toggleHobby(h)}>
-                <span aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}
+                <span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}
               </button>
             ))}
           </div>

@@ -1532,3 +1532,5 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-hobbies button { display: grid; gap: 4px; min-height: 76px; padding: 8px 4px; font-size: 13px; line-height: 1.15; }
 .pg-hobbies button span { font-size: 26px; line-height: 1; }
 .pg-hobbies button.is-on { box-shadow: 0 3px 0 var(--edu-blue); }
+.pg-hobbies button .material-symbols-outlined { font-size: 28px; color: var(--edu-muted); }
+.pg-hobbies button.is-on .material-symbols-outlined { color: var(--edu-blue); font-variation-settings: "FILL" 1; }
