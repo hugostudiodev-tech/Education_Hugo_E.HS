@@ -1473,3 +1473,10 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .fr-scan .edu-btn { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; translate: -50% 0; }
 .edu .fr-meta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; margin: -6px 0 4px; color: var(--edu-muted); font-weight: 700; text-align: center; }
 .edu .fr-meta > span + a::before { content: "·"; margin-right: 10px; color: var(--edu-muted); }
+.edu .fr-strip { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 4px; border: 2px solid var(--edu-line); border-radius: 16px; overflow: hidden; }
+.edu .fr-strip > * { display: grid; gap: 2px; justify-items: center; padding: 12px 6px; min-width: 0; color: var(--edu-ink); text-decoration: none; text-align: center; }
+.edu .fr-strip > * + * { border-left: 2px solid var(--edu-line); }
+.edu .fr-strip b { font-size: 18px; font-weight: 900; letter-spacing: .02em; }
+.edu .fr-strip small { color: var(--edu-muted); font-size: 13px; font-weight: 700; }
+.edu .fr-strip a:hover { background: var(--edu-soft); }
+.edu .fr-strip .is-new b { color: #ff4b4b; }

@@ -398,6 +398,18 @@ export function EduProfile({ learner, persona, onPersona }) {
   const [editing, setEditing] = useState(false);
   const stats = useLearnerStats(learner);
   const name = persona?.nickname || learner?.displayName || t("profile.learner");
+  const hero = (
+    <div className="edu-me-hero">
+      {/* Sửa nhân vật: nút bút nhỏ ở góc ảnh nhân vật. */}
+      <span className="edu-me-avatar">
+        <PersonaAvatar avatar={persona?.avatar} name={name} size={112} />
+        {onPersona && <button type="button" className="edu-me-avatar-edit" onClick={() => setEditing(true)} aria-label={t("persona.edit")}><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>}
+      </span>
+      {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
+      <b className={persona?.nickname ? "nick-font" : ""}>{name}</b>
+      {persona?.intro && <p>{persona.intro}</p>}
+    </div>
+  );
   return (
     <section className="edu-page edu-me">
       <header className="edu-me-bar">
@@ -406,20 +418,9 @@ export function EduProfile({ learner, persona, onPersona }) {
           <span className="material-symbols-outlined" aria-hidden="true">settings</span>
         </Link>
       </header>
-      <div className="edu-me-hero">
-        {/* Sửa nhân vật: nút bút nhỏ ở góc ảnh nhân vật. */}
-        <span className="edu-me-avatar">
-          <PersonaAvatar avatar={persona?.avatar} name={name} size={112} />
-          {onPersona && <button type="button" className="edu-me-avatar-edit" onClick={() => setEditing(true)} aria-label={t("persona.edit")}><span className="material-symbols-outlined" aria-hidden="true">edit</span></button>}
-        </span>
-        {editing && <PersonaGate editOnly current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditing(false); }} />}
-        <b className={persona?.nickname ? "nick-font" : ""}>{name}</b>
-        {persona?.intro && <p>{persona.intro}</p>}
-        <small>{learner?.email}</small>
-      </div>
-      {/* Kiểu Duolingo: @mã, số bạn, Thêm bạn + QR, Tổng quan, Streak bạn bè, Thành tích (EduFriends, tải lười). */}
-      <Suspense fallback={<div className="fr-skel"><span className="edu-skel is-line" /><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div>}>
-        <ProfileSocial learner={learner} name={name} steps={stats.done} />
+      {/* Kiểu Duolingo: dải Mã bạn | Bạn bè | Lời mời, Thêm bạn + QR, Tổng quan, Streak bạn bè, Thành tích (EduFriends, tải lười). */}
+      <Suspense fallback={<>{hero}<div className="fr-skel"><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div></>}>
+        <ProfileSocial learner={learner} name={name} steps={stats.done}>{hero}</ProfileSocial>
       </Suspense>
       {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
       <div className="edu-me-actions">

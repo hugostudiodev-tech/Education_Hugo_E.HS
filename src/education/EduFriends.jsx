@@ -116,17 +116,22 @@ function Overview({ streak, xp, rank, steps }) {
 }
 
 /** Phần mạng xã hội trong Hồ sơ của chính mình (gắn dưới ảnh nhân vật). */
-export function ProfileSocial({ learner, name, steps }) {
+export function ProfileSocial({ learner, name, steps, children }) {
   const { t } = useEduText();
   const { data } = useSocial();
   const [qr, setQr] = useState(false);
-  if (!data) return <div className="fr-skel"><span className="edu-skel is-line" /><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div>;
+  if (!data) return <>{children}<div className="fr-skel"><span className="edu-skel is-line" /><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div></>;
   const friends = (data.friends || []).filter((r) => !r.me);
   const rankIndex = (data.league || []).findIndex((r) => r.me);
   const slots = [...friends].sort((a, b) => b.streak - a.streak).slice(0, 5);
   return (
     <>
-      <p className="fr-meta">{data.code && <span translate="no">@{data.code}</span>}<Link to="/friends" className="fr-count">{t("friends.friendCount", { n: friends.length })}{data.requestsIn?.length > 0 && <i>{data.requestsIn.length}</i>}</Link></p>
+      {children}
+      <div className="fr-strip">
+        <span><b translate="no">{data.code || "—"}</b><small>{t("friends.yourCode")}</small></span>
+        <Link to="/friends"><b>{friends.length}</b><small>{t("friends.title")}</small></Link>
+        <Link to="/friends?tab=requests" className={data.requestsIn?.length ? "is-new" : ""}><b>{data.requestsIn?.length || 0}</b><small>{t("friends.tabRequests")}</small></Link>
+      </div>
       <div className="fr-cta">
         <Link to="/friends/find" className="edu-btn"><span className="material-symbols-outlined" aria-hidden="true">person_add</span>{t("friends.addFriends")}</Link>
         {data.code && <button type="button" className="edu-btn edu-btn--ghost fr-qr-btn" onClick={() => setQr(true)} aria-label={t("friends.myQr")}><span className="material-symbols-outlined" aria-hidden="true">qr_code_2</span></button>}
@@ -172,7 +177,7 @@ function PageHead({ title, close }) {
 export default function EduFriends() {
   const { t } = useEduText();
   const { data, act } = useSocial();
-  const [tab, setTab] = useState("friends");
+  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).get("tab") === "requests" ? "requests" : "friends"));
   if (!data) return <EduSkeleton rows={6} />;
   if (data.failed) return <section className="edu-page"><p className="fr-empty">{t("friends.failed")}</p></section>;
   const friends = (data.friends || []).filter((r) => !r.me);
