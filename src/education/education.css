@@ -1589,3 +1589,20 @@ button.edu-pop-course:disabled { cursor: default; }
   .pg-duo.is-transgender .pg-duo-a, .pg-duo-hand { animation: none; opacity: 0; }
   .pg-duo.is-transgender .pg-duo-b { animation: none; opacity: 1; }
 }
+/* Thẻ Thông tin cá nhân (chỉ chính chủ) */
+.pg-info { display: grid; gap: 12px; padding: 16px; border: 2px solid var(--edu-line); border-radius: 18px; }
+.pg-info header { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.pg-info header b { font-size: 17px; font-weight: 900; }
+.pg-info header small { display: inline-flex; align-items: center; gap: 4px; color: var(--edu-muted); font-size: 13px; font-weight: 700; }
+.pg-info header small .material-symbols-outlined { font-size: 16px; }
+.pg-info header .edu-btn { margin-left: auto; min-height: 38px; padding: 0 12px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
+.pg-info dl { display: grid; gap: 8px; margin: 0; }
+.pg-info dl > div { display: flex; justify-content: space-between; gap: 12px; }
+.pg-info dt { display: inline-flex; align-items: center; gap: 8px; color: var(--edu-muted); font-weight: 700; }
+.pg-info dt .material-symbols-outlined { font-size: 20px; color: var(--edu-blue); }
+.pg-info dd { margin: 0; font-weight: 800; text-align: right; }
+.pg-info-hobbies { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pg-info-hobbies li { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--edu-soft); font-size: 13px; font-weight: 700; }
+.pg-info-hobbies .material-symbols-outlined { font-size: 16px; color: var(--edu-blue); }
+.pg-card { position: relative; }
+.pg-close { position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: none; color: var(--edu-muted); cursor: pointer; }

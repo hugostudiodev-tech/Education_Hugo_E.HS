@@ -67,16 +67,17 @@ function missingSteps(p) {
   ].filter(Boolean);
 }
 
-export default function ProfileGate({ current, onDone }) {
+export default function ProfileGate({ current, onDone, editAll = false }) {
   const { t } = useEduText();
-  const [steps] = useState(() => missingSteps(current?.profile));
+  const p0 = current?.profile || {};
+  const [steps] = useState(() => (editAll ? ["birth", "province", "hobbies", "gender"] : missingSteps(p0)));
   const [index, setIndex] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [birth, setBirth] = useState("");
-  const [province, setProvince] = useState("");
-  const [hobbies, setHobbies] = useState([]);
-  const [gender, setGender] = useState("");
-  const [consent, setConsent] = useState(false);
+  const [birth, setBirth] = useState(p0.birthDate || "");
+  const [province, setProvince] = useState(p0.province || "");
+  const [hobbies, setHobbies] = useState(p0.hobbies || []);
+  const [gender, setGender] = useState(p0.gender === "skip" ? "" : p0.gender || "");
+  const [consent, setConsent] = useState(Boolean(p0.sensitiveConsentAt));
   const otherFamily = gender === "other" || SENSITIVE_GENDERS.includes(gender);
   const sensitive = SENSITIVE_GENDERS.includes(gender);
   const step = steps[index];
@@ -88,7 +89,7 @@ export default function ProfileGate({ current, onDone }) {
     setBusy(true);
     try {
       const saved = await persona.save({ profile: patch });
-      if (index + 1 < steps.length && !profileDone(saved.profile)) { setIndex(index + 1); return; }
+      if (index + 1 < steps.length && (editAll || !profileDone(saved.profile))) { setIndex(index + 1); return; }
       playEduSound("success");
       notify.success(t("friends.pg.done"));
       onDone(saved);
@@ -105,6 +106,7 @@ export default function ProfileGate({ current, onDone }) {
   return (
     <div className="persona-gate" role="dialog" aria-modal="true" aria-labelledby="pg-title">
       <form className="persona-card pg-card" onSubmit={(e) => { e.preventDefault(); if (value) save(value); }}>
+        {editAll && <button type="button" className="pg-close" onClick={() => onDone(null)} aria-label={t("common.close")}><span className="material-symbols-outlined" aria-hidden="true">close</span></button>}
         <span className="pg-progress" aria-hidden="true"><i style={{ width: `${((index + 1) / steps.length) * 100}%` }} /></span>
         <small className="pg-count">{index + 1}/{steps.length}{optional ? ` · ${t("friends.pg.optional")}` : ""}</small>
         <h2 id="pg-title">{t(`friends.pg.${step}.title`)}</h2>
@@ -171,5 +173,36 @@ export default function ProfileGate({ current, onDone }) {
         </div>
       </form>
     </div>
+  );
+}
+
+/** Thẻ "Thông tin cá nhân" — CHỈ hiện cho chính chủ (Hồ sơ của mình + Cài đặt), không có trên hồ sơ công khai. */
+export function ProfileInfo({ profile, onEdit }) {
+  const { t, lang } = useEduText();
+  const p = profile || {};
+  const genderKey = p.gender === "other" ? "otherAll" : p.gender;
+  const rows = [
+    ["cake", t("friends.pg.birth.title"), p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" }) : "—"],
+    ["location_on", t("friends.pg.province.title"), p.province ? (p.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[p.province]) : "—"],
+    ["wc", t("friends.pg.gender.title"), p.gender && p.gender !== "skip" ? t(`friends.pg.gender.list.${genderKey}`) : "—"],
+  ];
+  return (
+    <section className="pg-info">
+      <header>
+        <b>{t("friends.pg.infoTitle")}</b>
+        <small><span className="material-symbols-outlined" aria-hidden="true">lock</span>{t("friends.pg.onlyYou")}</small>
+        {onEdit && <button type="button" className="edu-btn edu-btn--ghost" onClick={onEdit}><span className="material-symbols-outlined" aria-hidden="true">edit</span>{t("friends.pg.edit")}</button>}
+      </header>
+      <dl>
+        {rows.map(([icon, label, value]) => (
+          <div key={icon}><dt><span className="material-symbols-outlined" aria-hidden="true">{icon}</span>{label}</dt><dd>{value}</dd></div>
+        ))}
+      </dl>
+      {p.hobbies?.length > 0 && (
+        <ul className="pg-info-hobbies">
+          {p.hobbies.map((h) => <li key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</li>)}
+        </ul>
+      )}
+    </section>
   );
 }

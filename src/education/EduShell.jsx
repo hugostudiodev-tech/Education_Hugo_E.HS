@@ -390,12 +390,15 @@ export function EduStore({ learner, onLearnerUpdate }) {
 
 
 /** Hồ sơ: trang thông tin của người học. Cài đặt nằm ở trang riêng (bánh răng góc phải). */
+const ProfileGate = lazy(() => import("./EduProfileGate"));
+const ProfileInfo = lazy(() => import("./EduProfileGate").then((m) => ({ default: m.ProfileInfo })));
 const ProfileSocial = lazy(() => import("./EduFriends").then((m) => ({ default: m.ProfileSocial })));
 
 export function EduProfile({ learner, persona, onPersona }) {
   const { t, lang } = useEduText();
   const support = supportMailUrl({ lang, nickname: persona?.nickname });
   const [editing, setEditing] = useState(false);
+  const [editInfo, setEditInfo] = useState(false);
   const stats = useLearnerStats(learner);
   const name = persona?.nickname || learner?.displayName || t("profile.learner");
   const hero = (
@@ -422,6 +425,11 @@ export function EduProfile({ learner, persona, onPersona }) {
       <Suspense fallback={<>{hero}<div className="fr-skel"><span className="edu-skel is-card" /><span className="edu-skel is-card" /></div></>}>
         <ProfileSocial learner={learner} name={name} steps={stats.done} links={persona?.links} onPersona={onPersona}>{hero}</ProfileSocial>
       </Suspense>
+      {/* Thông tin cá nhân: chỉ chính chủ thấy; sửa ngay tại đây hoặc trong Cài đặt. */}
+      <Suspense fallback={null}>
+        <ProfileInfo profile={persona?.profile} onEdit={onPersona ? () => setEditInfo(true) : null} />
+        {editInfo && <ProfileGate editAll current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditInfo(false); }} />}
+      </Suspense>
       {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
       <div className="edu-me-actions">
         <Link className="edu-btn edu-btn--ghost" to="/feedback">
@@ -442,6 +450,7 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
   const legal = legalFor(lang);
   const support = supportMailUrl({ lang, nickname: persona?.nickname });
   const [installable, setInstallable] = useState(false);
+  const [editInfo, setEditInfo] = useState(false);
   useEffect(() => {
     const on = () => setInstallable(true);
     window.addEventListener("edu:installable", on);
@@ -473,6 +482,10 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
         </button>
       </header>
       <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
+      <Suspense fallback={null}>
+        <ProfileInfo profile={persona?.profile} onEdit={() => setEditInfo(true)} />
+        {editInfo && <ProfileGate editAll current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditInfo(false); }} />}
+      </Suspense>
       <EduSettings embedded learner={learner} onLearnerUpdate={onLearnerUpdate} />
       <dl className="edu-facts">
         <dt>{t("profile.account")}</dt>
