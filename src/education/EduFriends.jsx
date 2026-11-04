@@ -9,6 +9,7 @@ import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 import { EduSkeleton } from "./EduStatus";
 import { supportMailUrl } from "./eduSupport";
+import { PublicAbout } from "./EduProfileGate";
 
 // Tài khoản chính thức Education Hugo: nút theo dõi mạng xã hội. href rỗng = ẩn nút (điền sau).
 const OFFICIAL_LINKS = [
@@ -568,6 +569,7 @@ export function EduPublicProfile() {
         {p.intro && <p>{p.intro}</p>}
       </div>
       {!p.official && <LinkButtons links={p.links} />}
+      {!p.official && <PublicAbout about={p.about} />}
       <div className="fr-cta">{button}</div>
       {p.official ? <OfficialBody /> : <>
         <Overview streak={p.streak} xp={p.xp} rank={0} steps={p.steps} />

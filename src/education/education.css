@@ -1606,3 +1606,15 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-info-hobbies .material-symbols-outlined { font-size: 16px; color: var(--edu-blue); }
 .pg-card { position: relative; }
 .pg-close { position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: none; color: var(--edu-muted); cursor: pointer; }
+/* Công tắc Công khai / Riêng tư */
+.pg-info dl > div { align-items: center; }
+.pg-info dd { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.pg-switch { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 8px 0 4px; border: 0; border-radius: 999px; background: none; color: var(--edu-muted); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.pg-switch i { position: relative; width: 40px; height: 24px; border-radius: 12px; background: var(--edu-line); transition: background .2s; }
+.pg-switch i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: translate .2s; }
+.pg-switch.is-on { color: var(--edu-green); }
+.pg-switch.is-on i { background: var(--edu-green); }
+.pg-switch.is-on i::after { translate: 16px 0; }
+.pg-switch:disabled { opacity: .6; }
+.pg-info-note { color: var(--edu-muted); font-size: 12px; }
+.pg-info-hobbies i { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--edu-soft); font-size: 13px; font-style: normal; font-weight: 700; }

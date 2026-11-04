@@ -9,6 +9,8 @@ export const MAX_HOBBIES = 8;
 export const SENSITIVE_GENDERS = ['lesbian', 'gay', 'bisexual', 'transgender'];
 export const GENDERS = ['male', 'female', 'other', ...SENSITIVE_GENDERS, 'private', 'skip'];
 export const MIN_AGE = 14;
+// Công tắc công khai từng mục (mặc định riêng tư). Ngày sinh công khai chỉ lộ ngày/tháng.
+export const PUBLIC_KEYS = ['birthDate', 'province', 'hobbies', 'gender'];
 
 export function ageOn(birthDate, today = new Date()) {
   const [y, m, d] = birthDate.split('-').map(Number);
@@ -44,8 +46,23 @@ export function checkProfile(raw, today = new Date()) {
     value.gender = raw.gender;
     value.sensitiveConsentAt = SENSITIVE_GENDERS.includes(raw.gender) ? today.toISOString() : null;
   }
+  if (raw.public !== undefined) {
+    if (!raw.public || typeof raw.public !== 'object') return { ok: false, code: 'PROFILE_BAD' };
+    for (const key of PUBLIC_KEYS) if (raw.public[key] !== undefined) value[`public.${key}`] = raw.public[key] === true;
+  }
   return Object.keys(value).length ? { ok: true, value } : { ok: false, code: 'PROFILE_BAD' };
 }
 
 /** Đủ chưa: bắt buộc có giá trị; tuỳ chọn chỉ cần đã trả lời hoặc bấm "Bỏ qua". */
+/** Phần hồ sơ người khác được xem: chỉ mục đã bật công khai; ngày sinh → chỉ "MM-DD". */
+export function publicProfile(p) {
+  const on = p?.public || {};
+  const out = {};
+  if (on.birthDate && p.birthDate) out.birthday = p.birthDate.slice(5);
+  if (on.province && p.province) out.province = p.province;
+  if (on.hobbies && p.hobbies?.length) out.hobbies = p.hobbies;
+  if (on.gender && p.gender && p.gender !== 'skip' && p.gender !== 'private') out.gender = p.gender;
+  return out;
+}
+
 export const profileDone = (p) => Boolean(p?.birthDate && p?.province && Array.isArray(p?.hobbies) && p?.gender);

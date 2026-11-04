@@ -10,6 +10,7 @@ import { announceTo, notify } from '../lib/notify.js';
 import { STAGES } from '../../packages/courses/coding/index.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
 import { streakView } from '../../packages/shared/eduStreak.js';
+import { publicProfile } from '../../packages/persona/profile.js';
 
 // Persona (biệt danh + nhân vật + giới thiệu) nằm ngay trong Learner.
 const PersonaService = {
@@ -66,7 +67,7 @@ async function ensureCode(doc) {
 
 const fail = (code, message) => Object.assign(new Error(message || code), { code, status: code === 'NOT_FOUND' ? 404 : 400 });
 const cleanCode = (raw) => String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-const FIELDS = 'email official links friendCode streak xpWeek xpWeekly friends requestsIn requestsOut createdAt badge nickname avatar intro completed';
+const FIELDS = 'email official links profile friendCode streak xpWeek xpWeekly friends requestsIn requestsOut createdAt badge nickname avatar intro completed';
 
 /** Một hàng người học gửi xuống client: persona + chuỗi + XP tuần + mã (để mở hồ sơ). Không có email. */
 function row(doc, week, day, personas, myEmail) {
@@ -175,6 +176,7 @@ export async function learnerProfile(email, rawCode) {
     relation,
     official: Boolean(target.official),
     links: target.links || {},
+    about: publicProfile(target.profile),
   };
 }
 

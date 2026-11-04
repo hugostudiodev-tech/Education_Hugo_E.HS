@@ -427,7 +427,7 @@ export function EduProfile({ learner, persona, onPersona }) {
       </Suspense>
       {/* Thông tin cá nhân: chỉ chính chủ thấy; sửa ngay tại đây hoặc trong Cài đặt. */}
       <Suspense fallback={null}>
-        <ProfileInfo profile={persona?.profile} onEdit={onPersona ? () => setEditInfo(true) : null} />
+        <ProfileInfo profile={persona?.profile} onEdit={onPersona ? () => setEditInfo(true) : null} onSaved={onPersona} />
         {editInfo && <ProfileGate editAll current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditInfo(false); }} />}
       </Suspense>
       {/* Đánh giá app (khảo sát /feedback) + phản hồi/hỗ trợ (thư soạn sẵn tới support@hugowishpax.studio) — chung một hàng. */}
@@ -483,7 +483,7 @@ export function EduSettingsPage({ learner, persona, onPersona, onSignOut, onLear
       </header>
       <PersonaInfoForm key={`${persona?.nickname}|${persona?.intro}`} current={persona} onSaved={onPersona} />
       <Suspense fallback={null}>
-        <ProfileInfo profile={persona?.profile} onEdit={() => setEditInfo(true)} />
+        <ProfileInfo profile={persona?.profile} onEdit={() => setEditInfo(true)} onSaved={onPersona} />
         {editInfo && <ProfileGate editAll current={persona} onDone={(saved) => { if (saved) onPersona(saved); setEditInfo(false); }} />}
       </Suspense>
       <EduSettings embedded learner={learner} onLearnerUpdate={onLearnerUpdate} />

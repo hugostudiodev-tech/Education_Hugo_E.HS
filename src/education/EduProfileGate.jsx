@@ -176,33 +176,77 @@ export default function ProfileGate({ current, onDone, editAll = false }) {
   );
 }
 
-/** Thẻ "Thông tin cá nhân" — CHỈ hiện cho chính chủ (Hồ sơ của mình + Cài đặt), không có trên hồ sơ công khai. */
-export function ProfileInfo({ profile, onEdit }) {
+/** Công tắc công khai/riêng tư cho một mục. */
+function VisibilitySwitch({ on, busy, onChange, label }) {
+  const { t } = useEduText();
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={`${label}: ${t(on ? "friends.pg.public" : "friends.pg.private")}`} disabled={busy}
+      className={`pg-switch${on ? " is-on" : ""}`} onClick={() => onChange(!on)}>
+      <i aria-hidden="true" /><span>{t(on ? "friends.pg.public" : "friends.pg.private")}</span>
+    </button>
+  );
+}
+
+/**
+ * Thẻ "Thông tin cá nhân" của chính chủ. Mỗi mục có công tắc Công khai / Riêng tư (mặc định riêng tư);
+ * ngày sinh công khai chỉ hiện ngày/tháng. onSaved có → hiện công tắc (Hồ sơ của mình + Cài đặt).
+ */
+export function ProfileInfo({ profile, onEdit, onSaved }) {
   const { t, lang } = useEduText();
+  const [busy, setBusy] = useState(false);
   const p = profile || {};
+  const pub = p.public || {};
   const genderKey = p.gender === "other" ? "otherAll" : p.gender;
+  const toggle = async (key, on) => {
+    setBusy(true);
+    try { onSaved(await persona.save({ profile: { public: { [key]: on } } })); } catch { notify.error(t("persona.failed")); } finally { setBusy(false); }
+  };
   const rows = [
-    ["cake", t("friends.pg.birth.title"), p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" }) : "—"],
-    ["location_on", t("friends.pg.province.title"), p.province ? (p.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[p.province]) : "—"],
-    ["wc", t("friends.pg.gender.title"), p.gender && p.gender !== "skip" ? t(`friends.pg.gender.list.${genderKey}`) : "—"],
+    ["birthDate", "cake", t("friends.pg.birth.title"), p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" }) : "—"],
+    ["province", "location_on", t("friends.pg.province.title"), p.province ? (p.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[p.province]) : "—"],
+    ["gender", "wc", t("friends.pg.gender.title"), p.gender && p.gender !== "skip" ? t(`friends.pg.gender.list.${genderKey}`) : "—"],
+    ["hobbies", "interests", t("friends.pg.hobbies.title"), p.hobbies?.length ? "" : "—"],
   ];
   return (
     <section className="pg-info">
       <header>
         <b>{t("friends.pg.infoTitle")}</b>
-        <small><span className="material-symbols-outlined" aria-hidden="true">lock</span>{t("friends.pg.onlyYou")}</small>
+        <small><span className="material-symbols-outlined" aria-hidden="true">visibility</span>{t("friends.pg.switchHint")}</small>
         {onEdit && <button type="button" className="edu-btn edu-btn--ghost" onClick={onEdit}><span className="material-symbols-outlined" aria-hidden="true">edit</span>{t("friends.pg.edit")}</button>}
       </header>
       <dl>
-        {rows.map(([icon, label, value]) => (
-          <div key={icon}><dt><span className="material-symbols-outlined" aria-hidden="true">{icon}</span>{label}</dt><dd>{value}</dd></div>
+        {rows.map(([key, icon, label, value]) => (
+          <div key={key}>
+            <dt><span className="material-symbols-outlined" aria-hidden="true">{icon}</span>{label}</dt>
+            <dd>
+              {value}
+              {key === "hobbies" && p.hobbies?.length > 0 && (
+                <span className="pg-info-hobbies">{p.hobbies.map((h) => <i key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</i>)}</span>
+              )}
+              {onSaved && <VisibilitySwitch on={Boolean(pub[key])} busy={busy} label={label} onChange={(on) => toggle(key, on)} />}
+            </dd>
+          </div>
         ))}
       </dl>
-      {p.hobbies?.length > 0 && (
-        <ul className="pg-info-hobbies">
-          {p.hobbies.map((h) => <li key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</li>)}
-        </ul>
-      )}
+      {pub.birthDate && <small className="pg-info-note">{t("friends.pg.birthdayNote")}</small>}
+    </section>
+  );
+}
+
+/** Thẻ "Giới thiệu thêm" trên hồ sơ công khai: chỉ những mục chủ hồ sơ đã bật công khai. */
+export function PublicAbout({ about }) {
+  const { t, lang } = useEduText();
+  if (!about || !Object.keys(about).length) return null;
+  const genderKey = about.gender === "other" ? "otherAll" : about.gender;
+  return (
+    <section className="pg-info">
+      <header><b>{t("friends.pg.aboutTitle")}</b></header>
+      <dl>
+        {about.birthday && <div><dt><span className="material-symbols-outlined" aria-hidden="true">cake</span>{t("friends.pg.birthday")}</dt><dd>{new Date(`2000-${about.birthday}T00:00:00`).toLocaleDateString(lang, { day: "numeric", month: "long" })}</dd></div>}
+        {about.province && <div><dt><span className="material-symbols-outlined" aria-hidden="true">location_on</span>{t("friends.pg.province.title")}</dt><dd>{about.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[about.province]}</dd></div>}
+        {about.gender && <div><dt><span className="material-symbols-outlined" aria-hidden="true">wc</span>{t("friends.pg.gender.title")}</dt><dd>{t(`friends.pg.gender.list.${genderKey}`)}</dd></div>}
+      </dl>
+      {about.hobbies?.length > 0 && <span className="pg-info-hobbies">{about.hobbies.map((h) => <i key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</i>)}</span>}
     </section>
   );
 }
