@@ -15,7 +15,7 @@ const EN = {
         h: "1. Who we are",
         p: [
           "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. It has its own accounts, servers and data. You may sign in with Google, Discord or a passkey; signing in with Google or Discord only shares your name, email and profile picture with us, and nothing else from those accounts.",
-          "Education Hugo was conceived and built by Hugo, a student at the University of Greenwich (Vietnam), as a non-profit contribution to the community. Its source code, lessons, characters and artwork belong to the author unless stated otherwise; do not copy or republish them without permission.",
+          "Hugo Studio is the personal, non-profit project name of Lê Gia Huy, a student at the University of Greenwich (Vietnam); it is not a business. Education Hugo was conceived and built by him as a non-profit contribution to the community. Its source code, lessons, characters and artwork belong to the author unless stated otherwise; do not copy or republish them without permission.",
           `Questions about these Terms may be addressed to ${CONTACT}.`,
         ],
       },
@@ -98,7 +98,7 @@ const EN = {
       {
         h: "1. Controller",
         p: [
-          `Hugo Studio is the controller of the personal data described here. Requests concerning your data may be sent to ${CONTACT}. We process personal data in accordance with applicable Vietnamese law on personal data protection, including the Law on Personal Data Protection 2025 (effective 1 January 2026), Decree No. 13/2023/ND-CP and any legislation that succeeds them.`,
+          `The controller of the personal data described here is Lê Gia Huy, an individual operating under the non-profit personal project name Hugo Studio (not a business). Requests concerning your data may be sent to ${CONTACT}. We process personal data in accordance with applicable Vietnamese law on personal data protection, including the Law on Personal Data Protection 2025 (effective 1 January 2026), Decree No. 13/2023/ND-CP and any legislation that succeeds them.`,
         ],
       },
       {
@@ -231,7 +231,7 @@ const VI = {
     sections: [
       { h: "1. Chúng tôi là ai", p: [
         "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, Discord hoặc passkey; đăng nhập bằng Google hay Discord chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của các tài khoản đó.",
-        "Education Hugo do Hugo, sinh viên Đại học Greenwich (Việt Nam), lên ý tưởng và xây dựng như một dự án phi lợi nhuận đóng góp cho cộng đồng. Mã nguồn, bài học, nhân vật và hình ảnh thuộc quyền của tác giả, trừ khi ghi khác; không sao chép hay đăng lại khi chưa được phép.",
+        "Hugo Studio là tên dự án cá nhân, phi lợi nhuận của Lê Gia Huy, sinh viên Đại học Greenwich (Việt Nam), không phải doanh nghiệp. Education Hugo do Lê Gia Huy lên ý tưởng và xây dựng như một dự án phi lợi nhuận đóng góp cho cộng đồng. Mã nguồn, bài học, nhân vật và hình ảnh thuộc quyền của tác giả, trừ khi ghi khác; không sao chép hay đăng lại khi chưa được phép.",
         `Mọi câu hỏi về Điều khoản xin gửi tới ${CONTACT}.`,
       ] },
       { h: "2. Điều kiện sử dụng", p: [
@@ -280,7 +280,7 @@ const VI = {
     lead: "Chính sách này giải thích Education Hugo xử lý dữ liệu cá nhân nào, vì sao, chia sẻ với ai và bạn kiểm soát chúng thế nào. Chúng tôi chỉ thu thập những gì dịch vụ thật sự cần, không bao giờ bán dữ liệu cá nhân hay hiển thị quảng cáo hành vi của bên thứ ba.",
     sections: [
       { h: "1. Bên kiểm soát dữ liệu", p: [
-        `Hugo Studio là bên kiểm soát dữ liệu cá nhân được mô tả ở đây. Yêu cầu liên quan tới dữ liệu của bạn xin gửi tới ${CONTACT}. Chúng tôi xử lý dữ liệu cá nhân theo pháp luật Việt Nam về bảo vệ dữ liệu cá nhân, gồm Luật Bảo vệ dữ liệu cá nhân 2025 (hiệu lực từ 01/01/2026), Nghị định 13/2023/NĐ-CP và văn bản thay thế (nếu có).`,
+        `Bên kiểm soát dữ liệu cá nhân được mô tả ở đây là cá nhân Lê Gia Huy, hoạt động dưới tên dự án cá nhân, phi lợi nhuận Hugo Studio (không phải doanh nghiệp). Yêu cầu liên quan tới dữ liệu của bạn xin gửi tới ${CONTACT}. Chúng tôi xử lý dữ liệu cá nhân theo pháp luật Việt Nam về bảo vệ dữ liệu cá nhân, gồm Luật Bảo vệ dữ liệu cá nhân 2025 (hiệu lực từ 01/01/2026), Nghị định 13/2023/NĐ-CP và văn bản thay thế (nếu có).`,
       ] },
       { h: "2. Dữ liệu chúng tôi xử lý", list: [
         "Dữ liệu tài khoản — email, tên hiển thị và ảnh đại diện từ đăng nhập Google hoặc Discord; với khoá truy cập: khoá công khai và tên thiết bị (dữ liệu sinh trắc học không bao giờ rời khỏi thiết bị của bạn).",
@@ -367,7 +367,7 @@ const ZH = {
     sections: [
       { h: "1. 我们是谁", p: [
         "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。项目拥有独立的账户、服务器和数据。你可以使用 Google、Discord 或通行密钥登录；使用 Google 或 Discord 登录时，我们只会获得你的姓名、邮箱和头像，不会获得这些账户的其他数据。",
-        "Education Hugo 由格林威治大学（越南）学生 Hugo 构思并开发，是一个回馈社区的非营利项目。除另有说明外，源代码、课程、角色和美术作品归作者所有；未经许可不得复制或转载。",
+        "Hugo Studio 是格林威治大学（越南）学生 Lê Gia Huy 的个人非营利项目名称，并非企业。Education Hugo 由 Lê Gia Huy 构思并开发，是一个回馈社区的非营利项目。除另有说明外，源代码、课程、角色和美术作品归作者所有；未经许可不得复制或转载。",
         `有关本条款的问题，请发送至 ${CONTACT}。`,
       ] },
       { h: "2. 使用资格", p: [
@@ -416,7 +416,7 @@ const ZH = {
     lead: "本政策说明 Education Hugo 处理哪些个人数据、为何处理、与谁共享，以及你如何控制这些数据。我们只收集服务真正需要的数据，从不出售个人数据，也不展示第三方行为广告。",
     sections: [
       { h: "1. 数据控制者", p: [
-        `Hugo Studio 是本文所述个人数据的控制者。有关你数据的请求请发送至 ${CONTACT}。我们依据越南有关个人数据保护的法律处理个人数据，包括《2025 年个人数据保护法》（2026 年 1 月 1 日起施行）、第 13/2023/NĐ-CP 号法令及其后续法规。`,
+        `本文所述个人数据的控制者为个人 Lê Gia Huy，以个人非营利项目名称 Hugo Studio 运营（并非企业）。有关你数据的请求请发送至 ${CONTACT}。我们依据越南有关个人数据保护的法律处理个人数据，包括《2025 年个人数据保护法》（2026 年 1 月 1 日起施行）、第 13/2023/NĐ-CP 号法令及其后续法规。`,
       ] },
       { h: "2. 我们处理的数据", list: [
         "账户数据——来自 Google 或 Discord 登录的电子邮箱、显示名称和头像；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",

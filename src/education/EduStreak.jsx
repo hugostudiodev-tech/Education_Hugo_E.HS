@@ -217,8 +217,9 @@ export function StreakCelebration({ count, stage, joy, onClose }) {
         .fromTo(".cel-ring", { scale: 0.2, opacity: 0.9 }, { scale: 2.6, opacity: 0, duration: 0.9, stagger: 0.16, ease: "power2.out" }, "<-0.2")
         .call(() => { setShown(count); playEduSound("success"); }, null, "<0.1")
         .fromTo(".cel-count", { scale: 0.4 }, { scale: 1, duration: 0.6, ease: "back.out(3)" }, "<")
-        .from(".cel-text > *", { y: 24, opacity: 0, duration: 0.4, stagger: 0.1 }, "<0.15");
-      if (!reduce) tl.to(".cel-flame", { y: -6, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        // clearProps: nút .edu-btn có transition transform (hiệu ứng lún) giành transform với GSAP → kẹt y:24, đè dòng ghi công.
+        .from(".cel-text > *", { y: 24, opacity: 0, duration: 0.4, stagger: 0.1, clearProps: "transform" }, "<0.15");
+      // ponytail: bỏ nhún vô hạn — Rive tự cháy rồi, transform liên tục trên canvas WebGL có mask làm máy yếu giật.
       if (!reduce && joy) {
         // Mốc: ba đợt pháo hoa từ hai bên rồi giữa.
         [[1.3, 0.1, 60], [1.7, 0.9, 120], [2.1, 0.5, 90]].forEach(([at, x, angle]) => tl.call(() => {

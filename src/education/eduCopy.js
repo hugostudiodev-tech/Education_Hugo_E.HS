@@ -177,7 +177,7 @@ export const EDU_COPY = {
       termsA: "Tôi đã đọc và đồng ý với", termsB: " của Hugo Studio.",
       ageLabel: "Nhóm tuổi", agePick: "Chọn nhóm tuổi", age16: "Từ 16 tuổi trở lên", age1415: "14–15 tuổi", ageUnder14: "Dưới 14 tuổi",
       guardianPhone: "Số điện thoại cha mẹ/người giám hộ", guardianPhoneHint: "Ví dụ: 0901234567", guardianConsent: "Tôi xác nhận cha mẹ hoặc người giám hộ đã cho phép tôi tạo và sử dụng tài khoản này.", under14Blocked: "Người dưới 14 tuổi chưa thể tạo tài khoản Education Hugo.",
-      accept: "Đồng ý và bắt đầu", back: "Đổi ngôn ngữ",
+      accept: "Đồng ý và bắt đầu", back: "Đổi ngôn ngữ", next: "Tiếp tục", prev: "Quay lại", ageTitle: "Bạn bao nhiêu tuổi?",
     },
     landing: {
       start: "Bắt đầu", explore: "Khám phá", startLearning: "Bắt đầu học", haveAccount: "Tôi đã có tài khoản", topics: "Chủ đề lập trình",
@@ -441,7 +441,7 @@ export const EDU_COPY = {
       termsA: "I have read and agree to Hugo Studio's", termsB: ".",
       ageLabel: "Age group", agePick: "Choose an age group", age16: "16 or older", age1415: "14–15 years old", ageUnder14: "Under 14",
       guardianPhone: "Parent or guardian phone number", guardianPhoneHint: "For example: +84 901 234 567", guardianConsent: "I confirm that my parent or legal guardian has allowed me to create and use this account.", under14Blocked: "People under 14 cannot create an Education Hugo account yet.",
-      accept: "Agree and start", back: "Change language",
+      accept: "Agree and start", back: "Change language", next: "Continue", prev: "Back", ageTitle: "How old are you?",
     },
     landing: {
       start: "Get started", explore: "Explore", startLearning: "Start learning", haveAccount: "I already have an account", topics: "Programming topics",
@@ -792,7 +792,7 @@ export const EDU_COPY = {
       termsA: "我已阅读并同意 Hugo Studio 的", termsB: "。",
       ageLabel: "年龄组", agePick: "选择年龄组", age16: "16 岁及以上", age1415: "14–15 岁", ageUnder14: "未满 14 岁",
       guardianPhone: "父母或法定监护人电话号码", guardianPhoneHint: "例如：+84 901 234 567", guardianConsent: "我确认父母或法定监护人已允许我创建并使用此账户。", under14Blocked: "未满 14 岁者目前不能创建 Education Hugo 账户。",
-      accept: "同意并开始", back: "更改语言",
+      accept: "同意并开始", back: "更改语言", next: "继续", prev: "返回", ageTitle: "你多大了？",
     },
     landing: {
       start: "开始", explore: "探索", startLearning: "开始学习", haveAccount: "我已有账户", topics: "编程主题",

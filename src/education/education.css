@@ -597,14 +597,18 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 /* ── Chào lần đầu: chọn ngôn ngữ → quyền riêng tư & điều khoản ─────────── */
 .edu-welcome { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / .5); }
 .edu-welcome-card {
-  position: relative; width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto;
-  display: grid; gap: 14px; justify-items: center; padding: 28px 22px 22px; border-radius: 28px;
+  /* Khung cố định mọi bước: đầu + chân đứng yên, chỉ thân cuộn khi màn thấp — không còn hộp dài lê thê. */
+  position: relative; width: min(440px, 100%); height: min(620px, calc(100dvh - 32px));
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 14px; justify-items: center; padding: 24px 22px 18px; border-radius: 28px;
   background: var(--edu-card); color: var(--edu-ink); text-align: center; animation: edu-welcome-in .45s cubic-bezier(.2, 1.4, .4, 1);
 }
+.edu-welcome-body { width: 100%; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 14px; animation: edu-fade .2s; }
+.edu-welcome-foot { width: 100%; display: grid; gap: 10px; justify-items: center; }
+.edu-welcome-card.is-small .edu-welcome-buddy { width: 76px; }
 @keyframes edu-welcome-in { from { transform: translateY(40px) scale(.94); opacity: 0; } }
 .edu-welcome-buddy { width: 110px; margin-top: -4px; animation: edu-bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
 .edu-welcome h2 { margin: 0; font-size: 24px; font-weight: 800; }
-.edu-welcome-card > p { margin: 0; color: var(--edu-muted); font-size: 15px; line-height: 1.5; }
+.edu-welcome-body > p { margin: 0; color: var(--edu-muted); font-size: 15px; line-height: 1.5; }
 .edu-welcome-langs { width: 100%; display: grid; gap: 10px; }
 .edu-welcome-lang {
   min-height: 56px; border-radius: 16px; border: 2px solid var(--edu-line); border-bottom-width: 5px;
@@ -614,7 +618,7 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 .edu-welcome-facts { width: 100%; margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; text-align: left; }
 .edu-welcome-facts li { display: flex; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--edu-soft); }
 .edu-welcome-facts .material-symbols-outlined { color: var(--edu-primary-edge); }
-.edu-welcome-facts b { display: block; font-size: 15px; } .edu-welcome-facts small { color: var(--edu-muted); font-size: 13.5px; line-height: 1.45; }
+.edu-welcome-facts b { display: block; font-size: 15px; } .edu-welcome-facts small { display: block; margin-top: 2px; color: var(--edu-muted); font-size: 13.5px; line-height: 1.4; }
 .edu-welcome-check { width: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; font-size: 14.5px; line-height: 1.45; cursor: pointer; }
 .edu-welcome-check input { flex: none; width: 22px; height: 22px; margin-top: 1px; accent-color: var(--edu-primary-strong); }
 .edu-welcome-check a { color: var(--edu-blue); font-weight: 700; text-decoration: underline; }
@@ -622,11 +626,10 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 .edu-welcome-field :is(input, select) { width: 100%; min-height: 46px; padding: 0 12px; border: 2px solid var(--edu-line); border-radius: 12px; background: var(--edu-card); color: var(--edu-text); font: inherit; font-weight: 600; }
 .edu-welcome-warning { color: var(--edu-red); font-weight: 700; }
 .edu-welcome .edu-link { border: 0; background: none; cursor: pointer; }
-.edu-welcome-more { width: 100%; text-align: left; font-size: 13.5px; }
-.edu-welcome-more summary { cursor: pointer; font-weight: 800; color: var(--edu-blue); }
-.edu-welcome-more dl { margin: 8px 0 0; display: grid; gap: 8px; max-height: 32dvh; overflow-y: auto; }
-.edu-welcome-more dt { font-family: ui-monospace, monospace; font-weight: 700; } .edu-welcome-more dt small { font-family: inherit; font-weight: 400; color: var(--edu-muted); }
-.edu-welcome-more dd { margin: 0; color: var(--edu-muted); line-height: 1.4; }
+.edu-welcome-more { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0 14px; border: 2px solid var(--edu-line); border-radius: 14px; background: none; color: var(--edu-blue); font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; }
+.edu-welcome-list { margin: 0; display: grid; gap: 12px; text-align: left; font-size: 13.5px; }
+.edu-welcome-list dt { font-family: ui-monospace, monospace; font-weight: 700; overflow-wrap: anywhere; } .edu-welcome-list dt small { font-family: inherit; font-weight: 400; color: var(--edu-muted); }
+.edu-welcome-list dd { margin: 0; color: var(--edu-muted); line-height: 1.4; }
 .edu-welcome-dots { display: flex; gap: 6px; } .edu-welcome-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--edu-line); }
 .edu-welcome-dots i.is-on { width: 22px; border-radius: 99px; background: var(--edu-primary-strong); }
 @media (prefers-reduced-motion: reduce) { .edu-welcome-card, .edu-welcome-buddy { animation: none; } }
@@ -649,8 +652,8 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 .edu-card--streak small { display: block; color: var(--edu-muted); font-size: 13px; line-height: 1.4; }
 
 /* Màn chúc mừng mốc — nền tối, lửa giữa, vòng sáng loang, số chuỗi to */
-.streak-celebrate { position: fixed; inset: 0; z-index: 1200; display: grid; place-content: center; justify-items: center; gap: 18px; padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); overflow-y: auto; background: #000; color: #fff; text-align: center; } /* đen = nền sẵn của artboard Rive, ánh lửa loang liền */
-.cel-stage { position: relative; display: grid; place-items: center; width: 260px; height: 300px; margin-bottom: 30px; }
+.streak-celebrate { position: fixed; inset: 0; z-index: 1200; display: grid; place-content: safe center; justify-items: center; gap: 18px; padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); overflow-y: auto; background: #000; color: #fff; text-align: center; } /* đen = nền sẵn của artboard Rive, ánh lửa loang liền */
+.cel-stage { position: relative; display: grid; place-items: center; width: 300px; height: 300px; margin-bottom: 30px; }
 .cel-rive { --s: 300px; -webkit-mask: radial-gradient(circle, #000 52%, transparent 70%); mask: radial-gradient(circle, #000 52%, transparent 70%); }
 .cel-spark { position: absolute; left: 50%; top: 62%; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; background: #ffe066; box-shadow: 0 0 40px 16px #ffb800; opacity: 0; pointer-events: none; }
 .cel-ring { position: absolute; left: 50%; top: 55%; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%; border: 6px solid #ffc800; opacity: 0; }
