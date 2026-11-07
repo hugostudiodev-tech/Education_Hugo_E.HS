@@ -174,6 +174,8 @@ export const STREAK_PUSH = {
     milestone: [['Mốc {n} ngày!', 'Lửa Nhỏ lớn thêm rồi — bạn nhận {gems} Ngọc. Mở lịch lửa để xem chương mới.']],
     security: [['Có đăng nhập mới', 'Tài khoản vừa đăng nhập trên {device}. Không phải bạn? Mở Hồ sơ Hugo Studio để đăng xuất máy lạ.']],
     friendRequest: [['Lời mời kết bạn', '{name} muốn làm bạn học với bạn. Mở Bạn bè để đồng ý.']],
+    challenge: [['{name} thách đấu bạn!', 'Trắc nghiệm «{step}»: ai điểm cao hơn nhận Ngọc. Mở Luyện tập để nhận lời.']],
+    challengeDone: [['Thách đấu có kết quả', '{name} đã làm xong thách đấu. Mở Luyện tập xem ai thắng!']],
     friendAccepted: [['Đã thành bạn học', '{name} đã đồng ý kết bạn. Cùng thi đua tuần này nhé!']],
     welcome: [['Chào bạn! Hugo đây.', 'Chào mừng tới Education Hugo — khoá học miễn phí cho học sinh – sinh viên mọi ngành, Hugo đồng hành cùng bạn trong từng bài. Bắt đầu bài đầu tiên nhé!']],
   },
@@ -200,6 +202,8 @@ export const STREAK_PUSH = {
     milestone: [['{n}-day milestone!', 'Little Flame grew — you earned {gems} gems. Open the flame calendar for a new chapter.']],
     security: [['New sign-in', "Your account just signed in on {device}. Not you? Open Profile Hugo Studio to sign out unknown devices."]],
     friendRequest: [['Friend request', '{name} wants to be your study buddy. Open Friends to accept.']],
+    challenge: [['{name} challenged you!', 'Quiz “{step}”: higher score wins Gems. Open Practice to accept.']],
+    challengeDone: [['Challenge result is in', '{name} finished the challenge. Open Practice to see who won!']],
     friendAccepted: [['You are now friends', '{name} accepted your request. Race each other this week!']],
     welcome: [['Hi! Hugo here.', 'Welcome to Education Hugo: free courses for students in every field, and Hugo is with you in every lesson. Start your first lesson!']],
   },
@@ -226,6 +230,8 @@ export const STREAK_PUSH = {
     milestone: [['{n} 天里程碑！', '小火苗长大了——你获得 {gems} 宝石。打开火焰日历看新的章节。']],
     security: [['新的登录', '你的账户刚在 {device} 上登录。不是你？打开 个人资料 Hugo Studio 退出陌生设备。']],
     friendRequest: [['好友请求', '{name} 想和你成为学习伙伴。打开好友页面同意。']],
+    challenge: [['{name} 向你发起挑战！', '测验「{step}」：分高者得宝石。打开练习页面应战。']],
+    challengeDone: [['挑战有结果了', '{name} 完成了挑战。打开练习页面看看谁赢了！']],
     friendAccepted: [['已成为好友', '{name} 同意了你的请求。本周一起比拼吧！']],
     welcome: [['你好！我是 Hugo。', '欢迎来到 Education Hugo：为各专业学生提供的免费课程，Hugo 陪你学好每一课。开始第一课吧！']],
   },
@@ -241,4 +247,4 @@ export function streakPush(lang, key, vars = {}) {
 }
 
 /** Nhân vật đi kèm từng loại thông báo Edu — hộp thông báo và thư (apps/web/public/edu/<tên>.svg, bản PNG cho thư ở edu/mail/). */
-export const EDU_CAST = { welcome: "cast-1", remind: "cast-1", remindNew: "buddy-learn", nearMilestone: "cast-3", lastCall: "cast-2", frozen: "buddy-wrong", shield: "cast-2", purchase: "cast-5", milestone: "buddy-done", security: "buddy-exam", friendRequest: "cast-6", friendAccepted: "cast-7" };
+export const EDU_CAST = { welcome: "cast-1", remind: "cast-1", remindNew: "buddy-learn", nearMilestone: "cast-3", lastCall: "cast-2", frozen: "buddy-wrong", shield: "cast-2", purchase: "cast-5", milestone: "buddy-done", security: "buddy-exam", friendRequest: "cast-6", friendAccepted: "cast-7", challenge: "cast-6", challengeDone: "buddy-done" };

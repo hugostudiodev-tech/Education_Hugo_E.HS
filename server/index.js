@@ -16,6 +16,7 @@ import store from './routes/store.js';
 import community from './routes/community.js';
 import partner from './routes/partner.js';
 import admin from './routes/admin.js';
+import practice from './routes/practice.js';
 import { inbox, push } from './routes/inbox.js';
 import { runReminders } from './services/learning.js';
 import { seedProducts } from './services/store.js';
@@ -60,6 +61,7 @@ app.use('/api/social', social);
 app.use('/api/store', store);
 app.use('/api/community', community);
 app.use('/api/admin', admin);
+app.use('/api/practice', practice);
 app.use('/api', me);
 app.use('/api', (_req, res) => res.status(404).json({ code: 'NOT_FOUND', error: 'Không có API này.' }));
 

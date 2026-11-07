@@ -1618,3 +1618,22 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-switch:disabled { opacity: .6; }
 .pg-info-note { color: var(--edu-muted); font-size: 12px; }
 .pg-info-hobbies i { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--edu-soft); font-size: 13px; font-style: normal; font-weight: 700; }
+
+/* Luyện tập (EduPractice.jsx) */
+.practice-h { margin: 0; font-size: 19px; font-weight: 800; }
+.practice-muted { margin: 0; color: var(--edu-muted); font-size: 14px; }
+.practice-quests { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.practice-quests li { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 15px; }
+.practice-quests i { grid-column: 1 / -1; height: 12px; border-radius: 99px; background: var(--edu-line); overflow: hidden; }
+.practice-quests i::after { content: ""; display: block; height: 100%; width: calc(var(--v) * 100%); background: #ffc800; border-radius: inherit; transition: width .4s; }
+.practice-quests li.is-done i::after { background: #58cc02; }
+.practice-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.practice-rows li { display: flex; align-items: center; gap: 12px; }
+.practice-rows li > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.practice-rows li > div b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.practice-rows small { color: var(--edu-muted); }
+.practice-rows .edu-btn { width: auto; flex: none; padding-inline: 16px; }
+.practice-win { color: #58a700; font-weight: 800; }
+.practice-lose { color: #ea2b2b; font-weight: 800; }
+.practice-actions { display: flex; gap: 12px; }
+.practice-actions .edu-btn { flex: 1; }

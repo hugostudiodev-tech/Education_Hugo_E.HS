@@ -150,6 +150,12 @@ export async function finishLesson(email, lessonId, lesson) {
   return { success: true, lessons: [...new Set([...have, lesson])].sort((a, b) => a - b), eduStreak, balance: eduStreak?.milestone?.balance };
 }
 
+/** Sổ câu sai: giữ các câu sai ở lần làm gần nhất (chỉ số câu trong đề; xáo chỉ đổi thứ tự phương án). */
+const noteMistakes = (email, stepId, review) => {
+  const wrong = review.flatMap((item, i) => (item.correct ? [] : [i]));
+  return Learner.updateOne({ email }, wrong.length ? { $set: { [`mistakes.${stepId}`]: wrong } } : { $unset: { [`mistakes.${stepId}`]: 1 } }).catch(() => {});
+};
+
 /** Nộp trắc nghiệm cuối step: máy chủ chấm lại, ghi điểm, mở step kế, thưởng Ngọc + XP lần đầu. */
 export async function submitQuiz(email, lessonId, answers) {
   const found = findStep(lessonId);
@@ -159,6 +165,10 @@ export async function submitQuiz(email, lessonId, answers) {
 
   if (completed.includes(lessonId)) {
     const review = gradeStepQuiz(lessonId, answers);
+    if (review) {
+      noteMistakes(email, lessonId, review.review);
+      Activity.create({ email, kind: 'review', stepId: lessonId, score: review.score, passed: review.passed }).catch(() => {});
+    }
     const eduStreak = review?.passed ? await noteStudy(email, { reviewOf: lessonId }).catch(() => null) : null;
     if (eduStreak) addXp(email, XP_REVIEW).catch(() => {});
     return { success: true, alreadyCompleted: true, eduStreak, balance: eduStreak?.milestone?.balance ?? doc.gems, ...review, passPercent: PASS_PERCENT };
@@ -176,6 +186,7 @@ export async function submitQuiz(email, lessonId, answers) {
     last: graded.score, attempts: Number(prev.attempts || 0) + 1, at: new Date().toISOString(),
   } } });
   Activity.create({ email, kind: 'quiz', stepId: lessonId, score: graded.score, passed: graded.passed }).catch(() => {});
+  noteMistakes(email, lessonId, graded.review);
   if (!graded.passed) {
     return { code: 'QUIZ_BELOW_PASS', ...graded, passPercent: PASS_PERCENT, error: `Đạt ${graded.score}%, cần từ ${PASS_PERCENT}%. Ôn lại phần chưa vững rồi làm lại.` };
   }

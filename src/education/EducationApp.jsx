@@ -36,6 +36,7 @@ const PAGES = {
   legal: () => import("./EduLegal.jsx"),
   developers: () => import("./EduDevelopers.jsx"),
   devTeam: () => import("./EduDeveloperTeam.jsx"),
+  practice: () => import("./EduPractice.jsx"),
 };
 const EduLanding = lazy(PAGES.landing);
 const EduLogin = lazy(PAGES.login);
@@ -54,6 +55,7 @@ const EduPublicProfile = lazy(() => PAGES.friends().then((m) => ({ default: m.Ed
 const EduLegal = lazy(PAGES.legal);
 const EduDevelopers = lazy(PAGES.developers);
 const EduDeveloperTeam = lazy(PAGES.devTeam);
+const EduPractice = lazy(PAGES.practice);
 
 const hasSavedAccounts = () => { try { return JSON.parse(localStorage.getItem("edu.accounts") || "[]").length > 0; } catch { return false; } };
 /** Sau đăng nhập: về ?next= nếu là đường dẫn nội bộ, không thì /learn. */
@@ -65,7 +67,7 @@ const Loading = () => <EduStatus kind="loading" />;
 
 // Khung chính (thanh trên, menu, cột phải, hộp thông báo) dựng MỘT lần cho mọi trang trong nó;
 // chuyển trang chỉ đổi phần nội dung, chờ tải thì quay nhỏ ngay trong vùng nội dung.
-const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team|friends|u\/)/, "profile"],
+const VIEW_OF = [[/^\/(learn|courses)/, "learn"], [/^\/practice/, "practice"], [/^\/(terms|privacy|guidelines)/, "legal"], [/^\/(feedback|profile|developer-team|friends|u\/)/, "profile"],
   [/^\/(ads|community)/, "community"], [/^\/store/, "store"]];
 function ShellLayout({ learner, signedIn }) {
   const { pathname } = useLocation();
@@ -251,6 +253,7 @@ export default function EducationApp() {
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/ads" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/community/*" element={<Navigate to="/ads" replace />} />
+          <Route path="/practice" element={signedIn ? <EduPractice onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
           <Route path="/friends/find" element={signedIn ? <EduFindFriends /> : needsLogin} />

@@ -201,6 +201,9 @@ const touches = (type, d, items) => type === "learner" && (d.op !== "update" || 
 function activityText(a) {
   if (a.kind === "lesson") return `học xong bài ${a.lesson + 1}`;
   if (a.kind === "quiz") return `làm trắc nghiệm ${a.score}% · ${a.passed ? "qua step ✓" : "chưa đạt"}`;
+  if (a.kind === "review") return `ôn lại trắc nghiệm ${a.score}%`;
+  if (a.kind === "practice") return `ôn sổ câu sai ${a.score}%`;
+  if (a.kind === "challenge") return `làm thách đấu ${a.score}%`;
   if (a.kind === "admin_done") return `được admin hoàn tất (${a.by})`;
   if (a.kind === "admin_undo") return `bị admin gỡ (${a.by})`;
   return a.kind;

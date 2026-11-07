@@ -2,7 +2,7 @@
 // gỡ email khỏi dữ liệu của người khác (bạn bè, tim, bình chọn), ẩn danh nhật ký admin.
 // Tài khoản đăng nhập Hugo Studio (bảng user/session) là dịch vụ riêng, không xoá ở đây.
 import {
-  AdminLog, DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Notification, Post, Purchase, PushSub, Receipt, Report,
+  Activity, AdminLog, Challenge, DevSignup, Feedback, GemTxn, Learner, LessonFeedback, Notification, Post, Purchase, PushSub, Receipt, Report,
 } from '../models.js';
 
 export async function eraseLearner(email) {
@@ -22,6 +22,8 @@ export async function eraseLearner(email) {
     Post.updateMany({ likes: email }, { $pull: { likes: email }, $inc: { likeCount: -1 } }),
     Post.updateMany({ 'poll.options.votes': email }, { $pull: { 'poll.options.$[].votes': email } }),
     ...[GemTxn, Purchase, Receipt, Notification, PushSub, Feedback, LessonFeedback, DevSignup].map((m) => m.deleteMany(byEmail)),
+    Activity.deleteMany(byEmail),
+    Challenge.deleteMany({ $or: [{ from: email }, { to: email }] }),
     Report.deleteMany({ $or: [{ reporterEmail: email }, { targetEmail: email }] }),
     AdminLog.updateMany({ target: email }, { $set: { target: '(đã xoá)' } }),
     Learner.deleteOne(byEmail),

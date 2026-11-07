@@ -19,6 +19,8 @@ const learnerSchema = new Schema({
   lessonsDone: { type: Mixed, default: () => ({}) },
   reviewedOn: { type: Mixed, default: () => ({}) },
   lastStep: String, // step học bài nhỏ gần nhất (admin xem "đang học")
+  mistakes: { type: Mixed, default: undefined }, // sổ câu sai: { stepId: [chỉ số câu sai ở lần làm gần nhất] }
+  questDay: String, // ngày đã nhận thưởng nhiệm vụ (chặn nhận đôi)
   // Ngọc — điểm tiêu được của Edu (thay JOY). Chỉ đổi qua services/gems.js.
   gems: { type: Number, default: 0, min: 0 },
   // Cài đặt + mục tiêu ngày
@@ -205,6 +207,17 @@ export const Activity = model('Activity', new Schema({
   email: { type: String, required: true, index: true },
   kind: String, stepId: String, lesson: Number, score: Number, passed: Boolean, by: String,
   createdAt: { type: Date, default: Date.now, expires: 30 * 86_400 },
+}));
+
+// Thách đấu bạn bè: hai người làm cùng một trắc nghiệm, điểm cao hơn nhận Ngọc. Tự xoá sau 7 ngày.
+export const Challenge = model('Challenge', new Schema({
+  from: { type: String, required: true, index: true },
+  to: { type: String, required: true, index: true },
+  stepId: { type: String, required: true },
+  fromScore: Number,
+  toScore: Number,
+  settled: Boolean,
+  createdAt: { type: Date, default: Date.now, expires: 7 * 86_400 },
 }));
 
 // Đăng ký chương trình Hugo Developer (mỗi người học một lần; hội đồng xét sau).

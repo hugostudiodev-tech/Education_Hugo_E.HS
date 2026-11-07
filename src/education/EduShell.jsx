@@ -23,6 +23,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
+  { to: "/practice", icon: "sparkles", key: "practice" },
   { to: "/ads", icon: "message", key: "community" },
   { to: "/store", icon: "bag", key: "store" },
   { to: "/profile", icon: "user", key: "profile" },
