@@ -9,6 +9,8 @@ import { PersonaAvatar } from "./EduPersona";
 import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
 import "../styles/hugoCoderLearning.css";
 
+const QUEST_ICON = { lessons: "menu_book", quiz: "target", review: "replay" };
+
 async function api(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: body ? "POST" : "GET",
@@ -96,80 +98,96 @@ export default function EduPractice({ onLearnerUpdate }) {
     <section className="edu-page practice">
       <h1 className="edu-page-title">{t("practice.title")}</h1>
 
-      <div className="edu-card">
-        <h2 className="practice-h">{t("practice.questsTitle")}</h2>
+      <div className="edu-card practice-card">
+        <header className="practice-head">
+          <h2 className="practice-h">{t("practice.questsTitle")}</h2>
+          <span className="practice-chip"><GemIcon size={16} />{quests.gems}</span>
+        </header>
         <ul className="practice-quests">
-          {quests.list.map((q) => (
-            <li key={q.id} className={q.done >= q.goal ? "is-done" : ""}>
-              <span>{t(`practice.quest.${q.id}`)}</span>
-              <b>{q.done}/{q.goal}</b>
-              <i style={{ "--v": q.done / q.goal }} />
-            </li>
-          ))}
+          {quests.list.map((q) => {
+            const done = q.done >= q.goal;
+            return (
+              <li key={q.id} className={done ? "is-done" : ""}>
+                <span className="practice-tick material-symbols-outlined" aria-hidden="true">{done ? "check" : QUEST_ICON[q.id]}</span>
+                <div>
+                  <span>{t(`practice.quest.${q.id}`)}</span>
+                  <i className="practice-bar" style={{ "--v": q.done / q.goal }}><b>{q.done}/{q.goal}</b></i>
+                </div>
+              </li>
+            );
+          })}
         </ul>
-        <button type="button" className="edu-btn" disabled={busy || !quests.complete || quests.claimed} onClick={claim}>
-          {quests.claimed ? t("practice.claimed") : <><GemIcon size={20} /> {t("practice.claim", { gems: quests.gems })}</>}
-        </button>
+        {quests.claimed
+          ? <p className="practice-claimed"><span className="material-symbols-outlined" aria-hidden="true">check_circle</span>{t("practice.claimed")}</p>
+          : quests.complete
+            ? <button type="button" className="edu-btn practice-claim" disabled={busy} onClick={claim}><GemIcon size={20} />{t("practice.claim", { gems: quests.gems })}</button>
+            : <p className="practice-muted">{t("practice.questsLeft", { n: quests.list.filter((q) => q.done < q.goal).length, gems: quests.gems })}</p>}
       </div>
 
-      <div className="edu-card">
+      <div className="edu-card practice-card">
         <h2 className="practice-h">{t("practice.reviewTitle")}</h2>
         <p className="practice-muted">{t("practice.reviewHint")}</p>
         {reviews.length ? (
-          <ul className="practice-rows">
+          <ul className="practice-list">
             {reviews.map((r) => (
               <li key={r.stepId}>
-                <div>
-                  <b>{stepTitle(r)}</b>
-                  <small>{[r.best !== null && t("practice.best", { n: r.best }), r.age !== null && t("practice.age", { n: r.age })].filter(Boolean).join(" · ")}</small>
-                </div>
-                <button type="button" className="edu-btn edu-btn--ghost" onClick={() => navigate(`/learn/${r.stepId}`, { state: { part: r.part } })}>{t("practice.review")}</button>
+                {/* Cả hàng là một nút: chạm vào đâu cũng mở trắc nghiệm, không có nút nhỏ bị đẩy khỏi màn. */}
+                <button type="button" className="practice-item" onClick={() => navigate(`/learn/${r.stepId}`, { state: { part: r.part } })}>
+                  <span className={`practice-score ${r.best === null ? "" : r.best >= 80 ? "is-ok" : "is-low"}`}>{r.best === null ? "—" : `${r.best}%`}</span>
+                  <span className="practice-item-text">
+                    <b>{stepTitle(r)}</b>
+                    {r.age !== null && <small>{t("practice.age", { n: r.age })}</small>}
+                  </span>
+                  <span className="material-symbols-outlined practice-go" aria-hidden="true">chevron_right</span>
+                </button>
               </li>
             ))}
           </ul>
-        ) : <p>{t("practice.reviewEmpty")}</p>}
+        ) : <p className="practice-empty">{t("practice.reviewEmpty")}</p>}
       </div>
 
-      <div className="edu-card">
+      <div className="edu-card practice-card">
         <h2 className="practice-h">{t("practice.mistakesTitle")}</h2>
-        <p>{mistakes ? t("practice.mistakesBody", { n: mistakes }) : t("practice.mistakesEmpty")}</p>
-        {mistakes > 0 && (
-          <button type="button" className="edu-btn" disabled={busy} onClick={startMistakes}>{t("practice.mistakesStart", { n: Math.min(10, mistakes) })}</button>
-        )}
+        {mistakes > 0 ? (
+          <>
+            <p className="practice-big"><b>{mistakes}</b><span>{t("practice.mistakesBody", { n: mistakes })}</span></p>
+            <button type="button" className="edu-btn" disabled={busy} onClick={startMistakes}>{t("practice.mistakesStart", { n: Math.min(10, mistakes) })}</button>
+          </>
+        ) : <p className="practice-empty">{t("practice.mistakesEmpty")}</p>}
       </div>
 
-      <div className="edu-card">
+      <div className="edu-card practice-card">
         <h2 className="practice-h">{t("practice.challengeTitle")}</h2>
         <p className="practice-muted">{t("practice.challengeHint", { gems: 10 })}</p>
         {challenges.length > 0 && (
-          <ul className="practice-rows">
+          <ul className="practice-list">
             {challenges.map((c) => (
-              <li key={c.id}>
-                <PersonaAvatar avatar={c.opponent.avatar} size={36} />
-                <div>
+              <li key={c.id} className="practice-person">
+                <PersonaAvatar avatar={c.opponent.avatar} name={c.opponent.name} size={40} />
+                <span className="practice-item-text">
                   <b>{t(c.sent ? "practice.to" : "practice.from", { name: c.opponent.name })}</b>
                   <small>{stepTitle(c)}</small>
-                </div>
+                </span>
                 {c.mine === null
-                  ? <button type="button" className="edu-btn" disabled={busy} onClick={() => play(c)}>{t("practice.play")}</button>
+                  ? <button type="button" className="edu-btn practice-small" disabled={busy} onClick={() => play(c)}>{t("practice.play")}</button>
                   : c.theirs === null
-                    ? <small>{t("practice.waiting", { name: c.opponent.name, mine: c.mine })}</small>
-                    : <b className={c.mine > c.theirs ? "practice-win" : c.mine < c.theirs ? "practice-lose" : ""}>{c.mine}% – {c.theirs}%</b>}
+                    ? <small className="practice-wait">{t("practice.waitShort", { mine: c.mine })}</small>
+                    : <b className={`practice-result ${c.mine > c.theirs ? "practice-win" : c.mine < c.theirs ? "practice-lose" : ""}`}>{c.mine}–{c.theirs}</b>}
               </li>
             ))}
           </ul>
         )}
         {friends.length ? (
-          <ul className="practice-rows">
+          <ul className="practice-list">
             {friends.map((f) => (
-              <li key={f.code}>
-                <PersonaAvatar avatar={f.avatar} size={36} />
-                <div><b>{f.name}</b></div>
-                <button type="button" className="edu-btn edu-btn--ghost" disabled={busy} onClick={() => challenge(f.code)}>{t("practice.challengeSend")}</button>
+              <li key={f.code} className="practice-person">
+                <PersonaAvatar avatar={f.avatar} name={f.name} size={40} />
+                <span className="practice-item-text"><b>{f.name}</b></span>
+                <button type="button" className="edu-btn edu-btn--ghost practice-small" disabled={busy} onClick={() => challenge(f.code)}>{t("practice.challengeSend")}</button>
               </li>
             ))}
           </ul>
-        ) : <p>{t("practice.challengeNoFriends")}</p>}
+        ) : <p className="practice-empty">{t("practice.challengeNoFriends")}</p>}
       </div>
     </section>
   );

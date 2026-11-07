@@ -3355,3 +3355,14 @@ span.cmap-mascot svg { display: block; width: 100%; height: auto; }
 /* Nhãn "Bắt đầu · Bài x/y" luôn nổi trên các nút khác. */
 .cmap-node.is-current { z-index: 3; }
 .cmap-bubble { z-index: 4; }
+
+/* Màn chúc mừng (bản mới): hai vùng — chúc mừng giữa màn, nút xếp dọc sát đáy. */
+.lesson-done { grid-template-rows: minmax(0, 1fr) auto; place-content: stretch; gap: 16px; padding: 24px 16px max(20px, env(safe-area-inset-bottom, 0px)); }
+.lesson-done-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 0; }
+.lesson-done-track { display: flex; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.lesson-done-track li { width: 28px; height: 8px; border-radius: 99px; background: rgba(118, 118, 128, 0.24); }
+.lesson-done-track li.is-on { background: var(--coder-blue); }
+.lesson-done-actions { flex-direction: column; justify-self: center; gap: 12px; margin-top: 0; }
+.lesson-done-actions button { flex: none; width: 100%; white-space: nowrap; text-transform: uppercase; letter-spacing: .04em; }
+.lesson-done-actions .is-ghost { background: none; box-shadow: none; color: var(--coder-blue); min-height: 44px; }
+.lesson-done-actions .is-ghost:active { transform: none; box-shadow: none; opacity: .7; }

@@ -202,32 +202,33 @@ export function ProfileInfo({ profile, onEdit, onSaved }) {
     try { onSaved(await persona.save({ profile: { public: { [key]: on } } })); } catch { notify.error(t("persona.failed")); } finally { setBusy(false); }
   };
   const rows = [
-    ["birthDate", "cake", t("friends.pg.birth.title"), p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" }) : "—"],
-    ["province", "location_on", t("friends.pg.province.title"), p.province ? (p.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[p.province]) : "—"],
-    ["gender", "wc", t("friends.pg.gender.title"), p.gender && p.gender !== "skip" ? t(`friends.pg.gender.list.${genderKey}`) : "—"],
-    ["hobbies", "interests", t("friends.pg.hobbies.title"), p.hobbies?.length ? "" : "—"],
+    ["birthDate", "cake", p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "2-digit", month: "2-digit", year: "numeric" }) : null],
+    ["province", "location_on", p.province ? (p.province === "abroad" ? t("friends.pg.province.abroad") : PROVINCE_NAMES[p.province]) : null],
+    ["gender", "wc", p.gender && p.gender !== "skip" ? t(`friends.pg.gender.list.${genderKey}`) : null],
+    ["hobbies", "interests", p.hobbies?.length ? (
+      <span className="pg-info-hobbies">{p.hobbies.map((h) => <i key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</i>)}</span>
+    ) : null],
   ];
+  // Mỗi hàng: ô biểu tượng · nhãn ngắn trên, giá trị dưới · công tắc bên phải. Không có chỗ nào tự xuống dòng giữa nhãn.
   return (
     <section className="pg-info">
-      <header>
+      <header className="pg-info-head">
         <b>{t("friends.pg.infoTitle")}</b>
-        <small><span className="material-symbols-outlined" aria-hidden="true">visibility</span>{t("friends.pg.switchHint")}</small>
-        {onEdit && <button type="button" className="edu-btn edu-btn--ghost" onClick={onEdit}><span className="material-symbols-outlined" aria-hidden="true">edit</span>{t("friends.pg.edit")}</button>}
+        {onEdit && <button type="button" className="pg-info-edit" onClick={onEdit}><span className="material-symbols-outlined" aria-hidden="true">edit</span>{t("friends.pg.edit")}</button>}
+        {onSaved && <small><span className="material-symbols-outlined" aria-hidden="true">visibility</span>{t("friends.pg.switchHint")}</small>}
       </header>
-      <dl>
-        {rows.map(([key, icon, label, value]) => (
-          <div key={key}>
-            <dt><span className="material-symbols-outlined" aria-hidden="true">{icon}</span>{label}</dt>
-            <dd>
-              {value}
-              {key === "hobbies" && p.hobbies?.length > 0 && (
-                <span className="pg-info-hobbies">{p.hobbies.map((h) => <i key={h}><span className="material-symbols-outlined" aria-hidden="true">{HOBBY_ICON[h]}</span>{t(`friends.pg.hobbies.list.${h}`)}</i>)}</span>
-              )}
-              {onSaved && <VisibilitySwitch on={Boolean(pub[key])} busy={busy} label={label} onChange={(on) => toggle(key, on)} />}
-            </dd>
-          </div>
+      <ul className="pg-rows">
+        {rows.map(([key, icon, value]) => (
+          <li key={key} className="pg-row">
+            <span className="pg-row-icon material-symbols-outlined" aria-hidden="true">{icon}</span>
+            <div className="pg-row-text">
+              <small>{t(`friends.pg.rows.${key}`)}</small>
+              {value === null ? <b className="is-empty">—</b> : typeof value === "string" ? <b>{value}</b> : value}
+            </div>
+            {onSaved && <VisibilitySwitch on={Boolean(pub[key])} busy={busy} label={t(`friends.pg.rows.${key}`)} onChange={(on) => toggle(key, on)} />}
+          </li>
         ))}
-      </dl>
+      </ul>
       {pub.birthDate && <small className="pg-info-note">{t("friends.pg.birthdayNote")}</small>}
     </section>
   );

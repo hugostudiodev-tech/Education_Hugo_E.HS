@@ -171,16 +171,22 @@ function LessonDone({ course, stepCount, onExit, onNext, lessonLabel, nextLabel 
   const { t } = useEduText();
   return (
     <div className="lesson-done">
-
-      <LessonBuddy mood="done" size="lg" seed={stepCount} />
-
-      <h2>{lessonLabel ? t("player.lessonDone", lessonLabel) : t("player.doneTitle")}</h2>
-      <p>{course.title.replace(/^\d+\.\s*/, "")}</p>
-      <span className="lesson-done-count">{t("player.doneCount", { n: stepCount })}</span>
+      {/* Phần chúc mừng ở giữa, nút ở đáy (vùng ngón cái): nút chính trên, nút phụ dưới, mỗi nút một dòng. */}
+      <div className="lesson-done-hero">
+        <LessonBuddy mood="done" size="lg" seed={stepCount} />
+        <h2>{lessonLabel ? t("player.lessonDone", lessonLabel) : t("player.doneTitle")}</h2>
+        <p>{course.title.replace(/^\d+\.\s*/, "")}</p>
+        {lessonLabel && (
+          <ol className="lesson-done-track" aria-hidden="true">
+            {Array.from({ length: lessonLabel.total }, (_, i) => <li key={i} className={i < lessonLabel.n ? "is-on" : ""} />)}
+          </ol>
+        )}
+        <span className="lesson-done-count">{t("player.doneCount", { n: stepCount })}</span>
+      </div>
 
       <div className="lesson-done-actions">
-        <button type="button" className="is-ghost" onClick={onExit}>{t("player.backToMap")}</button>
         {onNext && <button type="button" onClick={onNext}>{nextLabel || t("player.nextLesson")}<ArrowRight aria-hidden="true" /></button>}
+        <button type="button" className="is-ghost" onClick={onExit}>{t("player.backToMap")}</button>
       </div>
     </div>
   );
