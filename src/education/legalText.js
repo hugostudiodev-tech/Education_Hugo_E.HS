@@ -14,7 +14,7 @@ const EN = {
       {
         h: "1. Who we are",
         p: [
-          "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. It has its own accounts, servers and data. You may sign in with Google, Discord or a passkey; signing in with Google or Discord only shares your name, email and profile picture with us, and nothing else from those accounts.",
+          "Education Hugo is a free community learning project operated by Hugo Studio. It charges no tuition or access fee and may receive voluntary donations to support the project. Donations are received personally by Lê Gia Huy and used only to cover running costs such as servers and domain names; they are not payment for any service and give no gems, perks or other benefits in the app. It has its own accounts, servers and data. You may sign in with Google, Discord or a passkey; signing in with Google or Discord only shares your name, email and profile picture with us, and nothing else from those accounts.",
           "Hugo Studio is the personal, non-profit project name of Lê Gia Huy, a student at the University of Greenwich (Vietnam); it is not a business. Education Hugo was conceived and built by him as a non-profit contribution to the community. Its source code, lessons, characters and artwork belong to the author unless stated otherwise; do not copy or republish them without permission.",
           `Questions about these Terms may be addressed to ${CONTACT}.`,
         ],
@@ -230,7 +230,7 @@ const VI = {
     lead: "Điều khoản này điều chỉnh việc bạn sử dụng Education Hugo — dịch vụ học tập miễn phí do Hugo Studio vận hành tại education.hugowishpax.studio. Khi tạo tài khoản hoặc tiếp tục sử dụng dịch vụ, bạn chấp nhận toàn bộ Điều khoản. Nếu không đồng ý, vui lòng không sử dụng Education Hugo.",
     sections: [
       { h: "1. Chúng tôi là ai", p: [
-        "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, Discord hoặc passkey; đăng nhập bằng Google hay Discord chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của các tài khoản đó.",
+        "Education Hugo là dự án học tập cộng đồng miễn phí do Hugo Studio vận hành. Dự án không thu học phí hay phí truy cập và có thể nhận khoản ủng hộ tự nguyện để duy trì hoạt động. Khoản ủng hộ do cá nhân Lê Gia Huy nhận và chỉ dùng để trả chi phí vận hành như máy chủ, tên miền; đây không phải tiền mua dịch vụ và không đổi được Ngọc, đặc quyền hay lợi ích nào trong app. Dự án có tài khoản, máy chủ và dữ liệu riêng. Bạn có thể đăng nhập bằng Google, Discord hoặc passkey; đăng nhập bằng Google hay Discord chỉ chia sẻ cho chúng tôi tên, email và ảnh đại diện, không kèm dữ liệu nào khác của các tài khoản đó.",
         "Hugo Studio là tên dự án cá nhân, phi lợi nhuận của Lê Gia Huy, sinh viên Đại học Greenwich (Việt Nam), không phải doanh nghiệp. Education Hugo do Lê Gia Huy lên ý tưởng và xây dựng như một dự án phi lợi nhuận đóng góp cho cộng đồng. Mã nguồn, bài học, nhân vật và hình ảnh thuộc quyền của tác giả, trừ khi ghi khác; không sao chép hay đăng lại khi chưa được phép.",
         `Mọi câu hỏi về Điều khoản xin gửi tới ${CONTACT}.`,
       ] },
@@ -366,7 +366,7 @@ const ZH = {
     lead: "本条款适用于你使用 Education Hugo——由 Hugo Studio 在 education.hugowishpax.studio 运营的免费学习服务。创建账户或继续使用本服务，即表示你完全接受本条款。如不同意，请勿使用 Education Hugo。",
     sections: [
       { h: "1. 我们是谁", p: [
-        "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。项目拥有独立的账户、服务器和数据。你可以使用 Google、Discord 或通行密钥登录；使用 Google 或 Discord 登录时，我们只会获得你的姓名、邮箱和头像，不会获得这些账户的其他数据。",
+        "Education Hugo 是由 Hugo Studio 运营的免费社区学习项目，不收取学费或访问费，并可接受用于维持项目的自愿捐助。捐助由 Lê Gia Huy 个人接收，仅用于支付服务器、域名等运营成本；捐助不是任何服务的费用，也不会换取应用内的宝石、特权或其他权益。项目拥有独立的账户、服务器和数据。你可以使用 Google、Discord 或通行密钥登录；使用 Google 或 Discord 登录时，我们只会获得你的姓名、邮箱和头像，不会获得这些账户的其他数据。",
         "Hugo Studio 是格林威治大学（越南）学生 Lê Gia Huy 的个人非营利项目名称，并非企业。Education Hugo 由 Lê Gia Huy 构思并开发，是一个回馈社区的非营利项目。除另有说明外，源代码、课程、角色和美术作品归作者所有；未经许可不得复制或转载。",
         `有关本条款的问题，请发送至 ${CONTACT}。`,
       ] },
