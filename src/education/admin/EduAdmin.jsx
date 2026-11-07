@@ -487,8 +487,8 @@ function CourseProgress({ course: c, current, onSteps }) {
         <span className="h-2 min-w-[80px] flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-green-500" style={{ width: `${c.total ? (c.done / c.total) * 100 : 0}%` }} /></span>
       </summary>
       <div className="flex flex-wrap gap-2 border-t border-border px-3 py-2">
-        <Btn tone="ghost" onClick={onSteps(ready.filter((s) => !s.done).map((s) => s.id), true)} disabled={c.done === c.total}>Hoàn tất cả khoá</Btn>
-        <Btn tone="ghost" onClick={onSteps(ready.filter((s) => s.done || s.lessons).map((s) => s.id), false)} disabled={!started}>Gỡ cả khoá</Btn>
+        <Btn tone="ghost" onClick={() => onSteps(ready.filter((s) => !s.done).map((s) => s.id), true)} disabled={c.done === c.total}>Hoàn tất cả khoá</Btn>
+        <Btn tone="ghost" onClick={() => onSteps(ready.filter((s) => s.done || s.lessons).map((s) => s.id), false)} disabled={!started}>Gỡ cả khoá</Btn>
       </div>
       <ul className="divide-y divide-border border-t border-border">
         {c.steps.map((s, i) => {
@@ -501,10 +501,10 @@ function CourseProgress({ course: c, current, onSteps }) {
                 {s.total ? `bài ${s.lessons}/${s.total}` : ""}{s.score ? ` · điểm ${s.score.best}% (${s.score.attempts} lần)` : ""}
               </span>
               {!s.draft && (s.done || s.lessons
-                ? <span className="flex gap-1">{!s.done && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], true)}>Hoàn tất</Btn>}<Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], false)}>Gỡ</Btn></span>
+                ? <span className="flex gap-1">{!s.done && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], true)}>Hoàn tất</Btn>}<Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], false)}>Gỡ</Btn></span>
                 : <span className="flex gap-1">
-                  <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], true)}>Hoàn tất</Btn>
-                  {i > 0 && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" title="Hoàn tất mọi step từ đầu khoá tới step này" onClick={onSteps(ready.slice(0, ready.indexOf(s) + 1).filter((x) => !x.done).map((x) => x.id), true)}>Tới đây</Btn>}
+                  <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], true)}>Hoàn tất</Btn>
+                  {i > 0 && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" title="Hoàn tất mọi step từ đầu khoá tới step này" onClick={() => onSteps(ready.slice(0, ready.indexOf(s) + 1).filter((x) => !x.done).map((x) => x.id), true)}>Tới đây</Btn>}
                 </span>)}
             </li>
           );
@@ -859,26 +859,28 @@ function Slides() {
   );
 }
 
+/** Một mục trong tab: bấm tiêu đề để mở/đóng. Đóng thì không gắn (không tải API). */
+function Section({ title, open: initial, children }) {
+  const [open, setOpen] = useState(initial);
+  return (
+    <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="rounded-xl border border-border bg-card">
+      <summary className="flex min-h-[48px] cursor-pointer items-center px-4 text-[16px] font-semibold text-foreground">{title}</summary>
+      {open && <div className="border-t border-border p-3 md:p-4">{children}</div>}
+    </details>
+  );
+}
+
+// [id, nhãn, icon, [[tiêu đề mục, View, mở sẵn?]]]
 const TABS = [
-  ["overview", "Tổng quan", "space_dashboard", Overview],
-  ["learners", "Người học", "group", Learners],
-  ["slides", "Slide dạy", "slideshow", Slides],
-  ["store", "Cửa hàng", "storefront", Store],
-  ["partners", "Đối tác", "key", Partners],
-  ["developers", "Hugo Developer", "code", Developers],
-  ["promos", "Quảng cáo", "campaign", Promos],
-  ["articles", "Ads", "campaign", Articles],
-  ["moderation", "Kiểm duyệt", "shield", Moderation],
-  ["duplicates", "Nghi trùng", "group_off", Duplicates],
-  ["announce", "Thông báo", "campaign", Announce],
-  ["links", "Link MXH", "link", MemberLinks],
-  ["feedback", "Góp ý", "rate_review", Feedback],
-  ["log", "Nhật ký", "history", Log],
+  ["home", "Trung tâm", "space_dashboard", [["Tổng quan trực tiếp", Overview, true], ["Người học", Learners, true]]],
+  ["content", "Nội dung", "slideshow", [["Slide dạy", Slides, true], ["Ads (bài viết)", Articles], ["Quảng cáo trong app", Promos], ["Gửi thông báo", Announce]]],
+  ["business", "Cửa hàng & đối tác", "storefront", [["Cửa hàng", Store, true], ["Đối tác (API key)", Partners], ["Hugo Developer", Developers]]],
+  ["safety", "Kiểm duyệt", "shield", [["Báo cáo & bài đăng", Moderation, true], ["Góp ý", Feedback], ["Nghi trùng tài khoản", Duplicates], ["Link MXH", MemberLinks], ["Nhật ký admin", Log]]],
 ];
 
 export default function EduAdmin() {
   const [me, setMe] = useState(undefined);
-  const tabFromPath = () => TABS.find(([id]) => window.location.pathname === `/admin/${id}`)?.[0] || "overview";
+  const tabFromPath = () => TABS.find(([id]) => window.location.pathname === `/admin/${id}`)?.[0] || "home";
   const [tab, setTab] = useState(tabFromPath);
   const check = useCallback(() => { call("/admin/me").then(setMe).catch(() => setMe(null)); }, []);
   useEffect(() => {
@@ -896,7 +898,7 @@ export default function EduAdmin() {
 
   const go = (id) => { window.history.pushState(null, "", `/admin/${id}`); setTab(id); };
   const signOut = async () => { await call("/admin-auth/sign-out", { method: "POST", body: {} }).catch(() => {}); setMe(null); };
-  const [, label, , View] = TABS.find(([id]) => id === tab);
+  const [, label, , sections] = TABS.find(([id]) => id === tab);
   return (
     <div className="min-h-dvh bg-background md:flex">
       <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card p-2 md:sticky md:top-0 md:h-dvh md:w-56 md:flex-col md:border-b-0 md:border-r">
@@ -918,7 +920,9 @@ export default function EduAdmin() {
       <main className="min-w-0 flex-1 p-4 md:p-6">
         <PasskeyOffer />
         <h1 className="mb-4 text-[22px] font-bold text-foreground">{label}</h1>
-        <View />
+        <div key={tab} className="space-y-3">
+          {sections.map(([title, View, open]) => <Section key={title} title={title} open={Boolean(open)}><View /></Section>)}
+        </div>
       </main>
     </div>
   );
