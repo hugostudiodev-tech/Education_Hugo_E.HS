@@ -1,6 +1,6 @@
 // Học tập: ảnh chụp người học khi mở app, bài nhỏ, trắc nghiệm cuối step, chuỗi lửa,
 // mục tiêu ngày, nhắc học theo giờ. Logic chuỗi thuần nằm ở packages/shared/eduStreak.js.
-import { GemTxn, Learner } from '../models.js';
+import { Activity, GemTxn, Learner } from '../models.js';
 import { addGems, GEMS_PER_CORRECT } from './gems.js';
 import { addXp, XP_PER_CORRECT, XP_PER_LESSON, XP_REVIEW } from './social.js';
 import { notify } from '../lib/notify.js';
@@ -143,6 +143,8 @@ export async function finishLesson(email, lessonId, lesson) {
   if (!stepDone && lesson > 0 && !have.includes(lesson - 1)) throw fail(409, 'LESSON_ORDER', 'Học bài trước trước đã.');
   const added = await Learner.updateOne({ email }, { $addToSet: { [`lessonsDone.${lessonId}`]: lesson } });
   const fresh = added.modifiedCount === 1 && !stepDone;
+  Activity.create({ email, kind: 'lesson', stepId: lessonId, lesson }).catch(() => {});
+  Learner.updateOne({ email }, { $set: { lastStep: lessonId } }).catch(() => {}); // riêng: giữ modifiedCount ở trên chỉ đo bài mới
   const eduStreak = await noteStudy(email, fresh ? {} : { reviewOf: `${lessonId}_l${lesson}` }).catch(() => null);
   if (fresh) addXp(email, XP_PER_LESSON).catch(() => {});
   return { success: true, lessons: [...new Set([...have, lesson])].sort((a, b) => a - b), eduStreak, balance: eduStreak?.milestone?.balance };
@@ -173,6 +175,7 @@ export async function submitQuiz(email, lessonId, answers) {
     best: Math.max(Number(prev.best || 0), graded.score), firstTry: prev.firstTry ?? graded.score,
     last: graded.score, attempts: Number(prev.attempts || 0) + 1, at: new Date().toISOString(),
   } } });
+  Activity.create({ email, kind: 'quiz', stepId: lessonId, score: graded.score, passed: graded.passed }).catch(() => {});
   if (!graded.passed) {
     return { code: 'QUIZ_BELOW_PASS', ...graded, passPercent: PASS_PERCENT, error: `Đạt ${graded.score}%, cần từ ${PASS_PERCENT}%. Ôn lại phần chưa vững rồi làm lại.` };
   }

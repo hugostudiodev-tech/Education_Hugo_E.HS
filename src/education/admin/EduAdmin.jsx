@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { API_BASE } from "../../config/apiBase";
 import { OUTLINE } from "../../../packages/courses/python/stages.js";
 
@@ -26,17 +26,67 @@ const Btn = ({ tone, ...p }) => (
 const Input = (p) => <input {...p} className={`min-h-[40px] w-full rounded-lg border border-border bg-card px-3 text-[15px] text-foreground ${p.className || ""}`} />;
 const Card = ({ children, className = "" }) => <div className={`rounded-xl border border-border bg-card p-4 ${className}`}>{children}</div>;
 
+// ── Kênh trực tiếp: một EventSource cho cả trang (/admin/live, SSE từ change stream MongoDB) ──
+// Sự kiện: learner {id, op, fields} · activity {dòng nhật ký học} · resync (vừa nối lại → tải lại hết).
+const live = new EventTarget();
+function useLiveConnection(enabled) {
+  const [state, setState] = useState("connecting");
+  useEffect(() => {
+    if (!enabled) return undefined;
+    let es, timer, opened = false;
+    const fire = (type, detail) => live.dispatchEvent(new CustomEvent(type, { detail }));
+    const connect = () => {
+      es = new EventSource(`${API_BASE}/admin/live`, { withCredentials: true });
+      for (const type of ["learner", "activity", "resync"]) es.addEventListener(type, (e) => fire(type, JSON.parse(e.data || "{}")));
+      es.onopen = () => { setState("on"); if (opened) fire("resync", {}); opened = true; };
+      // Mất mạng → EventSource tự nối lại. Server trả lỗi (502 khi Render deploy, 401) → nó bỏ hẳn, nên tự mở lại.
+      es.onerror = () => { setState("connecting"); if (es.readyState === EventSource.CLOSED) timer = setTimeout(connect, 5000); };
+    };
+    connect();
+    return () => { clearTimeout(timer); es.close(); };
+  }, [enabled]);
+  return state;
+}
+/** Nghe sự kiện trực tiếp; fn(type, detail). */
+function useLive(types, fn) {
+  const ref = useRef(fn);
+  ref.current = fn;
+  const key = types.join();
+  useEffect(() => {
+    const h = (e) => ref.current(e.type, e.detail);
+    const list = key.split(",");
+    list.forEach((t) => live.addEventListener(t, h));
+    return () => list.forEach((t) => live.removeEventListener(t, h));
+  }, [key]);
+}
+/** Gộp nhiều lần gọi dồn dập thành một (sự kiện tới liên tục khi người học đang làm bài). */
+function useDebounced(fn, ms) {
+  const ref = useRef(fn);
+  ref.current = fn;
+  const timer = useRef(0);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return useCallback(() => { clearTimeout(timer.current); timer.current = setTimeout(() => ref.current(), ms); }, [ms]);
+}
+
 // ponytail: cache RAM theo path — đổi tab hiện ngay dữ liệu lần trước, rồi tải lại nền.
 const listCache = new Map();
-/** Tải một danh sách; reload() sau mỗi thao tác ghi. */
-function useList(path) {
+/**
+ * Tải một danh sách; reload() sau mỗi thao tác ghi.
+ * `follow(type, detail, items)` → true thì tải lại (gộp trong 3 giây, giữ dưới giới hạn 120 lần/phút). Có follow thì tự tải lại khi nối lại kênh.
+ */
+function useList(path, follow) {
   const [state, setState] = useState(() => ({ items: listCache.get(path) ?? null, error: "" }));
   const reload = useCallback(() => {
     if (listCache.has(path)) setState({ items: listCache.get(path), error: "" });
     call(path).then((d) => { const items = d.items ?? d; listCache.set(path, items); setState({ items, error: "" }); }).catch((e) => setState((s) => ({ items: s.items ?? [], error: e.message })));
   }, [path]);
   useEffect(reload, [reload]);
-  return { ...state, reload };
+  const later = useDebounced(reload, 3000);
+  useLive(follow ? ["learner", "activity", "resync"] : [], (type, detail) => {
+    if (type === "resync" || follow(type, detail, listCache.get(path) || [])) later();
+  });
+  const setItems = useCallback((fn) => setState((st) => { const items = fn(st.items || []); listCache.set(path, items); return { ...st, items }; }), [path]);
+  return { ...state, reload, setItems };
 }
 
 function act(fn, reload) {
@@ -132,48 +182,344 @@ function Login({ onDone }) {
   );
 }
 
+const ago = (d) => {
+  if (!d) return "—";
+  const s = (Date.now() - new Date(d)) / 1000;
+  return s < 60 ? "vừa xong" : s < 3600 ? `${Math.floor(s / 60)} phút trước` : s < 86400 ? `${Math.floor(s / 3600)} giờ trước` : fmt(d);
+};
+const isOnline = (d) => Boolean(d) && Date.now() - new Date(d) < 10 * 60_000;
+const Dot = ({ on }) => <span title={on ? "Đang online" : "Offline"} className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${on ? "bg-green-500" : "bg-border"}`} />;
+/** Vẽ lại mỗi 30 giây để "x phút trước" và chấm online tự đúng mà không gọi API. */
+function useTick() {
+  const [, set] = useState(0);
+  useEffect(() => { const t = setInterval(() => set((n) => n + 1), 30_000); return () => clearInterval(t); }, []);
+}
+// Một learner trong danh sách vừa đổi, hoặc có người mới/bị xoá → cần tải lại.
+// Danh sách xếp theo lần hoạt động: ai vừa hoạt động (kể cả ngoài danh sách) cũng làm đổi thứ tự.
+const touches = (type, d, items) => type === "learner" && (d.op !== "update" || d.fields.includes("lastActiveAt") || items.some((l) => l._id === d.id));
+
+function activityText(a) {
+  if (a.kind === "lesson") return `học xong bài ${a.lesson + 1}`;
+  if (a.kind === "quiz") return `làm trắc nghiệm ${a.score}% · ${a.passed ? "qua step ✓" : "chưa đạt"}`;
+  if (a.kind === "admin_done") return `được admin hoàn tất (${a.by})`;
+  if (a.kind === "admin_undo") return `bị admin gỡ (${a.by})`;
+  return a.kind;
+}
+function ActivityList({ items, onOpen }) {
+  if (!items) return <p className="text-muted-foreground">Đang tải…</p>;
+  if (!items.length) return <p className="text-[14px] text-muted-foreground">Chưa có hoạt động.</p>;
+  return (
+    <ul className="divide-y divide-border text-[14px] text-foreground">
+      {items.map((a) => (
+        <li key={a._id} className="flex flex-wrap items-baseline gap-x-2 py-2">
+          <span className="w-24 shrink-0 text-[13px] text-muted-foreground">{ago(a.createdAt)}</span>
+          {onOpen && <button type="button" onClick={() => onOpen(a.email)} className="font-semibold underline-offset-2 hover:underline">{a.email}</button>}
+          <span className={a.kind === "quiz" && !a.passed ? "text-amber-600" : a.kind.startsWith("admin") ? "text-sky-600" : ""}>{activityText(a)}</span>
+          <span className="min-w-0 basis-full truncate pl-[6.5rem] text-[13px] text-muted-foreground">{a.label}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Overview() {
   const [d, setD] = useState(null);
-  useEffect(() => { call("/admin/overview").then(setD).catch(() => setD({})); }, []);
-  if (!d) return <p className="text-muted-foreground">Đang tải…</p>;
-  const rows = [
+  const [open, setOpen] = useState(null);
+  const loadStats = useCallback(() => { call("/admin/overview").then(setD).catch(() => setD((x) => x || {})); }, []);
+  useEffect(loadStats, [loadStats]);
+  const statsLater = useDebounced(loadStats, 10_000);
+  useTick();
+  // Online: ai đổi lastActiveAt là có thể vừa vào/ra danh sách.
+  const online = useList("/admin/learners?online=1", touches);
+  const feed = useList("/admin/activity");
+  // Dòng hoạt động mới đẩy thẳng vào đầu luồng, không gọi API.
+  useLive(["activity", "learner", "resync"], (type, d) => {
+    if (type === "activity") feed.setItems((items) => [d, ...items.filter((x) => x._id !== d._id)].slice(0, 100));
+    if (type === "resync") feed.reload();
+    statsLater();
+  });
+  const rows = d ? [
     ["Người học", d.learners], ["Hoạt động 24h", d.active1], ["Hoạt động 7 ngày", d.active7], ["Mới hôm nay", d.newToday],
     ["Bài đăng 7 ngày", d.posts7], ["Báo cáo chờ xử lý", d.pendingReports], ["Góp ý bài học mới", d.newLessonFb],
     ["Phiếu đánh giá", d.feedback], ["Ngọc đang lưu hành", d.gemsOut], ["Đơn cửa hàng 30 ngày", d.sold30],
-  ];
+  ] : [];
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      {rows.map(([k, v]) => <Card key={k}><p className="text-[13px] text-muted-foreground">{k}</p><p className="mt-1 text-[24px] font-bold tabular-nums text-foreground">{(v ?? 0).toLocaleString("vi-VN")}</p></Card>)}
+    <div className="space-y-4">
+      {open && <LearnerDetail email={open} onClose={() => setOpen(null)} />}
+      {!d ? <p className="text-muted-foreground">Đang tải…</p> : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {rows.map(([k, v]) => <Card key={k}><p className="text-[13px] text-muted-foreground">{k}</p><p className="mt-1 text-[24px] font-bold tabular-nums text-foreground">{(v ?? 0).toLocaleString("vi-VN")}</p></Card>)}
+        </div>
+      )}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <Card>
+          <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground"><Dot on />Đang online ({online.items?.length ?? 0}) <small className="font-normal text-muted-foreground">· 10 phút qua</small></h2>
+          {!online.items ? <p className="text-muted-foreground">Đang tải…</p> : !online.items.length ? <p className="text-[14px] text-muted-foreground">Không ai online.</p> : (
+            <ul className="divide-y divide-border text-[14px]">
+              {online.items.map((l) => (
+                <li key={l._id}><button type="button" onClick={() => setOpen(l.email)} className="w-full py-2 text-left hover:bg-muted">
+                  <b className="text-foreground">{l.nickname || l.email}</b> <span className="text-[13px] text-muted-foreground">{ago(l.lastActiveAt)}</span>
+                  <LearningLine learning={l.learning} />
+                </button></li>
+              ))}
+            </ul>
+          )}
+        </Card>
+        <Card>
+          <h2 className="mb-2 font-semibold text-foreground">Hoạt động học trực tiếp <small className="font-normal text-muted-foreground">· trực tiếp</small></h2>
+          {feed.error && <p className="text-red-600">{feed.error}</p>}
+          <ActivityList items={feed.items} onOpen={setOpen} />
+        </Card>
+      </div>
     </div>
+  );
+}
+
+function LearningLine({ learning: n }) {
+  if (!n) return <span className="block text-[13px] text-muted-foreground">Chưa học step nào</span>;
+  return (
+    <span className="block text-[13px] text-muted-foreground">
+      {n.passed ? "Vừa qua: " : `Đang học (bài ${n.lessons}/${n.total}): `}<span className="text-foreground">{n.label}</span>
+    </span>
   );
 }
 
 function Learners() {
   const [q, setQ] = useState("");
   const [query, setQuery] = useState("");
-  const list = useList(`/admin/learners?q=${encodeURIComponent(query)}`);
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  useTick();
+  const list = useList(`/admin/learners?q=${encodeURIComponent(query)}${onlineOnly ? "&online=1" : ""}`, touches);
   const [open, setOpen] = useState(null);
+  const [adding, setAdding] = useState(false);
   return (
     <div className="space-y-3">
-      <form onSubmit={(e) => { e.preventDefault(); setQuery(q); }} className="flex gap-2">
-        <Input placeholder="Email, biệt danh hoặc mã bạn" value={q} onChange={(e) => setQ(e.target.value)} />
-        <Btn type="submit">Tìm</Btn>
-      </form>
+      <div className="flex flex-wrap items-center gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); setQuery(q); }} className="flex min-w-[260px] flex-1 gap-2">
+          <Input placeholder="Email, biệt danh hoặc mã bạn" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Btn type="submit">Tìm</Btn>
+        </form>
+        <label className="flex min-h-[40px] items-center gap-2 text-[14px] text-foreground"><input type="checkbox" checked={onlineOnly} onChange={(e) => setOnlineOnly(e.target.checked)} />Chỉ đang online</label>
+        <Btn tone="ghost" onClick={() => setAdding((v) => !v)}>+ Thêm member</Btn>
+      </div>
+      {adding && <AddLearner onDone={(email) => { setAdding(false); list.reload(); if (email) setOpen(email); }} />}
       {open && <LearnerDetail email={open} onClose={() => { setOpen(null); list.reload(); }} />}
-      <Table list={list} head={["Email", "Biệt danh", "Ngọc", "Bước", "Chuỗi", "Hoạt động", ""]} row={(l) => [
-        l.email, l.nickname || l.name || "—", l.gems ?? 0, l.steps, l.streak, fmt(l.lastActiveAt),
-        <span key="a" className="flex gap-2">{l.bannedAt && <span className="text-red-600">Đã khoá</span>}<Btn tone="ghost" onClick={() => setOpen(l.email)}>Mở</Btn></span>,
+      {list.items && <p className="text-[13px] text-muted-foreground">{list.items.length} người{list.items.length >= 200 ? " (200 hoạt động gần nhất)" : ""}</p>}
+      <Table list={list} onRow={(l) => setOpen(l.email)} head={["Người học", "Đang học", "Step qua", "Ngọc", "Chuỗi", "Hoạt động"]} row={(l) => [
+        <span key="n" className="flex items-start gap-2"><span className="pt-1.5"><Dot on={isOnline(l.lastActiveAt)} /></span><span className="min-w-0">
+          <b>{l.nickname || l.name || "—"}</b>{l.bannedAt && <span className="ml-2 rounded bg-red-100 px-1.5 text-[12px] text-red-700">Đã khoá</span>}
+          <br /><small className="text-muted-foreground">{l.email}</small></span></span>,
+        <span key="l" className="block max-w-[340px]"><LearningLine learning={l.learning} /></span>,
+        l.steps, (l.gems ?? 0).toLocaleString("vi-VN"), l.streak ? `🔥 ${l.streak}` : "—",
+        <span key="t" className="whitespace-nowrap">{ago(l.lastActiveAt)}</span>,
       ]} />
     </div>
   );
 }
+
+function AddLearner({ onDone }) {
+  const [f, setF] = useState({ email: "", name: "", nickname: "" });
+  const [err, setErr] = useState("");
+  const submit = async (e) => {
+    e.preventDefault(); setErr("");
+    try { await call("/admin/learners", { method: "POST", body: f }); onDone(f.email.trim().toLowerCase()); } catch (x) { setErr(x.message); }
+  };
+  return (
+    <Card>
+      <form onSubmit={submit} className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
+        <Input type="email" required placeholder="Email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+        <Input placeholder="Tên" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        <Input placeholder="Biệt danh" value={f.nickname} onChange={(e) => setF({ ...f, nickname: e.target.value })} />
+        <Btn type="submit">Tạo</Btn>
+      </form>
+      {err && <p className="mt-2 text-[14px] text-red-600">{err}</p>}
+    </Card>
+  );
+}
+
+function LearnerDetail({ email, onClose }) {
+  const [d, setD] = useState(null);
+  const [err, setErr] = useState("");
+  const [edit, setEdit] = useState(null);
+  const path = `/admin/learners/${encodeURIComponent(email)}`;
+  const load = useCallback(() => { call(path).then((x) => { setD(x); setErr(""); }).catch((e) => setErr(e.message)); }, [path]);
+  useEffect(load, [load]);
+  useTick();
+  const loadLater = useDebounced(load, 500);
+  const idRef = useRef(null);
+  idRef.current = d?.learner?._id;
+  useLive(["learner", "activity", "resync"], (type, x) => {
+    if (type === "resync" || (type === "learner" && x.id === idRef.current) || (type === "activity" && x.email === email)) loadLater();
+  });
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const gems = act(async () => {
+    const amount = window.prompt("Cộng/trừ bao nhiêu Ngọc? (số âm để trừ)");
+    if (!amount) return;
+    const note = window.prompt("Lý do điều chỉnh:");
+    if (!note) return;
+    await call(`${path}/gems`, { method: "POST", body: { amount: Number(amount), note } });
+  }, load);
+  const ban = act(async (on) => {
+    const reason = on ? window.prompt("Lý do khoá tài khoản:") : "";
+    if (on && !reason) return;
+    await call(`${path}/ban`, { method: "POST", body: { ban: on, reason } });
+  }, load);
+  const removeLink = act(async (key) => { if (window.confirm(`Gỡ link ${key}?`)) await call(`${path}/links`, { method: "POST", body: { key } }); }, load);
+  const reset = act(async () => { if (window.confirm("Xoá biệt danh, giới thiệu và nhân vật của người này?")) await call(`${path}/reset-persona`, { method: "POST" }); }, load);
+  const erase = async () => {
+    const typed = window.prompt(`XOÁ VĨNH VIỄN mọi dữ liệu của ${email}. Gõ lại email để xác nhận:`);
+    if (typed?.trim().toLowerCase() !== email) return;
+    try { await call(path, { method: "DELETE", body: { confirm: email } }); onClose(); } catch (e) { window.alert(e.message); }
+  };
+  const steps = act(async (ids, done) => {
+    if (!done && !window.confirm(`Gỡ ${ids.length} step (xoá cả bài đã học và điểm)?`)) return;
+    if (done && ids.length > 1 && !window.confirm(`Hoàn tất ${ids.length} step?`)) return;
+    await call(`${path}/steps`, { method: "POST", body: { stepIds: ids, done } });
+  }, load);
+  const saveEdit = async (e) => {
+    e.preventDefault();
+    try { await call(path, { method: "PATCH", body: edit }); setEdit(null); load(); } catch (x) { window.alert(x.message); }
+  };
+
+  const l = d?.learner;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={onClose}>
+      <aside role="dialog" aria-label={email} onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-3xl space-y-4 overflow-y-auto bg-background p-4 shadow-xl md:p-6">
+        <div className="sticky -top-4 z-10 -mx-4 -mt-4 flex items-center justify-between gap-2 border-b border-border bg-background px-4 py-3 md:-top-6 md:-mx-6 md:-mt-6 md:px-6">
+          <h2 className="flex min-w-0 items-center gap-2 text-[17px] font-bold text-foreground"><Dot on={isOnline(l?.lastActiveAt)} /><span className="truncate">{l?.nickname || email}</span></h2>
+          <Btn tone="ghost" onClick={onClose}>Đóng</Btn>
+        </div>
+        {err && <p className="text-red-600">{err}</p>}
+        {!d ? <p className="text-muted-foreground">Đang tải…</p> : (<>
+          <Card>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[14px] sm:grid-cols-3">
+              {[["Email", l.email], ["Tên", l.name || "—"], ["Biệt danh", l.nickname || "—"], ["Mã bạn", l.friendCode || "—"],
+                ["Ngọc", (l.gems ?? 0).toLocaleString("vi-VN")], ["Khiên lửa", l.shields ?? 0],
+                ["Chuỗi lửa", `${l.streak?.count ?? 0} ngày${l.streak?.studiedToday ? " · đã học hôm nay" : ""}`],
+                ["Hoạt động", ago(l.lastActiveAt)], ["Tạo lúc", fmt(l.createdAt)], ["Nhóm tuổi", l.consent?.ageGroup || "—"],
+                ["Ngày sinh", l.profile?.birthDate || "—"], ["Tỉnh/thành", l.profile?.province || "—"], ["Giới tính", l.profile?.gender || "—"],
+              ].map(([k, v]) => <div key={k} className="min-w-0"><dt className="text-[12px] text-muted-foreground">{k}</dt><dd className="break-words text-foreground">{v}</dd></div>)}
+            </dl>
+            {l.bannedAt && <p className="mt-2 text-[14px] font-semibold text-red-600">Đã khoá từ {fmt(l.bannedAt)}</p>}
+            {l.ageMismatch && <p className="mt-2 text-[14px] font-semibold text-red-600">Ngày sinh dưới 16 nhưng đã chọn 16+ (thiếu xác nhận phụ huynh)</p>}
+            {l.intro && <p className="mt-2 text-[14px] text-muted-foreground">“{l.intro}”</p>}
+            <div className="mt-3"><LearningLine learning={d.learning} /></div>
+          </Card>
+
+          {edit ? (
+            <Card>
+              <form onSubmit={saveEdit} className="grid gap-2 sm:grid-cols-2">
+                {[["name", "Tên"], ["nickname", "Biệt danh"], ["shields", "Khiên lửa"]].map(([k, label]) => (
+                  <label key={k} className="text-[13px] text-muted-foreground">{label}<Input className="mt-1" value={edit[k]} onChange={(e) => setEdit({ ...edit, [k]: e.target.value })} /></label>
+                ))}
+                <label className="text-[13px] text-muted-foreground sm:col-span-2">Giới thiệu
+                  <textarea rows={2} maxLength={300} value={edit.intro} onChange={(e) => setEdit({ ...edit, intro: e.target.value })} className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" /></label>
+                <div className="flex gap-2 sm:col-span-2"><Btn type="submit">Lưu</Btn><Btn tone="ghost" onClick={() => setEdit(null)}>Huỷ</Btn></div>
+              </form>
+            </Card>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Btn onClick={() => setEdit({ name: l.name || "", nickname: l.nickname || "", intro: l.intro || "", shields: l.shields ?? 0 })}>Sửa thông tin</Btn>
+              <Btn tone="ghost" onClick={gems}>Điều chỉnh Ngọc</Btn>
+              <Btn tone="ghost" onClick={reset}>Xoá hồ sơ công khai</Btn>
+              {l.bannedAt ? <Btn tone="ghost" onClick={() => ban(false)}>Mở khoá</Btn> : <Btn tone="danger" onClick={() => ban(true)}>Khoá tài khoản</Btn>}
+              <Btn tone="danger" onClick={erase}>Xoá tài khoản</Btn>
+            </div>
+          )}
+
+          {Object.values(l.links || {}).some(Boolean) && (
+            <ul className="space-y-1 text-[14px]">
+              {Object.entries(l.links).filter(([, v]) => v).map(([k, v]) => (
+                <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="min-w-0 break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a>
+                  <Btn tone="ghost" onClick={() => removeLink(k)}>Gỡ</Btn></li>
+              ))}
+            </ul>
+          )}
+
+          <section className="space-y-2">
+            <h3 className="font-semibold text-foreground">Tiến độ học</h3>
+            {d.progress.map((c) => <CourseProgress key={c.key} course={c} current={d.learning?.stepId} onSteps={steps} />)}
+          </section>
+
+          <section>
+            <h3 className="mb-1 font-semibold text-foreground">Hoạt động học (30 ngày)</h3>
+            <ActivityList items={d.activity} />
+          </section>
+
+          <section>
+            <h3 className="mb-1 font-semibold text-foreground">Sổ Ngọc</h3>
+            <ul className="max-h-60 space-y-1 overflow-auto text-[14px] text-foreground">
+              {d.gems.map((g) => <li key={g._id}>{fmt(g.createdAt)} · <b className="tabular-nums">{g.amount > 0 ? "+" : ""}{g.amount}</b> · {g.reason} {g.note ? `· ${g.note}` : ""}</li>)}
+              {!d.gems.length && <li className="text-muted-foreground">Chưa có giao dịch.</li>}
+            </ul>
+          </section>
+          {d.receipts.length > 0 && (
+            <section>
+              <h3 className="mb-1 font-semibold text-foreground">Đơn cửa hàng</h3>
+              <ul className="space-y-1 text-[14px] text-foreground">{d.receipts.map((r) => <li key={r._id}>{fmt(r.createdAt)} · {r.slug || r.productId} · {r.price} Ngọc</li>)}</ul>
+            </section>
+          )}
+          {d.reports.length > 0 && (
+            <section>
+              <h3 className="mb-1 font-semibold text-red-600">{d.reports.length} báo cáo về người này</h3>
+              <ul className="space-y-1 text-[14px] text-foreground">{d.reports.map((r) => <li key={r._id}>{fmt(r.createdAt)} · {r.reason}{r.note ? ` · ${r.note}` : ""} · {r.status}</li>)}</ul>
+            </section>
+          )}
+        </>)}
+      </aside>
+    </div>
+  );
+}
+
+/** Một khoá: thanh tiến độ + từng step (đã qua / đang học / chưa), nút hoàn tất, gỡ, hoàn tất tới đây. */
+function CourseProgress({ course: c, current, onSteps }) {
+  const started = c.done > 0 || c.steps.some((s) => s.lessons);
+  const ready = c.steps.filter((s) => !s.draft);
+  return (
+    <details open={started} className="rounded-xl border border-border bg-card">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-3">
+        <b className="text-[15px] text-foreground">{c.title}</b>
+        <span className="text-[13px] tabular-nums text-muted-foreground">{c.done}/{c.total} step</span>
+        <span className="h-2 min-w-[80px] flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-green-500" style={{ width: `${c.total ? (c.done / c.total) * 100 : 0}%` }} /></span>
+      </summary>
+      <div className="flex flex-wrap gap-2 border-t border-border px-3 py-2">
+        <Btn tone="ghost" onClick={onSteps(ready.filter((s) => !s.done).map((s) => s.id), true)} disabled={c.done === c.total}>Hoàn tất cả khoá</Btn>
+        <Btn tone="ghost" onClick={onSteps(ready.filter((s) => s.done || s.lessons).map((s) => s.id), false)} disabled={!started}>Gỡ cả khoá</Btn>
+      </div>
+      <ul className="divide-y divide-border border-t border-border">
+        {c.steps.map((s, i) => {
+          const state = s.done ? "done" : s.lessons ? "doing" : "todo";
+          return (
+            <li key={s.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-[14px] ${s.id === current ? "bg-sky-50" : ""} ${s.draft ? "opacity-50" : ""}`}>
+              <span className={`w-5 text-center ${state === "done" ? "text-green-600" : state === "doing" ? "text-amber-500" : "text-muted-foreground"}`}>{state === "done" ? "✓" : state === "doing" ? "◐" : "○"}</span>
+              <span className="min-w-0 flex-1 text-foreground">{s.title}</span>
+              <span className="text-[13px] tabular-nums text-muted-foreground">
+                {s.total ? `bài ${s.lessons}/${s.total}` : ""}{s.score ? ` · điểm ${s.score.best}% (${s.score.attempts} lần)` : ""}
+              </span>
+              {!s.draft && (s.done || s.lessons
+                ? <span className="flex gap-1">{!s.done && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], true)}>Hoàn tất</Btn>}<Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], false)}>Gỡ</Btn></span>
+                : <span className="flex gap-1">
+                  <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={onSteps([s.id], true)}>Hoàn tất</Btn>
+                  {i > 0 && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" title="Hoàn tất mọi step từ đầu khoá tới step này" onClick={onSteps(ready.slice(0, ready.indexOf(s) + 1).filter((x) => !x.done).map((x) => x.id), true)}>Tới đây</Btn>}
+                </span>)}
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
+}
+
 
 /** Nhiều email đăng nhập từ cùng một máy (cùng IP + trình duyệt). Gợi ý thôi — trường học/gia đình dùng chung máy là bình thường. */
 function Duplicates() {
   const list = useList("/admin/duplicates");
   return (
     <div className="space-y-3">
-      <p className="text-[14px] text-muted-foreground">Cùng IP + cùng trình duyệt, khác email. Kiểm tra kỹ trước khi khoá: máy dùng chung ở trường/nhà cũng hiện ở đây.</p>
       <Table list={list} head={["Email", "Số tài khoản", "IP", "Lần cuối"]} row={(g) => [
         <span key="e" className="whitespace-pre-line">{g.emails.join("\n")}</span>, g.emails.length, g.ip, fmt(g.lastAt),
       ]} />
@@ -191,7 +537,6 @@ function MemberLinks() {
   };
   return (
     <div className="space-y-3">
-      <p className="text-[14px] text-muted-foreground">Link hiện công khai trên hồ sơ member. Gỡ link quảng cáo, lừa đảo, nội dung xấu; member cũng báo cáo được với lý do "Link mạng xã hội".</p>
       <Table list={list} head={["Người học", "Link", "Sửa lúc", ""]} row={(l) => [
         <span key="n">{l.nickname || "—"}<br /><small className="text-muted-foreground">{l.email}</small></span>,
         <ul key="l" className="space-y-1">{Object.entries(l.links || {}).filter(([, v]) => v).map(([k, v]) => (
@@ -218,64 +563,11 @@ function Announce() {
   const input = "w-full rounded-lg border border-border bg-background px-3 py-2 text-[15px]";
   return (
     <form onSubmit={send} className="max-w-xl space-y-3">
-      <p className="text-[14px] text-muted-foreground">Gửi dưới tên tài khoản chính thức (mã HUGOED) tới người đang theo dõi.</p>
       <input className={input} placeholder="Tiêu đề" maxLength={120} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} required />
       <textarea className={input} rows={4} placeholder="Nội dung" maxLength={500} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} required />
       <input className={input} placeholder="Đường dẫn khi bấm (vd. /store)" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} />
       <Btn type="submit" disabled={busy}>{busy ? "Đang gửi…" : "Gửi thông báo"}</Btn>
     </form>
-  );
-}
-
-function LearnerDetail({ email, onClose }) {
-  const [d, setD] = useState(null);
-  const load = useCallback(() => { call(`/admin/learners/${encodeURIComponent(email)}`).then(setD).catch((e) => window.alert(e.message)); }, [email]);
-  useEffect(load, [load]);
-  const path = `/admin/learners/${encodeURIComponent(email)}`;
-  const gems = act(async () => {
-    const amount = window.prompt("Cộng/trừ bao nhiêu Ngọc? (số âm để trừ)");
-    if (!amount) return;
-    const note = window.prompt("Lý do điều chỉnh:");
-    if (!note) return;
-    await call(`${path}/gems`, { method: "POST", body: { amount: Number(amount), note } });
-  }, load);
-  const ban = act(async (on) => {
-    const reason = on ? window.prompt("Lý do khoá tài khoản:") : "";
-    if (on && !reason) return;
-    await call(`${path}/ban`, { method: "POST", body: { ban: on, reason } });
-  }, load);
-  const removeLink = act(async (key) => { if (window.confirm(`Gỡ link ${key}?`)) await call(`${path}/links`, { method: "POST", body: { key } }); }, load);
-  const reset = act(async () => { if (window.confirm("Xoá biệt danh, giới thiệu và nhân vật của người này?")) await call(`${path}/reset-persona`, { method: "POST" }); }, load);
-  if (!d) return <Card>Đang tải…</Card>;
-  const l = d.learner;
-  return (
-    <Card className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[17px] font-bold text-foreground">{l.email}</h2>
-        <Btn tone="ghost" onClick={onClose}>Đóng</Btn>
-      </div>
-      <p className="text-[14px] text-muted-foreground">Biệt danh: {l.nickname || "—"} · Ngọc: {l.gems ?? 0} · Mã bạn: {l.friendCode || "—"} · Tạo: {fmt(l.createdAt)}{l.bannedAt ? ` · Khoá từ ${fmt(l.bannedAt)}` : ""}</p>
-      {l.profile && <p className="text-[14px] text-muted-foreground">Ngày sinh: {l.profile.birthDate || "—"} · Tỉnh/thành: {l.profile.province || "—"} · Giới tính: {l.profile.gender || "—"} · Sở thích: {(l.profile.hobbies || []).join(", ") || "—"}{l.ageMismatch ? <b className="text-red-600"> · Ngày sinh dưới 16 nhưng đã chọn 16+ (thiếu xác nhận phụ huynh)</b> : null}</p>}
-      {Object.values(l.links || {}).some(Boolean) && (
-        <ul className="space-y-1 text-[14px]">
-          {Object.entries(l.links).filter(([, v]) => v).map(([k, v]) => (
-            <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a>
-              <Btn tone="ghost" onClick={() => removeLink(k)}>Gỡ</Btn></li>
-          ))}
-        </ul>
-      )}
-      <div className="flex flex-wrap gap-2">
-        <Btn onClick={gems}>Điều chỉnh Ngọc</Btn>
-        <Btn tone="ghost" onClick={reset}>Xoá hồ sơ công khai</Btn>
-        {l.bannedAt ? <Btn tone="ghost" onClick={() => ban(false)}>Mở khoá</Btn> : <Btn tone="danger" onClick={() => ban(true)}>Khoá tài khoản</Btn>}
-      </div>
-      <h3 className="font-semibold text-foreground">Sổ Ngọc gần đây</h3>
-      <ul className="max-h-60 space-y-1 overflow-auto text-[14px] text-foreground">
-        {d.gems.map((g) => <li key={g._id}>{fmt(g.createdAt)} · <b className="tabular-nums">{g.amount > 0 ? "+" : ""}{g.amount}</b> · {g.reason} {g.note ? `· ${g.note}` : ""}</li>)}
-        {!d.gems.length && <li className="text-muted-foreground">Chưa có giao dịch.</li>}
-      </ul>
-      {d.reports.length > 0 && <p className="text-[14px] text-red-600">{d.reports.length} báo cáo về người này.</p>}
-    </Card>
   );
 }
 
@@ -405,7 +697,7 @@ function Developers() {
   const set = (d, status) => act(() => call(`/admin/developers/${d._id}`, { method: "POST", body: { status } }), list.reload);
   return (
     <div className="space-y-3">
-      <p className="text-[14px] text-muted-foreground">{list.items ? `${list.items.length} người đăng ký` : ""} · Danh sách để hội đồng xét và xây chương trình.</p>
+      <p className="text-[14px] text-muted-foreground">{list.items ? `${list.items.length} người đăng ký` : ""}</p>
       <Table list={list} head={["Lúc đăng ký", "Email", "Tên", "Trạng thái", ""]} row={(d) => [
         fmt(d.createdAt), d.email, d.name || "—", STATUS[d.status] || d.status,
         <select key="s" value={d.status} onChange={(e) => set(d, e.target.value)()} className="min-h-[40px] rounded-lg border border-border bg-card px-2 text-[14px] text-foreground">
@@ -421,7 +713,7 @@ function Log() {
   return <Table list={list} head={["Lúc", "Admin", "Thao tác", "Đối tượng"]} row={(l) => [fmt(l.createdAt), l.admin, l.action, l.target]} />;
 }
 
-function Table({ list, head, row }) {
+function Table({ list, head, row, onRow }) {
   if (list.error) return <p className="text-red-600">{list.error}</p>;
   if (!list.items) return <p className="text-muted-foreground">Đang tải…</p>;
   if (!list.items.length) return <p className="text-muted-foreground">Chưa có dữ liệu.</p>;
@@ -430,7 +722,7 @@ function Table({ list, head, row }) {
       <table className="w-full text-left text-[14px] text-foreground">
         <thead className="bg-muted text-muted-foreground"><tr>{head.map((h) => <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold">{h}</th>)}</tr></thead>
         <tbody>{list.items.map((item, i) => (
-          <tr key={item._id || i} className="border-t border-border align-top">{row(item).map((c, j) => <td key={j} className="px-3 py-2">{c}</td>)}</tr>
+          <tr key={item._id || i} onClick={onRow && (() => onRow(item))} className={`border-t border-border align-top ${onRow ? "cursor-pointer hover:bg-muted" : ""}`}>{row(item).map((c, j) => <td key={j} className="px-3 py-2">{c}</td>)}</tr>
         ))}</tbody>
       </table>
     </div>
@@ -537,7 +829,6 @@ function Promos() {
         <div className="flex items-center gap-3"><Btn onClick={save}>Lưu</Btn>{msg && <span className="text-[14px] text-muted-foreground">{msg}</span>}</div>
       </Card>
       <div>
-        <p className="mb-2 text-[14px] text-muted-foreground">Xem trước ({LANGS.find(([id]) => id === lang)[1]}) — ô trống sẽ hiện chữ mặc định trong app</p>
         <Card className={`flex items-center gap-3 ${form.enabled === false ? "opacity-40" : ""}`}>
           <div className="min-w-0 flex-1 space-y-1">
             <span className="inline-block rounded-md bg-yellow-400 px-2 py-0.5 text-[12px] font-black italic text-blue-900">{t.badge || "HUGO DEVELOPER"}</span>
@@ -599,6 +890,7 @@ export default function EduAdmin() {
     return () => window.removeEventListener("popstate", onPop);
   }, [check]);
 
+  const liveState = useLiveConnection(Boolean(me));
   if (me === undefined) return <p className="p-6 text-muted-foreground">Đang tải…</p>;
   if (!me) return <Login onDone={check} />;
 
@@ -609,6 +901,7 @@ export default function EduAdmin() {
     <div className="min-h-dvh bg-background md:flex">
       <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card p-2 md:sticky md:top-0 md:h-dvh md:w-56 md:flex-col md:border-b-0 md:border-r">
         <p className="hidden px-3 py-2 text-[15px] font-bold text-foreground md:block">Education Hugo</p>
+        <p className="flex shrink-0 items-center gap-2 px-3 text-[13px] text-muted-foreground"><Dot on={liveState === "on"} />{liveState === "on" ? "Trực tiếp" : "Đang nối lại…"}</p>
         {TABS.map(([id, text, icon]) => (
           <button key={id} type="button" onClick={() => go(id)} aria-current={tab === id ? "page" : undefined}
             className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg px-3 text-[15px] ${tab === id ? "bg-muted font-semibold text-foreground" : "text-muted-foreground"}`}>

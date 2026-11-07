@@ -4,8 +4,15 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { requireAdmin } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
-import { AdminLog, DevSignup, Promo, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
+import { Activity, AdminLog, DevSignup, Promo, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
 import { addGems } from '../services/gems.js';
+import { eraseLearner } from '../services/erase.js';
+import { subscribe } from '../services/live.js';
+import { COURSES, findStep } from '../../packages/courses/index.js';
+import { CATALOG } from '../../packages/courses/catalog.js';
+import { stepLessons } from '../../packages/courses/coding/lessons.js';
+import { streakView } from '../../packages/shared/eduStreak.js';
+import { checkNickname } from '../../packages/persona/nickname.js';
 import { issuePartnerKey, listPartnerKeys, revokePartnerKey, updatePartnerKey } from '../services/partner.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
 
@@ -37,11 +44,111 @@ router.get('/overview', handle(async () => {
 }));
 
 // ── Người học ─────────────────────────────────────────────────────────────────
+const COURSE_TITLE = Object.fromEntries(CATALOG.map((c) => [c.id, c.title.vi]));
+const lessonCount = (step) => (step.draft ? 0 : stepLessons(step.slides).length - 1); // bài nhỏ, không tính trắc nghiệm
+const stepLabel = (id) => { const f = findStep(id); return f ? `${COURSE_TITLE[f.key] || f.key} · ${f.step.title}` : id; };
+/** Step học gần nhất (lastStep); dữ liệu cũ chưa có thì lấy step dở cuối hoặc step vừa qua. */
+function nowLearning(l) {
+  const done = new Set(l.completed || []);
+  const id = l.lastStep || Object.keys(l.lessonsDone || {}).findLast((k) => !done.has(k) && l.lessonsDone[k]?.length) || l.completed?.at(-1);
+  if (!id) return null;
+  if (done.has(id)) return { stepId: id, label: stepLabel(id), passed: true };
+  const f = findStep(id);
+  return { stepId: id, label: stepLabel(id), lessons: (l.lessonsDone?.[id] || []).length, total: f ? lessonCount(f.step) : 0 };
+}
+/** Tiến độ từng khoá: mọi step, bài nhỏ đã học, điểm trắc nghiệm. */
+function progressOf(l) {
+  const done = new Set(l.completed || []);
+  return Object.entries(COURSES).map(([key, c]) => {
+    const steps = c.WEB_COURSES.map((s) => ({
+      id: s.id, title: s.title, stage: s.stage, draft: Boolean(s.draft), done: done.has(s.id),
+      lessons: (l.lessonsDone?.[s.id] || []).length, total: lessonCount(s), score: l.scores?.[s.id] || null,
+    }));
+    return { key, title: COURSE_TITLE[key] || key, done: steps.filter((s) => s.done).length, total: steps.filter((s) => !s.draft).length, steps };
+  });
+}
+const emailOf = (req) => String(req.params.email).toLowerCase();
+const mustExist = async (email) => { if (!(await Learner.exists({ email }))) throw fail(404, 'NOT_FOUND', 'Không có người học này.'); };
+
 router.get('/learners', handle(async (req) => {
   const q = String(req.query.q || '').trim().slice(0, 80);
   const filter = q ? { $or: [{ email: { $regex: esc(q), $options: 'i' } }, { nickname: { $regex: esc(q), $options: 'i' } }, { friendCode: q.toUpperCase() }] } : {};
-  const items = await Learner.find(filter).select('email name nickname gems completed streak lastActiveAt createdAt bannedAt friendCode').sort({ lastActiveAt: -1 }).limit(100).lean();
-  return { items: items.map(({ completed, streak, ...d }) => ({ ...d, steps: completed?.length || 0, streak: streak?.count || 0 })) };
+  if (req.query.online === '1') filter.lastActiveAt = { $gte: new Date(Date.now() - 10 * 60_000) };
+  const { day } = vnClock();
+  const items = await Learner.find(filter).select('email name nickname gems completed lessonsDone lastStep streak lastActiveAt createdAt bannedAt friendCode').sort({ lastActiveAt: -1 }).limit(200).lean();
+  return { items: items.map(({ completed, lessonsDone, lastStep, streak, ...d }) => ({
+    ...d, steps: completed?.length || 0, streak: streakView(streak, day).count, learning: nowLearning({ completed, lessonsDone, lastStep }),
+  })) };
+}));
+router.post('/learners', handle(async (req) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw fail(400, 'BAD_EMAIL', 'Email không hợp lệ.');
+  const set = { email, name: String(req.body?.name || '').trim().slice(0, 80) };
+  if (req.body?.nickname) { const n = checkNickname(req.body.nickname); if (!n.ok) throw fail(400, n.code, 'Biệt danh 2–20 ký tự, chỉ chữ và emoji.'); set.nickname = n.value; }
+  try { await Learner.create(set); } catch (error) { if (error.code === 11000) throw fail(409, 'DUPLICATE', 'Email này đã có.'); throw error; }
+  await log(req, 'learner_create', email);
+  return { success: true };
+}));
+router.patch('/learners/:email', handle(async (req) => {
+  const email = emailOf(req);
+  const b = req.body || {};
+  const set = {};
+  if (b.name !== undefined) set.name = String(b.name).trim().slice(0, 80);
+  if (b.nickname !== undefined) {
+    if (b.nickname === '') set.nickname = '';
+    else { const n = checkNickname(b.nickname); if (!n.ok) throw fail(400, n.code, 'Biệt danh 2–20 ký tự, chỉ chữ và emoji.'); set.nickname = n.value; }
+  }
+  if (b.intro !== undefined) set.intro = String(b.intro).trim().slice(0, 300);
+  if (b.shields !== undefined) set.shields = Math.max(0, Math.min(99, Math.trunc(Number(b.shields)) || 0));
+  if (!Object.keys(set).length) throw fail(400, 'EMPTY', 'Không có gì để sửa.');
+  const r = await Learner.updateOne({ email }, { $set: set });
+  if (!r.matchedCount) throw fail(404, 'NOT_FOUND');
+  await log(req, 'learner_update', email, set);
+  return { success: true };
+}));
+// Xoá hẳn: mọi dữ liệu học (services/erase.js) + đăng xuất mọi máy. Tài khoản đăng nhập giữ — vào lại là bắt đầu từ đầu.
+router.delete('/learners/:email', handle(async (req) => {
+  const email = emailOf(req);
+  if (req.body?.confirm !== email) throw fail(400, 'CONFIRM_REQUIRED', 'Gõ đúng email để xác nhận xoá.');
+  await mustExist(email);
+  await eraseLearner(email);
+  await Activity.deleteMany({ email });
+  const user = await mongoose.connection.db.collection('user').findOne({ email });
+  if (user) await mongoose.connection.db.collection('session').deleteMany({ userId: user._id });
+  await log(req, 'learner_delete', '(đã xoá)');
+  return { success: true };
+}));
+// Hoàn tất / gỡ một step thay member. Không cộng Ngọc, XP hay thưởng chặng — chỉ sửa tiến độ.
+router.post('/learners/:email/steps', handle(async (req) => {
+  const email = emailOf(req);
+  const ids = [].concat(req.body?.stepIds ?? req.body?.stepId ?? []).map(String).slice(0, 200);
+  const done = Boolean(req.body?.done);
+  const steps = ids.map((id) => findStep(id));
+  if (!ids.length || steps.some((f) => !f || f.step.draft)) throw fail(400, 'BAD_STEP', 'Step không hợp lệ.');
+  await mustExist(email);
+  const update = done
+    ? { $addToSet: { completed: { $each: ids } }, $set: Object.fromEntries(steps.map((f) => [`lessonsDone.${f.step.id}`, Array.from({ length: lessonCount(f.step) }, (_, i) => i)])) }
+    : { $pull: { completed: { $in: ids } }, $unset: Object.fromEntries(ids.flatMap((id) => [[`lessonsDone.${id}`, 1], [`scores.${id}`, 1]])) };
+  await Learner.updateOne({ email }, update);
+  await Activity.insertMany(ids.map((stepId) => ({ email, kind: done ? 'admin_done' : 'admin_undo', stepId, by: req.admin })));
+  await log(req, done ? 'step_done' : 'step_undo', email, { steps: ids });
+  return { success: true };
+}));
+// Kênh đẩy trực tiếp (SSE). no-transform: compression không gom bộ đệm; ping giữ kết nối qua proxy.
+router.get('/live', (req, res) => {
+  res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no' });
+  res.flushHeaders();
+  res.write('retry: 3000\n\n');
+  const stop = subscribe(res, (a) => ({ ...a, label: stepLabel(a.stepId) }));
+  const ping = setInterval(() => res.write(': ping\n\n'), 20_000);
+  req.on('close', () => { clearInterval(ping); stop(); });
+});
+// Nhật ký học trực tiếp: toàn hệ thống hoặc một người. `after` = chỉ lấy dòng mới hơn.
+router.get('/activity', handle(async (req) => {
+  const filter = {};
+  if (req.query.email) filter.email = String(req.query.email).toLowerCase();
+  const items = await Activity.find(filter).sort({ createdAt: -1 }).limit(Math.min(200, Number(req.query.limit) || 100)).lean();
+  return { items: items.map((a) => ({ ...a, label: stepLabel(a.stepId) })) };
 }));
 // Nghi một người nhiều tài khoản: nhóm phiên Better Auth theo IP + trình duyệt.
 // Thông báo từ tài khoản chính thức tới người theo dõi.
@@ -60,15 +167,25 @@ router.get('/duplicates', handle(async () => {
   return { items: groups.map((g) => ({ ip: g._id.ip, emails: g.u.map((u) => u.email), lastAt: g.lastAt })).filter((g) => g.emails.length > 1) };
 }));
 router.get('/learners/:email', handle(async (req) => {
-  const email = String(req.params.email).toLowerCase();
+  const email = emailOf(req);
   const learner = await Learner.findOne({ email }).lean();
   if (!learner) throw fail(404, 'NOT_FOUND', 'Không có người học này.');
-  const [gems, receipts, reports] = await Promise.all([
+  const { day } = vnClock();
+  const [gems, receipts, reports, activity] = await Promise.all([
     GemTxn.find({ email }).sort({ createdAt: -1 }).limit(50).lean(),
     Receipt.find({ email }).sort({ createdAt: -1 }).limit(50).lean(),
     Report.find({ targetEmail: email }).sort({ createdAt: -1 }).limit(50).lean(),
+    Activity.find({ email }).sort({ createdAt: -1 }).limit(50).lean(),
   ]);
-  return { learner, gems, receipts, reports };
+  const rest = { ...learner, streak: streakView(learner.streak, day) };
+  for (const k of ['completed', 'lessonsDone', 'lastStep', 'scores', 'reviewedOn']) delete rest[k];
+  return {
+    learner: rest,
+    learning: nowLearning(learner),
+    progress: progressOf(learner),
+    activity: activity.map((a) => ({ ...a, label: stepLabel(a.stepId) })),
+    gems, receipts, reports,
+  };
 }));
 router.post('/learners/:email/gems', handle(async (req) => {
   const email = String(req.params.email).toLowerCase();

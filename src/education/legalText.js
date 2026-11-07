@@ -2,7 +2,7 @@
 // Ba bản phải cùng nội dung; bản tiếng Anh là bản gốc. Mọi khẳng định ở đây phải khớp với hệ thống thật:
 // sửa luồng dữ liệu (thêm nhà cung cấp, đổi thời hạn lưu, thêm loại dữ liệu) thì sửa văn bản này.
 // Đổi nội dung đáng kể → cập nhật UPDATED và báo người học (push/hộp thông báo).
-export const UPDATED = { en: "3 November 2026", vi: "03/11/2026", zh: "2026年11月3日" };
+export const UPDATED = { en: "7 November 2026", vi: "07/11/2026", zh: "2026年11月7日" };
 export const UPDATED_LABEL = { en: "Last updated", vi: "Cập nhật lần cuối", zh: "最后更新" };
 export const CONTACT = "contact@hugowishpax.studio";
 
@@ -65,6 +65,7 @@ const EN = {
         h: "8. Moderation and enforcement",
         p: [
           "Profile, feedback and support input may be reviewed to protect the service and its learners. Administrator notices may be corrected or removed at any time.",
+          "To support your learning and keep records accurate, administrators can see your learning progress and activity, and may mark steps as completed, remove steps, correct account details, adjust gems or close an account — for example to fix a technical error, restore lost progress or handle a breach. Every administrator action is recorded in an internal audit log.",
           "Serious or repeated breaches may lead to the reset of a nickname or character, the loss of illegitimate gems or XP, or the suspension or termination of the account. Where practicable, we will tell you what action was taken and why.",
         ],
       },
@@ -107,7 +108,7 @@ const EN = {
           "Social links — optional links to your Facebook, Instagram, TikTok, GitHub or YouTube profile that you choose to add; they are shown publicly on your Education Hugo profile and you can remove them at any time.",
           "Private profile — your date of birth and province/city (required), and your interests and gender (optional, you may skip). We use them to verify your age and protect learners under 16, to suggest friends of a similar age, nearby or with shared interests (gender is never used for friend suggestions). If you choose Lesbian, Gay, Bisexual or Transgender, this is sensitive personal data: we record it only with your separate explicit consent, never use it for suggestions or statistics shown to anyone, and you can change or delete it anytime, to suggest suitable projects and events, and for aggregate statistics. They stay private by default; in Settings you can switch each item to public so it appears on your profile (a public date of birth shows only the day and month). We never ask for your street address.",
           "Profile identity (Persona) — nickname, pixel-art character and short introduction. These are used within your own account; your real name, email and photograph are not displayed on the Ads page.",
-          "Learning data — completed steps and lessons, quiz answers and scores, streak calendar, XP, daily goals and personal settings. SQL exercises run entirely inside your browser; what you type there is kept only on your device as a draft and is never sent to us.",
+          "Learning data — completed steps and lessons, quiz answers, scores and number of attempts, a learning activity log (each lesson finished and quiz attempt, with its time), last active time, streak calendar, XP, daily goals and personal settings. SQL exercises run entirely inside your browser; what you type there is kept only on your device as a draft and is never sent to us.",
           "Store data — items you have bought, the badge you wear, remaining Streak Shields and Double XP time, together with the gem transactions that paid for them.",
           "Feedback — your ratings and comments in the Education Hugo survey, and the reports and support requests you send; you can review all of them under Profile › Feedback history.",
           "Interaction data — likes you add to administrator notices. For learners aged 14–15, we also store the parent or guardian phone number and the learner's confirmation of permission.",
@@ -120,6 +121,7 @@ const EN = {
         list: [
           "To provide the service you requested: authentication, lessons, progress, streaks, the item shop and Ads likes (performance of our agreement with you).",
           "To keep the service safe: rate limiting, abuse detection, moderation and the handling of reports (legitimate interest and legal obligation).",
+          "To support learners: administrators review progress and activity to help when you are stuck, correct progress errors and improve course content (performance of our agreement and legitimate interest).",
           "To send study reminders, streak alerts and account notices — only where you have enabled notifications, and always adjustable in Profile (consent).",
           "To send a limited number of emails: a welcome message, account and security notices, streak milestones and, once a month between the 1st and the 7th, a trilingual letter inviting voluntary feedback and support for Education Hugo. Every non-essential email can be switched off with the email setting in Profile; security and account notices remain (consent and legitimate interest).",
         ],
@@ -146,7 +148,7 @@ const EN = {
         h: "6. Retention",
         list: [
           "Account, Persona and learning data are kept for as long as your account exists.",
-          "Inbox notifications are deleted automatically after 90 days; security records after 180 days; anonymous performance metrics after 30 days.",
+          "Inbox notifications are deleted automatically after 90 days; security records after 180 days; anonymous performance metrics and the learning activity log after 30 days.",
           "Likes on administrator notices remain until you remove them or delete your account.",
           "Survey answers and feedback history are kept for as long as your account exists, so that you can always consult them.",
           "When you delete your account, your personal data is erased or irreversibly anonymised, save for what the law obliges us to retain.",
@@ -257,6 +259,7 @@ const VI = {
       ] },
       { h: "8. Kiểm duyệt và xử lý vi phạm", p: [
         "Thông tin hồ sơ, góp ý và yêu cầu hỗ trợ có thể được rà soát để bảo vệ dịch vụ và người học. Thông báo của Admin có thể được sửa hoặc gỡ bất cứ lúc nào.",
+        "Để hỗ trợ việc học và giữ dữ liệu chính xác, quản trị viên xem được tiến độ và hoạt động học của bạn, và có thể đánh dấu hoàn tất hoặc gỡ step, sửa thông tin tài khoản, điều chỉnh Ngọc hoặc đóng tài khoản — chẳng hạn để sửa lỗi kỹ thuật, khôi phục tiến độ bị mất hoặc xử lý vi phạm. Mọi thao tác của quản trị viên đều được ghi vào nhật ký kiểm tra nội bộ.",
         "Vi phạm nghiêm trọng hoặc lặp lại có thể dẫn tới đặt lại biệt danh hoặc nhân vật, thu hồi Ngọc/XP có được trái phép, hoặc tạm khoá hay chấm dứt tài khoản. Khi có thể, chúng tôi sẽ cho bạn biết đã xử lý gì và vì sao.",
       ] },
       { h: "9. Tính sẵn sàng và thay đổi", p: [
@@ -283,7 +286,7 @@ const VI = {
         "Liên kết mạng xã hội — link tới trang Facebook, Instagram, TikTok, GitHub hoặc YouTube mà bạn tự chọn thêm (không bắt buộc); hiển thị công khai trên hồ sơ Education Hugo và bạn xoá được bất cứ lúc nào.",
         "Hồ sơ riêng tư — ngày sinh và tỉnh/thành phố (bắt buộc), sở thích và giới tính (không bắt buộc, có thể bỏ qua). Dùng để xác minh tuổi và bảo vệ người học dưới 16 tuổi, gợi ý bạn bè cùng độ tuổi, cùng khu vực hoặc cùng sở thích (giới tính không dùng để gợi ý bạn bè). Nếu bạn chọn Lesbian, Gay, Bisexual hoặc Transgender, đây là dữ liệu cá nhân nhạy cảm: chỉ được ghi khi bạn đồng ý riêng và rõ ràng, không dùng để gợi ý hay thống kê hiển thị cho bất kỳ ai, và bạn sửa hoặc xoá được bất cứ lúc nào, gợi ý dự án và sự kiện phù hợp, và thống kê tổng hợp. Mặc định riêng tư; trong Cài đặt bạn có thể bật công khai từng mục để hiện trên hồ sơ (ngày sinh công khai chỉ hiện ngày và tháng). Chúng tôi không hỏi số nhà hay địa chỉ đường.",
         "Danh tính hồ sơ (Persona) — biệt danh, nhân vật pixel và lời giới thiệu ngắn. Các thông tin này được dùng trong tài khoản của bạn; tên thật, email và ảnh của bạn không hiển thị trên trang Ads.",
-        "Dữ liệu học tập — step và bài đã học, câu trả lời và điểm trắc nghiệm, lịch chuỗi lửa, XP, mục tiêu ngày và cài đặt cá nhân. Bài tập SQL chạy hoàn toàn trong trình duyệt; những gì bạn gõ ở đó chỉ lưu nháp trên thiết bị của bạn và không bao giờ gửi về chúng tôi.",
+        "Dữ liệu học tập — step và bài đã học, câu trả lời, điểm và số lần làm trắc nghiệm, nhật ký hoạt động học (mỗi bài học xong và mỗi lần làm trắc nghiệm, kèm thời điểm), thời điểm hoạt động gần nhất, lịch chuỗi lửa, XP, mục tiêu ngày và cài đặt cá nhân. Bài tập SQL chạy hoàn toàn trong trình duyệt; những gì bạn gõ ở đó chỉ lưu nháp trên thiết bị của bạn và không bao giờ gửi về chúng tôi.",
         "Dữ liệu Cửa hàng — vật phẩm đã mua, huy hiệu đang đeo, số Khiên lửa và thời gian Nhân đôi XP còn lại, cùng các giao dịch Ngọc đã thanh toán.",
         "Phản hồi — điểm và góp ý của bạn trong khảo sát Education Hugo, các báo cáo và yêu cầu hỗ trợ bạn gửi; bạn xem lại được tất cả ở Hồ sơ › Lịch sử phản hồi.",
         "Dữ liệu tương tác — lượt thích bạn đặt trên thông báo của Admin. Với người học 14–15 tuổi, chúng tôi còn lưu số điện thoại cha mẹ/người giám hộ và xác nhận đã được cho phép.",
@@ -293,6 +296,7 @@ const VI = {
       { h: "3. Vì sao chúng tôi xử lý", list: [
         "Để cung cấp dịch vụ bạn yêu cầu: đăng nhập, bài học, tiến độ, chuỗi lửa, Cửa hàng và lượt thích Ads (thực hiện thoả thuận với bạn).",
         "Để giữ an toàn cho dịch vụ: giới hạn tần suất, phát hiện lạm dụng, kiểm duyệt và xử lý báo cáo (lợi ích chính đáng và nghĩa vụ pháp lý).",
+        "Để hỗ trợ người học: quản trị viên xem tiến độ và hoạt động học để giúp khi bạn gặp khó, sửa lỗi tiến độ và cải thiện nội dung khoá học (thực hiện thoả thuận với bạn và lợi ích chính đáng).",
         "Để gửi nhắc học, cảnh báo chuỗi lửa và thông báo tài khoản — chỉ khi bạn bật thông báo, và luôn chỉnh được trong Hồ sơ (sự đồng ý).",
         "Để gửi một số ít email: thư chào mừng, thông báo tài khoản và bảo mật, mốc chuỗi lửa, và mỗi tháng một lần trong khoảng ngày 01–07, một lá thư ba ngôn ngữ mời bạn tự nguyện góp ý và ủng hộ Education Hugo. Mọi email không thiết yếu đều tắt được bằng công tắc email trong Hồ sơ; thông báo bảo mật và tài khoản vẫn được gửi (sự đồng ý và lợi ích chính đáng).",
       ], p: ["Chúng tôi không dùng dữ liệu của bạn cho quảng cáo, không lập hồ sơ tiếp thị và không đưa ra quyết định có hệ quả pháp lý đối với bạn chỉ bằng phương tiện tự động."] },
@@ -308,7 +312,7 @@ const VI = {
       ] },
       { h: "6. Thời hạn lưu trữ", list: [
         "Dữ liệu tài khoản, Persona và học tập được lưu chừng nào tài khoản còn tồn tại.",
-        "Thông báo trong hộp thư tự xoá sau 90 ngày; bản ghi bảo mật sau 180 ngày; số đo hiệu năng ẩn danh sau 30 ngày.",
+        "Thông báo trong hộp thư tự xoá sau 90 ngày; bản ghi bảo mật sau 180 ngày; số đo hiệu năng ẩn danh và nhật ký hoạt động học sau 30 ngày.",
         "Lượt thích trên thông báo của Admin được giữ đến khi bạn bỏ thích hoặc xoá tài khoản.",
         "Câu trả lời khảo sát và lịch sử phản hồi được giữ chừng nào tài khoản còn tồn tại, để bạn luôn xem lại được.",
         "Khi bạn xoá tài khoản, dữ liệu cá nhân được xoá hoặc ẩn danh không thể khôi phục, trừ phần pháp luật buộc chúng tôi lưu giữ.",
@@ -390,6 +394,7 @@ const ZH = {
       ] },
       { h: "8. 审核与处理", p: [
         "个人资料、反馈和支持请求可能会被审核，以保护服务和学员。管理员通知可随时更正或移除。",
+        "为支持你的学习并保持记录准确，管理员可以查看你的学习进度和学习活动，并可将 step 标记为完成、移除 step、更正账户信息、调整宝石或关闭账户——例如修复技术错误、恢复丢失的进度或处理违规。管理员的每项操作都会记入内部审计日志。",
         "严重或屡次违规可能导致重置昵称或角色、收回不正当获得的 宝石 或 XP，或暂停、终止账户。在可行时，我们会告知你所采取的措施及原因。",
       ] },
       { h: "9. 可用性与变更", p: [
@@ -414,7 +419,7 @@ const ZH = {
       { h: "2. 我们处理的数据", list: [
         "账户数据——来自 Google 或 Discord 登录的电子邮箱、显示名称和头像；使用通行密钥时，为公钥和设备名称（生物特征本身从不离开你的设备）。",
         "个人资料身份（Persona）——昵称、像素角色和简短介绍。这些信息用于你自己的账户；真实姓名、邮箱和照片不会显示在 Ads 页面。",
-        "学习数据——已完成的 step 和课程、测验答案与分数、连胜日历、XP、每日目标和个人设置。SQL 练习完全在你的浏览器中运行；你在其中输入的内容仅作为草稿保存在你的设备上，绝不会发送给我们。",
+        "学习数据——已完成的 step 和课程、测验答案、分数与作答次数、学习活动日志（每节完成的课程和每次测验及其时间）、最近活跃时间、连胜日历、XP、每日目标和个人设置。SQL 练习完全在你的浏览器中运行；你在其中输入的内容仅作为草稿保存在你的设备上，绝不会发送给我们。",
         "商店数据——你购买的道具、佩戴的徽章、剩余的火焰护盾和双倍 XP 时间，以及相应的 宝石 交易记录。",
         "反馈——你在 Education Hugo 问卷中的评分和意见，以及你提交的举报和支持请求；你可在“个人资料 › 反馈记录”中查看全部内容。",
         "互动数据——你对管理员通知添加的点赞。对于 14–15 岁学员，我们还保存父母或监护人电话号码及学员已获许可的确认。",
@@ -425,6 +430,7 @@ const ZH = {
       { h: "3. 处理目的", list: [
         "提供你所请求的服务：登录、课程、进度、连胜、商店和 Ads 点赞（履行与你的约定）。",
         "保障服务安全：频率限制、滥用检测、内容审核和举报处理（正当利益和法定义务）。",
+        "支持学员：管理员查看学习进度和活动，以便在你遇到困难时提供帮助、更正进度错误并改进课程内容（履行与你的约定和正当利益）。",
         "发送学习提醒、连胜提醒和账户通知——仅在你开启通知时发送，并可随时在个人资料中调整（同意）。",
         "发送少量电子邮件：欢迎信、账户与安全通知、连胜里程碑，以及每月 1 日至 7 日之间一封三语信件，邀请你自愿提供反馈并支持 Education Hugo。所有非必要邮件都可通过个人资料中的邮件开关关闭；安全和账户通知仍会发送（同意和正当利益）。",
       ], p: ["我们不将你的数据用于广告，不建立营销画像，也不会仅凭自动化手段作出对你产生法律效果的决定。"] },
@@ -440,7 +446,7 @@ const ZH = {
       ] },
       { h: "6. 保存期限", list: [
         "账户、Persona 和学习数据在账户存在期间一直保存。",
-        "收件箱通知在 90 天后自动删除；安全记录在 180 天后删除；匿名性能指标在 30 天后删除。",
+        "收件箱通知在 90 天后自动删除；安全记录在 180 天后删除；匿名性能指标和学习活动日志在 30 天后删除。",
         "管理员通知上的点赞会保留到你取消点赞或删除账户。",
         "问卷答案和反馈记录在账户存在期间一直保存，方便你随时查看。",
         "你删除账户后，个人数据将被删除或不可逆地匿名化，法律要求我们保留的除外。",

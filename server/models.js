@@ -18,6 +18,7 @@ const learnerSchema = new Schema({
   scores: { type: Mixed, default: () => ({}) },
   lessonsDone: { type: Mixed, default: () => ({}) },
   reviewedOn: { type: Mixed, default: () => ({}) },
+  lastStep: String, // step học bài nhỏ gần nhất (admin xem "đang học")
   // Ngọc — điểm tiêu được của Edu (thay JOY). Chỉ đổi qua services/gems.js.
   gems: { type: Number, default: 0, min: 0 },
   // Cài đặt + mục tiêu ngày
@@ -197,6 +198,14 @@ export const PartnerKey = model('PartnerKey', new Schema({
 export const AdminLog = model('AdminLog', new Schema({
   admin: String, action: String, target: String, detail: Mixed,
 }, { timestamps: true }));
+
+// Nhật ký học (admin xem trực tiếp ai đang học gì). Tự xoá sau 30 ngày.
+// kind: lesson | quiz | admin_done | admin_undo
+export const Activity = model('Activity', new Schema({
+  email: { type: String, required: true, index: true },
+  kind: String, stepId: String, lesson: Number, score: Number, passed: Boolean, by: String,
+  createdAt: { type: Date, default: Date.now, expires: 30 * 86_400 },
+}));
 
 // Đăng ký chương trình Hugo Developer (mỗi người học một lần; hội đồng xét sau).
 export const DevSignup = model('DevSignup', new Schema({
