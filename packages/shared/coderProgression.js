@@ -14,18 +14,8 @@ const lessonIdFor = (number) => `step${number}`;
 // tiến độ ở chỗ riêng, nên hai bên lệch số, lệch kết quả. Giờ cả hai đọc cùng
 // `bio.completedLessons`; HugoTeam chỉ cần biết tổng số step và thời hạn.
 export const CODER_TOTAL_STEPS = CODER_STAGE_SEQUENCE.at(-1)?.to || 0;
-/** Thời hạn hoàn tất phần Coding của HugoTeam (ngày). */
-export const HUGOTEAM_CODING_DAYS = 30;
-/** Số step đầu học thử không cần tài khoản (trọn chặng 1). Phần còn lại miễn phí, chỉ cần đăng nhập để lưu tiến độ. */
-export const CODER_PREVIEW_STEPS = 6;
 /** Qua một step LẦN ĐẦU: mỗi câu trắc nghiệm đúng được ngần này Ngọc (học lại không cộng). */
 export const GEMS_PER_CORRECT = 5;
-
-/** Các step Coding đã hoàn tất (step1…stepN), không trùng, theo thứ tự. */
-export function completedCoderSteps(completedLessons) {
-  const done = new Set(Array.isArray(completedLessons) ? completedLessons : []);
-  return Array.from({ length: CODER_TOTAL_STEPS }, (_, index) => lessonIdFor(index + 1)).filter((id) => done.has(id));
-}
 
 function getCoderStage(stageId) {
   return CODER_STAGE_SEQUENCE.find((stage) => stage.id === stageId) || null;
@@ -56,27 +46,6 @@ export function getCoderStageCompletion(completedLessons, stageId) {
     completed: requiredLessons.length - missingLessons.length,
     total: requiredLessons.length,
     missingLessons,
-  };
-}
-
-export function getCoderStageGate(completedLessons, targetStageId) {
-  const targetIndex = CODER_STAGE_SEQUENCE.findIndex((stage) => stage.id === targetStageId);
-  if (targetIndex < 0) {
-    return { unlocked: false, code: "INVALID_STAGE", missingLessons: [] };
-  }
-
-  const prerequisiteStages = CODER_STAGE_SEQUENCE.slice(0, targetIndex);
-  const progress = prerequisiteStages.map((stage) => (
-    getCoderStageCompletion(completedLessons, stage.id)
-  ));
-  const missingLessons = progress.flatMap((item) => item.missingLessons);
-
-  return {
-    unlocked: missingLessons.length === 0,
-    code: missingLessons.length ? "PREVIOUS_STAGE_INCOMPLETE" : null,
-    previousStage: prerequisiteStages.at(-1) || null,
-    missingLessons,
-    progress,
   };
 }
 
@@ -120,7 +89,3 @@ export function getCoderLessonGate(completedLessons, lessonId) {
   };
 }
 
-export function isCoderLessonId(lessonId) {
-  return Boolean(getCoderStageForLesson(lessonId))
-    || PYTHON_ADVANCED_STEP_IDS.includes(lessonId);
-}

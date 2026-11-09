@@ -23,7 +23,6 @@ export function clearMemberSession() {
 
 // Web cùng origin dùng cookie HttpOnly — không có token nào trong JavaScript.
 export const getMemberToken = () => null;
-export const isMemberAuthenticated = () => Boolean(getMemberSession());
 
 export function loginMember(user, provider) {
   const session = {

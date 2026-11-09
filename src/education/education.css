@@ -1715,14 +1715,17 @@ button.edu-pop-course:disabled { cursor: default; }
   .edu-anywhere { padding-top: 84px; gap: 12px; }
 }
 .edu-footer-note { display: block; margin-top: 6px; color: var(--edu-muted); font-size: 12.5px; line-height: 1.5; }
-/* Chế độ tối: nền chặng (xanh lá, vàng nhạt…) phủ một lớp tối để không chói (Apple HIG: dark mode giảm độ sáng mảng lớn).
-   Vẫn giữ màu riêng từng chặng; nút bài học và chữ không bị tối đi. Chặng đêm sao vốn đã tối nên bỏ qua. */
+/* Chế độ tối: KHÔNG phủ lớp xám (làm mọi chặng thành màu bùn). Dùng bản đậm, vẫn tươi của chính màu đất
+   từng chặng (trộn với chàm sâu), thêm chấm sáng li ti cho có chiều sâu. Chặng đêm sao giữ nguyên. */
 .dark .edu .cmap .cmap-zone:not(.is-night) {
+  --dk: color-mix(in oklab, var(--ground) 70%, #0e1116);
+  --dk-prev: color-mix(in oklab, var(--prev, var(--ground)) 70%, #0e1116);
   background:
-    linear-gradient(rgb(19 31 36 / .58), rgb(19 31 36 / .58)),
-    linear-gradient(180deg, var(--prev-sky, var(--sky)) 0, var(--sky) 220px);
+    radial-gradient(circle, rgb(255 255 255 / .16) 0 1.2px, transparent 1.6px) 0 0 / 38px 38px,
+    radial-gradient(120% 60% at 50% 0%, rgb(255 255 255 / .1), transparent 70%),
+    linear-gradient(180deg, var(--dk-prev) 0, var(--dk) 220px, color-mix(in oklab, var(--dk) 80%, #000) 100%);
 }
-.dark .edu .cmap .cmap-scenery { filter: brightness(.8) saturate(.9); }
+.dark .edu .cmap .cmap-scenery { filter: saturate(1.1); }
 .dark .edu .cmap-node.is-locked { --c: #37464f; --c-lip: #263238; --c-ink: #6f8794; } /* tối: nút khoá chìm xuống, nút đang mở nổi lên */
 /* ── Thi đua tuần ─────────────────────────────────────────────────────── */
 .edu .fr-league-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 18px; background: #ffc800; color: #4b3500; }
@@ -1984,7 +1987,7 @@ button.edu-pop-course:disabled { cursor: default; }
 @keyframes vs-fade { from { opacity: 0; transform: translate(-50%, 12px); } }
 @keyframes vs-pop { from { opacity: 0; transform: translateX(-50%) scale(.3); } }
 
-.vs-screen.is-quiz { align-content: start; gap: 14px; padding: max(12px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); background: linear-gradient(105deg, #13306e 0 50%, #5a1a12 50% 100%); }
+.vs-screen.is-quiz { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 14px; padding: max(12px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); background: linear-gradient(105deg, #13306e 0 50%, #5a1a12 50% 100%); }
 .vs-bar { display: grid; grid-template-columns: 44px 40px 1fr 40px; align-items: center; gap: 10px; width: min(100%, 640px); margin: 0 auto; }
 .vs-x { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: rgb(255 255 255 / .12); color: #fff; cursor: pointer; }
 .vs-mini { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; }
@@ -2022,3 +2025,8 @@ button.edu-pop-course:disabled { cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .is-intro, .is-intro *, .vs-card, .vs-verdict, .arena-badge { animation: none !important; }
 }
+
+/* Chống tràn ngang toàn app: ô lưới/flex mặc định không co nhỏ hơn nội dung (min-width: auto), nên một dòng
+   code dài trong <pre> đẩy cả thẻ rộng quá màn hình. Cho mọi khung co lại, và chỉ khung code tự cuộn ngang. */
+.edu-page > *, .edu-card > *, .vs-screen > *, .vs-card > *, .lesson-player > *, .edu-main > * { min-width: 0; }
+.edu pre, .vs-screen pre { max-width: 100%; overflow-x: auto; }

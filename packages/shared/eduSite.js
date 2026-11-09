@@ -4,5 +4,3 @@
 export const EDU_HOST = "education.hugowishpax.studio";
 export const EDU_ORIGIN = `https://${EDU_HOST}`;
 
-/** Dev mở bằng http://education.localhost:3000 (trình duyệt tự trỏ *.localhost về máy). */
-export const isEduHost = (hostname) => hostname === EDU_HOST || /^education\.localhost$/.test(hostname || "");

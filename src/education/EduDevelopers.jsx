@@ -532,7 +532,6 @@ export default function EduDevelopers() {
         </details>
       </section>
 
-
       </>}
       {tab === "stack" && <DevStack />}
       {tab === "license" && <>

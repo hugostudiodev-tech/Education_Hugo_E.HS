@@ -14,7 +14,4 @@
  */
 export const API_BASE = import.meta.env?.VITE_API_URL || "/api";
 
-/** True when the client talks to a different origin than the page it runs on. */
-export const isCrossOriginApi = /^https?:\/\//i.test(API_BASE);
-
 // ponytail: no getter/config object — this is read-only and fixed at build time.

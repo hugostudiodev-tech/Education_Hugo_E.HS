@@ -14,7 +14,6 @@ export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", locale: "en-US" },
   { code: "zh", label: "简体中文", locale: "zh-CN" },
 ];
-export const SELECTABLE_LANGUAGES = SUPPORTED_LANGUAGES.filter(({ code }) => code !== "nom");
 
 // One app-owned key is the source of truth. `i18nextLng` and `ui-store` are
 // kept as migration targets because older releases wrote the preference there.
@@ -37,10 +36,6 @@ export function languageCode(language = "en") {
 
 export function localeForLanguage(language = "en") {
   return LANGUAGE_BY_CODE.get(languageCode(language))?.locale || "en-US";
-}
-
-export function languageLabel(language = "en") {
-  return LANGUAGE_BY_CODE.get(languageCode(language))?.label || "English";
 }
 
 function browserStorage() {
@@ -99,6 +94,3 @@ export function persistAppLanguage(language, storage = browserStorage()) {
   return code;
 }
 
-export function isVietnameseLanguage(language) {
-  return languageCode(language) === "vi";
-}

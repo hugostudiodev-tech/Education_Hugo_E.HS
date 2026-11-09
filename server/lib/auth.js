@@ -131,7 +131,6 @@ export function initAuth() {
   return auth;
 }
 
-export const getAuth = () => auth;
 export const getAdminAuth = () => adminAuth;
 
 async function sessionOf(req) {
