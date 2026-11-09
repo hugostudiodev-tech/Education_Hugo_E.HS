@@ -11,7 +11,7 @@ export const webauthnHelper = {
 
   async registerDevice(_email, deviceName) {
     const { error } = await (await client()).passkey.addPasskey({ name: deviceName });
-    if (error) throw Object.assign(new Error(error.message || 'Không thêm được passkey'), { name: error.code === 'ERROR_CEREMONY_ABORTED' ? 'NotAllowedError' : 'Error' });
+    if (error) throw Object.assign(new Error(error.message || 'Không thêm được passkey'), { name: error.code === 'ERROR_CEREMONY_ABORTED' ? 'NotAllowedError' : 'Error', code: error.code });
   },
 
   // Trả hồ sơ thành viên như bản cũ; phiên đã được lưu trong loginMemberWithPasskey.

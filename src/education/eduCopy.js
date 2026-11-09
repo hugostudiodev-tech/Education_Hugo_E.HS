@@ -112,7 +112,7 @@ export const EDU_COPY = {
     },
     progress: { title: "Tiến độ" },
     settings: {
-      passkey: "Đăng nhập bằng Face ID / vân tay", passkeyHint: "Thêm máy này để lần sau đăng nhập chỉ bằng Face ID hoặc vân tay, không cần mật khẩu.", passkeyUnsupported: "Trình duyệt này chưa hỗ trợ Face ID / vân tay.", passkeyAdd: "Thêm máy này", passkeyAdded: "Đã thêm máy này.", passkeyFailed: "Chưa làm được, thử lại sau.", passkeyRemove: "Gỡ", passkeyRemoveAsk: "Gỡ máy này khỏi đăng nhập Face ID / vân tay?",
+      passkey: "Đăng nhập bằng Face ID / vân tay", passkeyHint: "Thêm máy này để lần sau đăng nhập chỉ bằng Face ID hoặc vân tay, không cần mật khẩu.", passkeyUnsupported: "Trình duyệt này chưa hỗ trợ Face ID / vân tay.", passkeyAdd: "Thêm máy này", passkeyAdded: "Đã thêm máy này.", passkeyFailed: "Chưa làm được, thử lại sau.", passkeyRemove: "Gỡ", passkeyRemoveAsk: "Gỡ máy này khỏi đăng nhập Face ID / vân tay?", passkeyReauth: "Để bảo vệ tài khoản, hãy đăng nhập lại một lần trước khi thêm Face ID / vân tay.", passkeyReady: "Đã xác nhận. Giờ bấm “Thêm máy này”.",
       title: "Cài đặt", saveFailed: "Chưa lưu được cài đặt, thử lại sau.",
       study: "Học tập", goal: "Mục tiêu mỗi ngày", goalHint: "Số step qua lần đầu trong một ngày.",
       sound: "Âm thanh trong bài", soundHint: "Tiếng chọn đáp án, qua bài.",
@@ -379,7 +379,7 @@ export const EDU_COPY = {
     },
     progress: { title: "Progress" },
     settings: {
-      passkey: "Sign in with Face ID / fingerprint", passkeyHint: "Add this device to sign in next time with just Face ID or your fingerprint — no password.", passkeyUnsupported: "This browser doesn't support Face ID / fingerprint yet.", passkeyAdd: "Add this device", passkeyAdded: "This device was added.", passkeyFailed: "Couldn't do that, try again later.", passkeyRemove: "Remove", passkeyRemoveAsk: "Remove this device from Face ID / fingerprint sign-in?",
+      passkey: "Sign in with Face ID / fingerprint", passkeyHint: "Add this device to sign in next time with just Face ID or your fingerprint — no password.", passkeyUnsupported: "This browser doesn't support Face ID / fingerprint yet.", passkeyAdd: "Add this device", passkeyAdded: "This device was added.", passkeyFailed: "Couldn't do that, try again later.", passkeyRemove: "Remove", passkeyRemoveAsk: "Remove this device from Face ID / fingerprint sign-in?", passkeyReauth: "To protect your account, sign in again once before adding Face ID / fingerprint.", passkeyReady: "Confirmed. Now tap “Add this device”.",
       title: "Settings", saveFailed: "Couldn't save settings. Please try again later.",
       study: "Learning", goal: "Daily goal", goalHint: "Steps passed for the first time in a day.",
       sound: "Lesson sounds", soundHint: "Sounds for picking answers and finishing a lesson.",
@@ -733,7 +733,7 @@ export const EDU_COPY = {
     },
     progress: { title: "进度" },
     settings: {
-      passkey: "使用 Face ID / 指纹登录", passkeyHint: "添加此设备，下次只需 Face ID 或指纹即可登录，无需密码。", passkeyUnsupported: "此浏览器暂不支持 Face ID / 指纹。", passkeyAdd: "添加此设备", passkeyAdded: "已添加此设备。", passkeyFailed: "暂时无法完成，请稍后再试。", passkeyRemove: "移除", passkeyRemoveAsk: "从 Face ID / 指纹登录中移除此设备？",
+      passkey: "使用 Face ID / 指纹登录", passkeyHint: "添加此设备，下次只需 Face ID 或指纹即可登录，无需密码。", passkeyUnsupported: "此浏览器暂不支持 Face ID / 指纹。", passkeyAdd: "添加此设备", passkeyAdded: "已添加此设备。", passkeyFailed: "暂时无法完成，请稍后再试。", passkeyRemove: "移除", passkeyRemoveAsk: "从 Face ID / 指纹登录中移除此设备？", passkeyReauth: "为保护账户安全，请先重新登录一次，再添加 Face ID / 指纹。", passkeyReady: "已确认。现在点击“添加此设备”。",
       title: "设置", saveFailed: "设置未能保存，请稍后再试。",
       study: "学习", goal: "每日目标", goalHint: "一天内首次通过的 step 数。",
       sound: "课程音效", soundHint: "选择答案、完成课程时的提示音。",

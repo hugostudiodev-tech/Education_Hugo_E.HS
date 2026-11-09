@@ -10,12 +10,15 @@ import { EduInstall } from "./EduBrand";
 import { useEduText } from "./eduText";
 import { EDU_LANGS } from "./eduCopy";
 import { webauthnHelper } from "../utils/webauthnHelper";
+import { SignInPanel } from "./EduLogin";
 
 /** Passkey (Face ID / vân tay) của tài khoản: xem, thêm máy này, gỡ máy cũ — Better Auth phía máy chủ. */
 function Passkeys() {
   const { t } = useEduText();
   const [list, setList] = useState(null);
   const [busy, setBusy] = useState(false);
+  // Better Auth chỉ cho thêm passkey khi phiên tạo < 24 giờ (chặn cookie cũ bị lấy cắp gắn Face ID lạ). Phiên cũ → đăng nhập lại tại chỗ.
+  const [stale, setStale] = useState(false);
   const supported = webauthnHelper.isSupported();
   const load = () => webauthnHelper.listDevices().then(setList).catch(() => setList([]));
   useEffect(() => { if (supported) load(); }, [supported]);
@@ -27,7 +30,8 @@ function Passkeys() {
       notify.success(t("settings.passkeyAdded"));
       load();
     } catch (error) {
-      if (error.name !== "NotAllowedError") notify.error(t("settings.passkeyFailed"));
+      if (error.code === "SESSION_NOT_FRESH") setStale(true);
+      else if (error.name !== "NotAllowedError") notify.error(t("settings.passkeyFailed"));
     } finally { setBusy(false); }
   };
   const remove = async (id) => {
@@ -45,7 +49,13 @@ function Passkeys() {
           <button type="button" className="edu-btn is-ghost" onClick={() => remove(p._id)}>{t("settings.passkeyRemove")}</button>
         </div>
       ))}
-      {supported && <button type="button" className="edu-btn" disabled={busy} onClick={add}>{t("settings.passkeyAdd")}</button>}
+      {supported && !stale && <button type="button" className="edu-btn" disabled={busy} onClick={add}>{t("settings.passkeyAdd")}</button>}
+      {stale && (
+        <>
+          <p className="edu-set-note">{t("settings.passkeyReauth")}</p>
+          <SignInPanel onSignedIn={() => { setStale(false); notify.success(t("settings.passkeyReady")); }} />
+        </>
+      )}
     </div>
   );
 }

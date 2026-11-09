@@ -64,7 +64,8 @@ export function SignInPanel({ onSignedIn, hint = "" }) {
   const redirect = async (provider) => {
     setBusy(true);
     setError("");
-    const next = new URLSearchParams(window.location.search).get("next") || "/learn";
+    // Đăng nhập lại ở Cài đặt (để thêm Face ID) thì quay về Cài đặt.
+    const next = new URLSearchParams(window.location.search).get("next") || (window.location.pathname === "/settings" ? "/settings" : "/learn");
     const { error: failure } = await loginMemberWithRedirect(provider, next.startsWith("/") ? next : "/learn");
     if (failure) { setError(failure === "network" ? t("login.failed") : failure); setBusy(false); }
   };
