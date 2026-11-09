@@ -1,11 +1,9 @@
 import { clearCache } from "../lib/offlineCache";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { PersonaAvatar, PersonaGate, PersonaInfoForm } from "./EduPersona";
-import HugoLogo from "../components/HugoLogo";
 import { notify } from "../lib/notify";
 import { playEduSound } from "./eduSound";
 import { GemIcon, gemText } from "./gems";
-import { useStandalone } from "../hooks/usePWA";
 import { detectInstallTarget } from "../config/platform";
 import { useCoderLessons } from "../hooks/useCoderLessons";
 import { API_BASE } from "../config/apiBase";
@@ -20,6 +18,10 @@ import AnimIcon from "../components/icons/animated/AnimIcon";
 import EduSettings from "./EduSettings";
 import { FeedbackHistory } from "./EduFeedback";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { EduBrand, EduInstall } from "./EduBrand";
+import EduSpotlight from "./EduSpotlight";
+// Trang chủ/đăng nhập chỉ cần logo + nút cài: để ở file nhỏ riêng cho gói đầu nhẹ, vẫn xuất lại ở đây.
+export { EduBrand, EduInstall };
 
 const NAV = [
   { to: "/learn", icon: "home", key: "learn" },
@@ -35,41 +37,6 @@ const CODE_ZIPS = [
   "nhip-chang4-bao-mat.zip", "nhip-chang5-hoan-thien.zip", "nhip-hoan-chinh.zip",
 ];
 
-
-/** "EDUCATION HUGO", dưới là "thuộc [giọt nước] Hugo Studio". */
-export function EduBrand({ to = "/learn" }) {
-  const { t } = useEduText();
-  return (
-    <Link to={to} className="edu-brand" aria-label={t("brand.aria")}>
-      <img src="/edu/buddy-learn.svg" alt="" className="edu-brand-mark" />
-      <span className="edu-brand-text">
-        <b>EDUCATION HUGO</b>
-        <small>{t("brand.of")} <HugoLogo className="h-3.5 w-3.5" aria-hidden="true" /> Hugo Studio</small>
-      </span>
-    </Link>
-  );
-}
-
-/**
- * Nút cài app: máy tính có hộp cài thật thì mở luôn, còn lại sang trang /install
- * (video mascot + từng bước). Video dựng bằng scripts/video/edu-install/render.mjs.
- */
-export function EduInstall({ className = "edu-btn edu-btn--ghost" }) {
-  const { t } = useEduText();
-  const standalone = useStandalone();
-  const navigate = useNavigate();
-  if (standalone) return null;
-  const target = detectInstallTarget();
-  const onClick = async () => {
-    if (!(target.iOS || target.android) && (await promptInstall())) return;
-    navigate("/install");
-  };
-  return (
-    <button type="button" className={className} onClick={onClick}>
-      <span className="material-symbols-outlined" aria-hidden="true">install_mobile</span> {t("install.button")}
-    </button>
-  );
-}
 
 const INSTALL_STEPS = {
   ios: [["language", "install.ios1"], ["ios_share", "install.ios2"], ["add_box", "install.ios3"], ["check_circle", "install.ios4"]],
@@ -229,6 +196,7 @@ function Rail({ learner, signedIn, stats }) {
   ];
   return (
     <>
+      <EduSpotlight learner={learner} />
       <section className="edu-card edu-dash">
         {/* Biểu đồ thanh: mỗi chỉ số một thanh dày cùng thang 0–100%, nhìn một lượt là thấy cả tình hình. */}
         <ul className="edu-dash-bars">

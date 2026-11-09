@@ -8,6 +8,7 @@ import { localizeStepTitle, useEduText } from "./eduText";
 import { PersonaAvatar } from "./EduPersona";
 import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
 import "../styles/hugoCoderLearning.css";
+import EduSpotlight from "./EduSpotlight";
 
 const QUEST_ICON = { lessons: "menu_book", quiz: "target", review: "replay" };
 
@@ -27,7 +28,7 @@ async function api(path, body) {
  * Luyện tập: nhiệm vụ hôm nay, nên ôn hôm nay, sổ câu sai, thách đấu bạn bè.
  * Máy chủ tính hết (server/services/practice.js); trang này chỉ vẽ và gửi câu trả lời.
  */
-export default function EduPractice({ onLearnerUpdate }) {
+export default function EduPractice({ learner, onLearnerUpdate }) {
   const { t, lang } = useEduText();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -97,6 +98,8 @@ export default function EduPractice({ onLearnerUpdate }) {
   return (
     <section className="edu-page practice">
       <h1 className="edu-page-title">{t("practice.title")}</h1>
+      {/* Điện thoại không có cột phải: gợi ý tính năng hiện ở đây. Máy tính đã có trong Rail. */}
+      <div className="edu-spot-mobile"><EduSpotlight learner={learner} /></div>
 
       <div className="edu-card practice-card">
         <header className="practice-head">

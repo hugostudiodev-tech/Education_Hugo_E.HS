@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EduSkeleton } from "./EduStatus";
 import gsap from "gsap";
 import confetti from "canvas-confetti";
@@ -261,12 +261,3 @@ export function StreakView({ learner, onLearnerUpdate }) {
 }
 
 /** Lắng nghe mốc mới (từ trình học) và hiện màn chúc mừng. */
-export function useStreakCelebration() {
-  const [event, setEvent] = useState(null);
-  useEffect(() => {
-    const on = (e) => setEvent(e.detail);
-    window.addEventListener("edu:streak-milestone", on);
-    return () => window.removeEventListener("edu:streak-milestone", on);
-  }, []);
-  return useMemo(() => ({ event, close: () => setEvent(null) }), [event]);
-}

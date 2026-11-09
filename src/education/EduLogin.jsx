@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { loginMemberWithGoogle, loginMemberWithPasskey, loginMemberWithRedirect } from "../services/api/core/authSession";
 import { loadGoogleIdentity } from "../utils/loadGoogleIdentity";
-import { EduBrand } from "./EduShell";
+import { EduBrand } from "./EduBrand";
 import { useEduText } from "./eduText";
 
 /**

@@ -248,3 +248,15 @@ export function streakPush(lang, key, vars = {}) {
 
 /** Nhân vật đi kèm từng loại thông báo Edu — hộp thông báo và thư (apps/web/public/edu/<tên>.svg, bản PNG cho thư ở edu/mail/). */
 export const EDU_CAST = { welcome: "cast-1", remind: "cast-1", remindNew: "buddy-learn", nearMilestone: "cast-3", lastCall: "cast-2", frozen: "buddy-wrong", shield: "cast-2", purchase: "cast-5", milestone: "buddy-done", security: "buddy-exam", friendRequest: "cast-6", friendAccepted: "cast-7", challenge: "cast-6", challengeDone: "buddy-done" };
+
+/**
+ * Thời gian còn lại tới khi bảng thi đua tuần làm mới (00:00 thứ Hai giờ VN, UTC+7 không đổi giờ).
+ * Trả { d, h } để giao diện hiện "Còn d ngày h giờ".
+ */
+export function leagueTimeLeft(now = new Date()) {
+  const vn = now.getTime() + 7 * 3600_000;
+  const d = new Date(vn);
+  const toMonday = (8 - d.getUTCDay()) % 7 || 7;
+  const ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + toMonday) - vn;
+  return { d: Math.floor(ms / DAY_MS), h: Math.floor((ms % DAY_MS) / 3600_000) };
+}

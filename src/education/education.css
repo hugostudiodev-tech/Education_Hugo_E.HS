@@ -23,7 +23,7 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
   --edu-soft: #f7f7f7;
   --edu-line: #e5e5e5;
   --edu-ink: #3c3c3c;
-  --edu-muted: #777777;
+  --edu-muted: #6b6b6b; /* ≥4.5:1 trên nền --edu-soft (Lighthouse) */
   --edu-active: #ddf4ff;
   --edu-active-line: #84d8ff;
   min-height: 100dvh;
@@ -319,6 +319,9 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 .edu-hero-buddy { position: absolute; z-index: 90; left: 50%; bottom: 4%; width: 50%; margin-left: -25%; transform-origin: 50% 100%; }
 .edu-hero-copy { width: min(460px, 100%); display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .edu-hero-copy h1 { margin: 0 0 12px; font-size: clamp(24px, 3.4vw, 32px); font-weight: 800; line-height: 1.3; }
+.edu-hero-note { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 2px 0 6px; padding: 0; list-style: none; color: var(--edu-muted); font-size: 13px; font-weight: 700; }
+.edu-hero-note li { display: inline-flex; align-items: center; gap: 4px; }
+.edu-hero-note .material-symbols-outlined { font-size: 18px; color: var(--edu-green, #58a700); }
 /* Dải chủ đề chạy vòng như băng chuyền; rê chuột vào thì dừng. Danh sách nhân đôi nên -50% là liền mạch. */
 .edu-strip { overflow: hidden; padding: 18px 0; border-top: 2px solid var(--edu-line); }
 .edu-strip-track { display: flex; width: max-content; animation: edu-marquee 40s linear infinite; }
@@ -598,7 +601,7 @@ html, body { background: var(--edu-page-bg) !important; overscroll-behavior-y: n
 .edu-welcome { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / .5); }
 .edu-welcome-card {
   /* Khung cố định mọi bước: đầu + chân đứng yên, chỉ thân cuộn khi màn thấp — không còn hộp dài lê thê. */
-  position: relative; width: min(440px, 100%); height: min(620px, calc(100dvh - 32px));
+  position: relative; width: min(440px, 100%); max-height: calc(100dvh - 32px);
   display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 14px; justify-items: center; padding: 24px 22px 18px; border-radius: 28px;
   background: var(--edu-card); color: var(--edu-ink); text-align: center; animation: edu-welcome-in .45s cubic-bezier(.2, 1.4, .4, 1);
 }
@@ -1399,7 +1402,7 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .fr-cta .edu-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .edu .fr-qr-btn { width: 56px; padding: 0; }
 .edu .fr-overview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.edu .fr-overview span { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px 14px; border: 2px solid var(--edu-line); border-radius: 16px; font-weight: 800; }
+.edu .fr-overview :is(span, a) { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px 14px; border: 2px solid var(--edu-line); border-radius: 16px; font-weight: 800; }
 .edu .fr-overview i { font-size: 26px; font-variation-settings: "FILL" 1; }
 .edu .is-fire { color: #ff9600; } .edu .is-xp { color: #ffc800; } .edu .is-rank { color: #ce82ff; } .edu .is-step { color: var(--edu-primary-strong); }
 .edu .fr-slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; justify-items: center; }
@@ -1419,7 +1422,7 @@ button.edu-pop-course:disabled { cursor: default; }
 .edu .fr-top { position: relative; display: grid; place-items: center; min-height: 48px; }
 .edu .fr-top h1 { margin: 0; font-size: 20px; font-weight: 900; }
 .edu .fr-x { position: absolute; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: none; color: var(--edu-muted); cursor: pointer; }
-.edu .fr-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--edu-line); border-radius: 16px; overflow: hidden; }
+.edu .fr-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 2px solid var(--edu-line); border-radius: 16px; overflow: hidden; }
 .edu .fr-tabs button { min-height: 48px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--edu-ink); font: inherit; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
 .edu .fr-tabs button[aria-selected="true"] { color: var(--edu-primary-strong); border-bottom-color: var(--edu-primary-strong); }
 .edu .fr-list { display: grid; margin: 0; padding: 0; list-style: none; border: 2px solid var(--edu-line); border-radius: 16px; overflow: hidden; }
@@ -1686,3 +1689,83 @@ button.edu-pop-course:disabled { cursor: default; }
 .pg-row-text b { font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
 .pg-row-text b.is-empty { color: var(--edu-muted); }
 .pg-row .pg-switch { flex-direction: column; gap: 4px; min-width: 64px; min-height: 44px; padding: 2px 0; font-size: 11px; }
+/* Màn đồng ý một bước: chip ngôn ngữ (≥44px theo Apple HIG) + dòng cam kết an toàn. */
+.edu-welcome-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.edu-welcome-chip { min-height: 44px; padding: 0 14px; border: 2px solid var(--edu-line); border-radius: 99px; background: var(--edu-card); color: var(--edu-ink); font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; }
+.edu-welcome-chip.is-on { border-color: var(--edu-active-line); background: var(--edu-active); color: var(--edu-blue); }
+.edu-welcome-more > span:first-child { display: inline-flex; align-items: center; gap: 8px; text-align: left; color: var(--edu-ink); }
+.edu-welcome-more > span:first-child .material-symbols-outlined { color: var(--edu-green, #58a700); }
+/* Điện thoại: bỏ khoảng trời trống phía trên tranh để nút chính nằm trong màn đầu (kể cả iPhone SE 667px). */
+@media (max-width: 899px) {
+  .edu-hero { min-height: auto; }
+  .edu-hero-main { align-content: start; gap: 16px; padding-top: 8px; }
+  .edu-art--hero { width: min(440px, 100%); aspect-ratio: 1 / .62; }
+}
+.edu-footer-note { display: block; margin-top: 6px; color: var(--edu-muted); font-size: 12.5px; line-height: 1.5; }
+/* Chế độ tối: nền chặng (xanh lá, vàng nhạt…) phủ một lớp tối để không chói (Apple HIG: dark mode giảm độ sáng mảng lớn).
+   Vẫn giữ màu riêng từng chặng; nút bài học và chữ không bị tối đi. Chặng đêm sao vốn đã tối nên bỏ qua. */
+.dark .edu .cmap .cmap-zone:not(.is-night) {
+  background:
+    linear-gradient(rgb(19 31 36 / .58), rgb(19 31 36 / .58)),
+    linear-gradient(180deg, var(--prev-sky, var(--sky)) 0, var(--sky) 220px);
+}
+.dark .edu .cmap .cmap-scenery { filter: brightness(.8) saturate(.9); }
+.dark .edu .cmap-node.is-locked { --c: #37464f; --c-lip: #263238; --c-ink: #6f8794; } /* tối: nút khoá chìm xuống, nút đang mở nổi lên */
+/* ── Thi đua tuần ─────────────────────────────────────────────────────── */
+.edu .fr-league-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 18px; background: #ffc800; color: #4b3500; }
+.edu .fr-league-head > .material-symbols-outlined { font-size: 32px; font-variation-settings: "FILL" 1; }
+.edu .fr-league-head b { flex: 1; font-size: 18px; font-weight: 900; }
+.edu .fr-league-head small { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; background: rgb(0 0 0 / .12); font-size: 13px; font-weight: 800; white-space: nowrap; }
+.edu .fr-league-head small .material-symbols-outlined { font-size: 16px; }
+.edu .fr-league-goal { display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px 14px; border: 2px solid var(--edu-line); border-radius: 16px; color: var(--edu-ink); font-weight: 800; text-decoration: none; }
+.edu .fr-league-goal > .material-symbols-outlined:first-child { color: var(--edu-green, #58a700); }
+.edu a.fr-league-goal > .material-symbols-outlined:last-child { margin-left: auto; color: var(--edu-muted); }
+.edu .fr-league { display: grid; margin: 0; padding: 0; list-style: none; border: 2px solid var(--edu-line); border-radius: 16px; overflow: hidden; }
+.edu .fr-league li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 14px; }
+.edu .fr-league li + li { border-top: 2px solid var(--edu-line); }
+/* Hàng của mình: nổi màu + dính đáy khi cuộn để luôn thấy mình đứng đâu. */
+.edu .fr-league li.is-me { position: sticky; bottom: 0; z-index: 1; background: var(--edu-active); box-shadow: inset 0 0 0 2px var(--edu-active-line); }
+.edu .fr-rank { flex: none; width: 32px; text-align: center; color: var(--edu-muted); font-weight: 900; font-variant-numeric: tabular-nums; }
+/* Huy hiệu số: chữ tối trên nền sáng, tương phản ≥ 4.5:1 cả ba màu; có viền để tách khỏi nền ở chế độ tối. */
+.edu .fr-rank.is-top { display: grid; place-items: center; height: 32px; border-radius: 50%; border: 2px solid rgb(0 0 0 / .18); font-size: 15px; }
+.edu .fr-rank.is-top1 { background: #ffd43b; color: #3d2c00; } .edu .fr-rank.is-top2 { background: #dee2e6; color: #343a40; } .edu .fr-rank.is-top3 { background: #f0b27a; color: #4a2300; }
+.edu .fr-league-who { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
+.edu .fr-league-who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; }
+.edu .fr-league-xp { flex: none; color: var(--edu-ink); font-variant-numeric: tabular-nums; }
+/* ── Thẻ gợi ý tính năng (EduSpotlight): một icon màu, tiêu đề ngắn, một chạm ── */
+.edu-spot { position: relative; display: flex; align-items: stretch; border: 2px solid var(--edu-line); border-bottom-width: 4px; border-radius: 18px; background: var(--edu-card); }
+.edu-spot-main { flex: 1; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 6px 10px 12px; border: 0; background: none; color: var(--edu-ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.edu-spot-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; color: #fff; font-size: 26px; font-variation-settings: "FILL" 1; }
+.edu-spot-text { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.edu-spot-text b { font-size: 15.5px; font-weight: 900; }
+.edu-spot-text small { color: var(--edu-muted); font-size: 13px; line-height: 1.35; }
+.edu-spot-main > .material-symbols-outlined:last-child { color: var(--edu-muted); }
+.edu-spot-x { flex: none; width: 44px; border: 0; background: none; color: var(--edu-muted); cursor: pointer; }
+.edu-spot-mobile { margin-bottom: 16px; }
+@media (min-width: 1100px) { .edu-spot-mobile { display: none; } }
+/* ══ Màu cho người mù màu ══════════════════════════════════════════════════
+   Lớp 1 (luôn bật): trạng thái không bao giờ chỉ dựa vào màu — luôn kèm dấu/hình (✓ ✕, viền nét đứt, số).
+   Lớp 2 (Cài đặt → "Màu cho người mù màu", lớp .edu-cvd trên <html>): bảng Okabe-Ito —
+   đúng = xanh dương #0072B2, sai = cam đỏ #D55E00, phân biệt được với mọi dạng mù màu phổ biến
+   (đỏ–lục, lam–vàng) và cả khi in đen trắng (khác độ sáng). Chế độ tối dùng bản sáng hơn để đủ tương phản. */
+:root { --cvd-ok: #30a46c; --cvd-bad: #e5484d; }
+:root.edu-cvd { --cvd-ok: #0072b2; --cvd-bad: #d55e00; }
+:root.edu-cvd.dark { --cvd-ok: #56b4e9; --cvd-bad: #f08a4b; }
+.lesson-quiz-review li.is-right b, .lesson-quiz-score.is-pass b { color: var(--cvd-ok); }
+.lesson-quiz-review li.is-wrong b, .lesson-quiz-score.is-fail b { color: var(--cvd-bad); }
+.lesson-quiz-review li.is-right b::before { content: "✓ "; }
+.lesson-quiz-review li.is-wrong b::before { content: "✕ "; }
+:root.edu-cvd .lesson-exam-review li.is-right { background: color-mix(in srgb, var(--cvd-ok) 12%, transparent); }
+:root.edu-cvd .lesson-exam-review li.is-wrong { background: color-mix(in srgb, var(--cvd-bad) 12%, transparent); }
+:root.edu-cvd .lesson-buddy.is-wrong .lesson-buddy-bubble { color: var(--cvd-bad); }
+/* Lịch chuỗi lửa: "đã học" (cam) và "đã phá băng" (vàng) trùng nhau với người mù màu đỏ → phá băng thêm viền nét đứt.
+   Chữ tối trên nền cam để đạt tương phản (chữ trắng trên #ff9600 chỉ ~2.2:1). */
+.streak-day.is-lit, .streak-day.is-lit.is-today { color: #3d1d00; }
+.streak-day.is-thawed { outline: 2px dashed #3c3c3c; outline-offset: -5px; }
+:root.edu-cvd .streak-day.is-lit { background: #e69f00; }
+:root.edu-cvd .streak-day.is-thawed { background: #cc79a7; color: #1a1a1a; }
+/* Mẫu xem trước trong Cài đặt */
+.edu-cvd-preview { display: inline-flex; gap: 6px; margin-top: 6px; }
+.edu-cvd-preview i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; color: #fff; font-style: normal; font-weight: 900; }
+.edu-cvd-preview .is-ok { background: var(--cvd-ok); } .edu-cvd-preview .is-bad { background: var(--cvd-bad); }
+:root.dark .edu-cvd-preview i { color: #0b1a24; }

@@ -5,7 +5,7 @@ import { useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 
 /**
- * Lần đầu mở Education Hugo: (1) chọn ngôn ngữ, (2) quyền riêng tư & điều khoản, (3) nhóm tuổi.
+ * Lần đầu bấm vào học/đăng nhập: MỘT màn gồm ngôn ngữ, cam kết riêng tư, nhóm tuổi và điều khoản (trang công khai không bị chặn).
  *
  * Làm theo luật, không theo thói quen "bấm Đồng ý hết":
  *  - Cookie: site chỉ dùng loại THIẾT YẾU (phiên đăng nhập, lưu cài đặt) — không quảng
@@ -30,10 +30,7 @@ export default function EduWelcome({ onDone }) {
   const guardianValid = /^\+?[0-9][0-9 .()-]{7,20}$/.test(guardianPhone.trim());
   const canAccept = terms && (ageGroup === "16+" || (ageGroup === "14-15" && guardianValid && guardianConsent));
 
-  const pickLanguage = async (code) => {
-    await changeAppLanguage(code);
-    setStep(1);
-  };
+  const pickLanguage = (code) => changeAppLanguage(code);
   const accept = () => {
     try {
       localStorage.setItem(KEY, JSON.stringify({ v: VERSION, at: new Date().toISOString(), lang, terms: true, age: true, ageGroup, guardianPhone: ageGroup === "14-15" ? guardianPhone.trim() : undefined, guardianConsent: ageGroup === "14-15" || undefined, cookies: "essential" }));
@@ -42,42 +39,32 @@ export default function EduWelcome({ onDone }) {
     onDone();
   };
 
-  // Bước: 0 ngôn ngữ → 1 quyền riêng tư (+ "cookies" xem từng mục) → 2 nhóm tuổi.
-  // Khung cố định: đầu (linh vật + tiêu đề) và chân (nút chính + chấm) đứng yên, chỉ thân cuộn khi màn quá thấp.
-  const head = { 0: t("welcome.langTitle"), 1: t("welcome.privacyTitle"), cookies: t("welcome.cookieMore"), 2: t("welcome.ageTitle") }[step];
-  const dot = step === "cookies" ? 1 : step;
+  // Một màn duy nhất (bớt thao tác trước bài đầu): ngôn ngữ dạng chip, cam kết an toàn, nhóm tuổi, điều khoản.
+  // "cookies" là màn phụ xem từng mục, bấm Quay lại về màn chính.
+  const cookies = step === "cookies";
   return (
     <div className="edu-welcome" role="dialog" aria-modal="true" aria-labelledby="edu-welcome-title">
-      <div className={`edu-welcome-card${step ? " is-small" : ""}`}>
-        <img src={step ? "/edu/buddy-correct.svg" : "/edu/buddy-learn.svg"} alt="" className="edu-welcome-buddy" />
-        <h2 id="edu-welcome-title">{head}</h2>
-        <div className="edu-welcome-body" key={step}>
-          {step === 0 && <>
-            <p>{t("welcome.langBody")}</p>
-            <div className="edu-welcome-langs">
-              {EDU_LANGS.map(({ code, label }) => (
-                <button key={code} type="button" lang={code} className={`edu-welcome-lang${code === lang ? " is-on" : ""}`} onClick={() => pickLanguage(code)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </>}
-          {step === 1 && <>
-            <ul className="edu-welcome-facts">
-              <li><span className="material-symbols-outlined" aria-hidden="true">cookie</span><div><b>{t("welcome.cookiesTitle")}</b><small>{t("welcome.cookiesBody")}</small></div></li>
-              <li><span className="material-symbols-outlined" aria-hidden="true">location_off</span><div><b>{t("welcome.locationTitle")}</b><small>{t("welcome.locationBody")}</small></div></li>
-            </ul>
-            <button type="button" className="edu-welcome-more" onClick={() => setStep("cookies")}>{t("welcome.cookieMore")}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
-          </>}
-          {/* Danh sách đúng những gì site đặt — thêm cookie/khoá lưu mới thì phải thêm vào welcome.cookieList. */}
-          {step === "cookies" && (
+      <div className="edu-welcome-card is-small">
+        <img src="/edu/buddy-learn.svg" alt="" className="edu-welcome-buddy" />
+        <h2 id="edu-welcome-title">{cookies ? t("welcome.cookieMore") : t("welcome.title")}</h2>
+        <div className="edu-welcome-body" key={String(step)}>
+          {cookies ? (
+            /* Danh sách đúng những gì site đặt — thêm cookie/khoá lưu mới thì phải thêm vào welcome.cookieList. */
             <dl className="edu-welcome-list">
               {t("welcome.cookieList").map(([name, kind, why]) => (
                 <div key={name}><dt>{name} <small>· {kind}</small></dt><dd>{why}</dd></div>
               ))}
             </dl>
-          )}
-          {step === 2 && <>
+          ) : <>
+            <div className="edu-welcome-chips" role="group" aria-label={t("welcome.langTitle")}>
+              {EDU_LANGS.map(({ code, label }) => (
+                <button key={code} type="button" lang={code} aria-pressed={code === lang} className={`edu-welcome-chip${code === lang ? " is-on" : ""}`} onClick={() => pickLanguage(code)}>{label}</button>
+              ))}
+            </div>
+            <button type="button" className="edu-welcome-more" onClick={() => setStep("cookies")}>
+              <span><span className="material-symbols-outlined" aria-hidden="true">verified_user</span> {t("welcome.safe")}</span>
+              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            </button>
             <label className="edu-welcome-field">
               <span>{t("welcome.ageLabel")}</span>
               <select value={ageGroup} onChange={(event) => setAgeGroup(event.target.value)}>
@@ -101,7 +88,9 @@ export default function EduWelcome({ onDone }) {
           </>}
         </div>
         <div className="edu-welcome-foot">
-          {step === 1 && <>
+          {cookies ? (
+            <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={() => setStep(0)}>{t("welcome.prev")}</button>
+          ) : <>
             <label className="edu-welcome-check">
               <input type="checkbox" checked={terms} onChange={(event) => setTerms(event.target.checked)} />
               <span>
@@ -109,15 +98,8 @@ export default function EduWelcome({ onDone }) {
                 <a href="/privacy">{t("login.policy")}</a>{t("welcome.termsB")}
               </span>
             </label>
-            <button type="button" className="edu-btn edu-btn--wide" disabled={!terms} onClick={() => setStep(2)}>{t("welcome.next")}</button>
-            <button type="button" className="edu-link" onClick={() => setStep(0)}>{t("welcome.back")}</button>
-          </>}
-          {step === "cookies" && <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={() => setStep(1)}>{t("welcome.prev")}</button>}
-          {step === 2 && <>
             <button type="button" className="edu-btn edu-btn--wide" disabled={!canAccept} onClick={accept}>{t("welcome.accept")}</button>
-            <button type="button" className="edu-link" onClick={() => setStep(1)}>{t("welcome.prev")}</button>
           </>}
-          <span className="edu-welcome-dots" aria-hidden="true">{[0, 1, 2].map((i) => <i key={i} className={dot === i ? "is-on" : ""} />)}</span>
         </div>
       </div>
     </div>

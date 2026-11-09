@@ -20,18 +20,21 @@ const langOf = (locale) => { const c = String(locale || '').toLowerCase().slice(
 
 const COPY = {
   vi: {
+    open: 'MỞ APP',
     cta: { welcome: 'HỌC NGAY', security: 'KIỂM TRA TÀI KHOẢN', frozen: 'SƯỞI ẤM LỬA NHỎ', milestone: 'XEM LỊCH LỬA', friendRequest: 'XEM LỜI MỜI' },
     tagline: 'Khoá học miễn phí cho học sinh – sinh viên · nhận ủng hộ tự nguyện để duy trì dự án',
     reason: 'Bạn nhận thư này vì có tài khoản Education Hugo. Tắt thư email trong Hồ sơ > Thông báo.',
     terms: 'Điều khoản', privacy: 'Quyền riêng tư', profile: 'Hồ sơ',
   },
   en: {
+    open: 'OPEN APP',
     cta: { welcome: 'LEARN NOW', security: 'REVIEW MY ACCOUNT', frozen: 'WARM UP LITTLE FLAME', milestone: 'SEE MY STREAK', friendRequest: 'SEE THE REQUEST' },
     tagline: 'Free courses for students · supported by voluntary donations',
     reason: 'You are receiving this because you have an Education Hugo account. Turn emails off in Profile > Notifications.',
     terms: 'Terms', privacy: 'Privacy', profile: 'Profile',
   },
   zh: {
+    open: '打开应用',
     cta: { welcome: '立即学习', security: '检查账户', frozen: '温暖小火苗', milestone: '查看火苗日历', friendRequest: '查看邀请' },
     tagline: '面向学生的免费课程 · 由自愿捐助支持',
     reason: '你收到此邮件是因为你拥有 Education Hugo 账户。可在 个人资料 > 通知 中关闭邮件。',
@@ -86,12 +89,17 @@ export async function sendMail(to, subject, html) {
   return res.json();
 }
 
-async function pushAll(email, textFor, url, tag) {
+// Thông báo màn hình khoá: icon app + badge đơn sắc (thanh trạng thái Android) + tranh nhân vật đúng loại tin
+// (ảnh lớn khi kéo xuống) + MỘT nút hành động đi thẳng vào đúng trang trong app.
+async function pushAll(email, textFor, url, tag, key) {
   const subs = await PushSub.find({ email }).lean();
+  const image = `/edu/mail/${EDU_CAST[key] || 'buddy-learn'}.png`;
   await Promise.all(subs.map((sub) => {
-    const text = textFor(langOf(sub.device?.locale));
+    const lang = langOf(sub.device?.locale);
+    const text = textFor(lang);
     if (!text?.title || !VAPID.privateKey) return null;
-    const payload = JSON.stringify({ title: text.title, body: text.body || '', icon: '/edu/icon-192.png', url, ...(tag ? { tag } : {}) });
+    const action = (COPY[lang].cta[key] || COPY[lang].open).toLowerCase().replace(/^./, (c) => c.toUpperCase());
+    const payload = JSON.stringify({ title: text.title, body: text.body || '', icon: '/edu/icon-192.png', badge: '/edu/badge-96.png', image, url, actions: [{ action: 'open', title: action }], ...(tag ? { tag } : {}) });
     return webpush.sendNotification(sub.subscription, payload, { TTL: 24 * 3600 }).catch((error) => {
       if (DEAD.has(error.statusCode)) return PushSub.deleteOne({ _id: sub._id });
       console.error('[push]', error.statusCode || error.message);
@@ -114,7 +122,7 @@ export async function notify(email, { key, vars = {}, url = '/learn', tag } = {}
     const vi = streakPush('vi', key, vars);
     if (!vi) return;
     await Notification.create({ email, key, params: vars, category: CATEGORY[key] || 'general', title: vi.title, message: vi.body, actionUrl: url });
-    await pushAll(email, (lang) => streakPush(lang, key, vars), url, tag);
+    await pushAll(email, (lang) => streakPush(lang, key, vars), url, tag, key);
     if (!MAIL_KEYS.has(key)) return;
     const doc = await Learner.findOne({ email }).select('prefs').lean();
     if (doc && !cleanEduPrefs(doc.prefs).notifyEmail && !ESSENTIAL.has(key)) return;

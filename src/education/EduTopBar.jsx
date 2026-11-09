@@ -131,6 +131,22 @@ export function useEduInbox(signedIn) {
       .then((data) => { setItems(data.notifications || []); setUnread(data.unreadCount || 0); })
       .catch(() => setItems((cur) => cur || []));
   }, [signedIn]);
+  // Trước đây chỉ tải khi bấm chuông → chưa mở chuông thì không bao giờ biết có thông báo.
+  // Giờ: tải ngay khi vào app, khi quay lại tab, và mỗi phút lúc tab đang mở.
+  // ponytail: polling 60s; chuyển sang SSE/push nếu cần thông báo tức thời.
+  useEffect(() => {
+    if (!signedIn) return undefined;
+    load();
+    const refresh = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", refresh);
+    const timer = setInterval(refresh, 60_000);
+    return () => { document.removeEventListener("visibilitychange", refresh); clearInterval(timer); };
+  }, [signedIn, load]);
+  // Số chưa đọc hiện trên icon app đã cài (Badging API: iOS 16.4+ PWA, Android, máy tính).
+  useEffect(() => {
+    if (!("setAppBadge" in navigator)) return;
+    (unread ? navigator.setAppBadge(unread) : navigator.clearAppBadge()).catch(() => {});
+  }, [unread]);
   const patch = (path) => fetch(`${API_BASE}/inbox/${path}`, { method: "PATCH", credentials: "include" }).catch(() => {});
   const openItem = (item) => {
     if (!item.read) { patch(`${item._id}/read`); setUnread((n) => Math.max(0, n - 1)); setItems((all) => all.map((x) => (x._id === item._id ? { ...x, read: true } : x))); }
@@ -148,7 +164,7 @@ export default function EduTopBar({ learner, signedIn, inbox }) {
   const pop = usePopover();
   const { items, unread } = inbox;
   const streak = learner?.edu?.streak;
-  // Có thông báo chưa đọc: chuông tự rung vài giây một lần (không hiện con số).
+  // Có thông báo chưa đọc: chuông tự rung vài giây một lần + chấm đỏ đếm số.
   const bell = useRef(null);
   useEffect(() => {
     if (!unread) return undefined;

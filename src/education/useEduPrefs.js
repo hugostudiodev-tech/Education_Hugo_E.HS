@@ -29,10 +29,11 @@ export function useEduPrefs(serverPrefs) {
       if (prefs.theme === "system") delete root.dataset.theme;
       else root.dataset.theme = prefs.theme;
       root.classList.toggle("dark", prefs.theme === "dark" || (prefs.theme === "system" && media.matches));
+      root.classList.toggle("edu-cvd", Boolean(prefs.colorSafe)); // bảng màu cho người mù màu
     };
     apply();
     return () => { delete root.dataset.theme; };
-  }, [prefs?.theme, prefs?.sound]); // eslint-disable-line react-hooks/exhaustive-deps -- chỉ đổi khi giá trị đổi
+  }, [prefs?.theme, prefs?.sound, prefs?.colorSafe]); // eslint-disable-line react-hooks/exhaustive-deps -- chỉ đổi khi giá trị đổi
 
   return prefs?.textSize || "md";
 }

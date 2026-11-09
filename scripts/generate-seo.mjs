@@ -36,7 +36,7 @@ function applyOgImage(html, img) {
   const image = { url: `${EDU_ORIGIN}/og/education.jpg`, type: "image/jpeg", width: 1200, height: 630 };
   const hreflang = [
     ...EDU_LANGS.map(({ code }) => `<link rel="alternate" hreflang="${code}" href="${eduUrl(code)}" />`),
-    `<link rel="alternate" hreflang="x-default" href="${eduUrl("vi")}" />`,
+    `<link rel="alternate" hreflang="x-default" href="${eduUrl("en")}" />`,
   ].join("\n    ");
   for (const { code } of EDU_LANGS) {
     const copy = EDU_COPY[code];
@@ -65,7 +65,7 @@ function applyOgImage(html, img) {
       html = html.replace(new RegExp(`<meta ${attr}="${name}" content="[\\s\\S]*?" />`), `<meta ${attr}="${name}" content="${escAttr(value)}" />`);
     }
     html = applyOgImage(html, image);
-    const provider = { "@type": "Organization", name: "Hugo Studio", url: ORIGIN, nonprofitStatus: "Nonprofit" };
+    const provider = { "@type": "Organization", name: "Hugo Studio", url: ORIGIN };
     const schema = [
       { "@context": "https://schema.org", "@type": "WebSite", name: "Education Hugo", url: eduUrl("vi"), inLanguage: EDU_LANGS.map((l) => l.code), publisher: provider },
       {
@@ -123,7 +123,7 @@ function applyOgImage(html, img) {
       html = html.replace(new RegExp(`<meta ${attr}="${name}" content="[\\s\\S]*?" />`), `<meta ${attr}="${name}" content="${escAttr(value)}" />`);
     }
     html = applyOgImage(html, image);
-    const provider = { "@type": "Organization", name: "Hugo Studio", url: ORIGIN, nonprofitStatus: "Nonprofit" };
+    const provider = { "@type": "Organization", name: "Hugo Studio", url: ORIGIN };
     const schema = [
       {
         "@context": "https://schema.org", "@type": "Course", "@id": `${url}#course`, name: course.title.vi, description, url, image: image.url,
@@ -160,7 +160,7 @@ function applyOgImage(html, img) {
     EDU_LANGS.map(({ code }) =>
       `  <url>\n    <loc>${eduUrl(code)}</loc>\n` +
       EDU_LANGS.map((l) => `    <xhtml:link rel="alternate" hreflang="${l.code}" href="${eduUrl(l.code)}"/>\n`).join("") +
-      `    <xhtml:link rel="alternate" hreflang="x-default" href="${eduUrl("vi")}"/>\n    <changefreq>weekly</changefreq>\n    <priority>${code === "vi" ? "1.0" : "0.9"}</priority>\n  </url>\n`).join("") +
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${eduUrl("en")}"/>\n    <changefreq>weekly</changefreq>\n    <priority>${code === "vi" ? "1.0" : "0.9"}</priority>\n  </url>\n`).join("") +
     CATALOG.map((c) => `  <url>\n    <loc>${EDU_ORIGIN}/courses/${c.id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`).join("") +
     ["terms", "privacy", "guidelines"].map((p) => `  <url>\n    <loc>${EDU_ORIGIN}/${p}</loc>\n    <changefreq>yearly</changefreq>\n    <priority>0.3</priority>\n  </url>\n`).join("") +
     `</urlset>\n`);

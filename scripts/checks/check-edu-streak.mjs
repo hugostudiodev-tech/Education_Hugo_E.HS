@@ -2,16 +2,34 @@
 // Kiểm: sang ngày đúng 00:00 giờ VN, mỗi ngày tính tối đa một lần, lỡ ngày thì đóng băng,
 // quá MAX_FREEZES lần/tháng thì mất chuỗi, phá băng hợp lệ, thưởng mốc không trả đôi.
 import assert from "node:assert/strict";
-import { vnClock } from "../../packages/shared/eduPrefs.js";
+import { cleanEduPrefs, clockIn, dayStartIn, vnClock } from "../../packages/shared/eduPrefs.js";
 import { checkNickname } from "../../packages/persona/nickname.js";
 import { checkAvatar, randomAvatar } from "../../packages/persona/avatar.js";
 import { WEB_COURSES } from "../../packages/courses/coding/index.js";
 import { nextLesson, stepLessons } from "../../packages/courses/coding/lessons.js";
-import { MAX_FREEZES, settleStreak, streakView, studyToday, thawDay } from "../../packages/shared/eduStreak.js";
+import { MAX_FREEZES, leagueTimeLeft, settleStreak, streakView, studyToday, thawDay } from "../../packages/shared/eduStreak.js";
 
 // 1. Ranh giới ngày = 00:00 Asia/Ho_Chi_Minh (UTC+7) = 17:00 UTC hôm trước.
 assert.equal(vnClock(new Date("2026-11-01T16:59:59Z")).day, "2026-11-01");
 assert.equal(vnClock(new Date("2026-11-01T17:00:00Z")).day, "2026-11-02");
+
+// 1a. Ngày theo múi giờ THIẾT BỊ của người học: cùng một thời điểm, New York còn hôm qua, Tokyo đã sang mai.
+const at = new Date("2026-11-02T03:30:00Z");
+assert.equal(clockIn(at, "Asia/Ho_Chi_Minh").day, "2026-11-02");
+assert.equal(clockIn(at, "America/New_York").day, "2026-11-01");
+assert.equal(clockIn(at, "America/New_York").hour, 22);
+assert.equal(clockIn(at, "Asia/Tokyo").hour, 12);
+assert.equal(dayStartIn("2026-11-02", "Asia/Ho_Chi_Minh").toISOString(), "2026-11-01T17:00:00.000Z");
+assert.equal(dayStartIn("2026-03-08", "America/New_York").toISOString(), "2026-03-08T05:00:00.000Z"); // ngày đổi sang giờ mùa hè
+assert.equal(dayStartIn("2026-07-01", "Europe/Paris").toISOString(), "2026-06-30T22:00:00.000Z");
+assert.equal(cleanEduPrefs({ timeZone: "Europe/Paris" }).timeZone, "Europe/Paris");
+assert.equal(cleanEduPrefs({ timeZone: "Mars/Olympus" }).timeZone, "Asia/Ho_Chi_Minh"); // tên sai → giữ mặc định
+assert.equal(cleanEduPrefs({}, cleanEduPrefs({ timeZone: "Asia/Tokyo" })).timeZone, "Asia/Tokyo"); // không gửi → giữ múi đã lưu
+
+// 1b. Bảng thi đua làm mới 00:00 thứ Hai giờ VN (= 17:00 UTC Chủ nhật).
+assert.deepEqual(leagueTimeLeft(new Date("2026-11-08T16:00:00Z")), { d: 0, h: 1 });   // CN 23:00 VN
+assert.deepEqual(leagueTimeLeft(new Date("2026-11-08T17:00:00Z")), { d: 7, h: 0 });   // T2 00:00 VN: tuần mới
+assert.deepEqual(leagueTimeLeft(new Date("2026-11-11T05:00:00Z")), { d: 4, h: 12 });  // T4 12:00 VN
 
 // 2. Học nhiều bài trong một ngày chỉ +1.
 let s = studyToday({}, "2026-11-02").state;

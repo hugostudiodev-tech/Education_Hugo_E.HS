@@ -177,11 +177,11 @@ self.addEventListener('push', function (event) {
     // do máy chủ soạn sẵn theo ngôn ngữ của thiết bị (packages/shared/notificationText.js).
     // Vì vậy câu dự phòng ở đây chỉ còn tên thương hiệu — không ngôn ngữ nào cả,
     // thay cho hai câu tiếng Việt cứng trước kia.
-    const FALLBACK_URL = '/member/utilities/psychology';
+    const FALLBACK_URL = '/learn';
     let payload = {
-      title: 'Hugo Studio',
+      title: 'Education Hugo',
       body: '',
-      icon: '/image/avt7.png', // Logo không nền của mascot
+      icon: '/edu/icon-192.png',
       url: FALLBACK_URL
     };
 
@@ -190,9 +190,9 @@ self.addEventListener('push', function (event) {
         payload = event.data.json();
       } catch (jsonErr) {
         payload = {
-          title: 'Hugo Studio',
+          title: 'Education Hugo',
           body: event.data.text() || '',
-          icon: '/image/avt7.png',
+          icon: '/edu/icon-192.png',
           url: FALLBACK_URL
         };
       }
@@ -200,8 +200,13 @@ self.addEventListener('push', function (event) {
 
     const options = {
       body: payload.body,
-      icon: payload.icon || '/image/avt7.png',
-      badge: '/favicon.ico', // Icon hiển thị trên thanh trạng thái (status bar)
+      icon: payload.icon || '/edu/icon-192.png',
+      // Badge thanh trạng thái Android phải là PNG đơn sắc nền trong suốt (favicon.ico hiện thành ô vuông trắng).
+      badge: payload.badge || '/edu/badge-96.png',
+      // Tranh nhân vật đúng loại tin (Android hiện khi kéo thông báo xuống) + một nút đi thẳng vào app.
+      ...(payload.image ? { image: payload.image } : {}),
+      ...(Array.isArray(payload.actions) ? { actions: payload.actions.slice(0, 2) } : {}),
+      timestamp: Date.now(),
       vibrate: [100, 50, 100], // Rung máy (với thiết bị di động hỗ trợ)
       data: {
         url: payload.url || FALLBACK_URL
@@ -233,7 +238,7 @@ self.addEventListener('notificationclick', function (event) {
   try {
     event.notification.close(); // Đóng thông báo hiện tại
 
-    const targetUrl = event.notification.data.url;
+    const targetUrl = event.notification.data?.url || '/learn'; // chạm thân thông báo hay nút "Mở app" đều vào cùng trang
 
     // Tìm kiếm các window hiện có của website và tập trung (focus) vào đó
     event.waitUntil(
@@ -242,7 +247,8 @@ self.addEventListener('notificationclick', function (event) {
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
           if ('focus' in client) {
-            return client.focus().then(() => client.navigate(targetUrl));
+            // navigate() lỗi với cửa sổ SW chưa kiểm soát → mở thẳng URL, để một chạm luôn tới đúng trang.
+            return client.focus().then(() => client.navigate(targetUrl)).catch(() => clients.openWindow(targetUrl));
           }
         }
         // Nếu chưa mở tab nào, mở tab mới đến địa chỉ targetUrl

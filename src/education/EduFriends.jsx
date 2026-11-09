@@ -10,6 +10,7 @@ import { playEduSound } from "./eduSound";
 import { EduSkeleton } from "./EduStatus";
 import { supportMailUrl } from "./eduSupport";
 import { PublicAbout } from "./EduProfileGate";
+import { leagueTimeLeft } from "../../packages/shared/eduStreak";
 
 // Tài khoản chính thức Education Hugo: nút theo dõi mạng xã hội. href rỗng = ẩn nút (điền sau).
 const OFFICIAL_LINKS = [
@@ -261,7 +262,7 @@ function Overview({ streak, xp, rank, steps }) {
       <div className="fr-overview">
         <span><i className="material-symbols-outlined is-fire" aria-hidden="true">local_fire_department</i>{t("friends.days", { n: streak })}</span>
         <span><i className="material-symbols-outlined is-xp" aria-hidden="true">bolt</i>{xp} XP</span>
-        <span><i className="material-symbols-outlined is-rank" aria-hidden="true">trophy</i>{rank ? t("friends.rank", { n: rank }) : t("friends.noRank")}</span>
+        <Link to="/friends?tab=league"><i className="material-symbols-outlined is-rank" aria-hidden="true">trophy</i>{rank ? t("friends.rank", { n: rank }) : t("friends.noRank")}</Link>
         <span><i className="material-symbols-outlined is-step" aria-hidden="true">task_alt</i>{t("friends.stepsN", { n: steps })}</span>
       </div>
     </>
@@ -339,10 +340,51 @@ function PageHead({ title, close }) {
 }
 
 /** /friends — Bạn bè | Lời mời. */
+/**
+ * Thi đua tuần: đếm ngược tới 00:00 thứ Hai, mục tiêu gần nhất tự tính ("+N XP để vượt X"),
+ * top 3 đeo huy chương, hàng của mình nổi bật. Ít chữ: số, huy chương, ảnh nhân vật.
+ */
+function League({ rows }) {
+  const { t } = useEduText();
+  const left = leagueTimeLeft();
+  const mine = rows.findIndex((r) => r.me);
+  const ahead = mine > 0 ? rows[mine - 1] : null;
+  return (
+    <>
+      <div className="fr-league-head">
+        <span className="material-symbols-outlined" aria-hidden="true">trophy</span>
+        <b>{t("friends.league")}</b>
+        <small><span className="material-symbols-outlined" aria-hidden="true">schedule</span>{t("friends.endsIn", left)}</small>
+      </div>
+      {mine < 0 ? (
+        <Link to="/learn" className="fr-league-goal"><span className="material-symbols-outlined" aria-hidden="true">bolt</span>{t("friends.notRanked")}<span className="material-symbols-outlined" aria-hidden="true">chevron_right</span></Link>
+      ) : (
+        <p className="fr-league-goal"><span className="material-symbols-outlined" aria-hidden="true">{ahead ? "trending_up" : "workspace_premium"}</span>{ahead ? t("friends.gap", { n: ahead.xp - rows[mine].xp + 1, name: ahead.name }) : t("friends.leading")}</p>
+      )}
+      {rows.length ? (
+        <ol className="fr-league">
+          {rows.map((row, i) => (
+            <li key={row.code} className={row.me ? "is-me" : ""}>
+              {/* Top 3: huy hiệu tròn CÓ SỐ (không chỉ dựa vào màu vàng/bạc/đồng — người mù màu vẫn đọc được). */}
+              <span className={`fr-rank${i < 3 ? ` is-top is-top${i + 1}` : ""}`}>{i + 1}</span>
+              <Link to={`/u/${row.code}`} className="fr-league-who">
+                <PersonaAvatar avatar={row.avatar} name={row.name} size={40} />
+                <b className="nick-font">{row.me ? t("friends.you") : row.name}</b>
+              </Link>
+              <b className="fr-league-xp">{t("friends.xp", { n: row.xp })}</b>
+            </li>
+          ))}
+        </ol>
+      ) : <p className="fr-empty">{t("friends.leagueEmpty")}</p>}
+    </>
+  );
+}
+
 export default function EduFriends() {
   const { t } = useEduText();
   const { data, act } = useSocial();
-  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).get("tab") === "requests" ? "requests" : "friends"));
+  // Mặc định mở Thi đua: thấy ngay mình đứng đâu và còn bao lâu. ?tab=friends|requests mở tab khác.
+  const [tab, setTab] = useState(() => ({ requests: "requests", friends: "friends" })[new URLSearchParams(window.location.search).get("tab")] || "league");
   if (!data) return <EduSkeleton rows={6} />;
   if (data.failed) return <section className="edu-page"><p className="fr-empty">{t("friends.failed")}</p></section>;
   const friends = (data.friends || []).filter((r) => !r.me);
@@ -353,10 +395,11 @@ export default function EduFriends() {
     <section className="edu-page fr">
       <PageHead title={t("friends.title")} />
       <div className="fr-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === "league"} onClick={() => setTab("league")}>{t("friends.tab.league")}</button>
         <button type="button" role="tab" aria-selected={tab === "friends"} onClick={() => setTab("friends")}>{t("friends.title")}</button>
         <button type="button" role="tab" aria-selected={tab === "requests"} onClick={() => setTab("requests")}>{t("friends.tabRequests")}{ins.length > 0 && <i>{ins.length}</i>}</button>
       </div>
-      {tab === "friends" ? (
+      {tab === "league" ? <League rows={data.league || []} /> : tab === "friends" ? (
         friends.length ? <ul className="fr-list">{friends.map((row) => <PersonRow key={row.code} row={row} />)}</ul>
           : <div className="fr-empty"><p>{t("friends.friendsEmpty")}</p><Link className="edu-btn" to="/friends/find">{t("friends.addFriends")}</Link></div>
       ) : (

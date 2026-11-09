@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { playEduSound } from "./eduSound";
 import { useEduCourse } from "./useEduCourse";
 import DevSite from "./DevTop";
@@ -8,14 +8,12 @@ import { clearCache, readCache, writeCache } from "../lib/offlineCache";
 import { hugoCoderApi } from "../services/api/modules/hugoCoderApi";
 import { useEduHead } from "./eduHead";
 import { needsWelcome, readConsent, rememberAccount, takePendingGoal } from "./eduAccounts";
-import EduShell, { EduInstallGate, EduProfile, EduSettingsPage, EduStore } from "./EduShell";
 import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
 import { useEduPrefs } from "./useEduPrefs";
 import { useEduText } from "./eduText";
 import { changeAppLanguage } from "../i18n/config";
 import { installEduTapSounds } from "./eduSound";
-import { StreakCelebration, useStreakCelebration } from "./EduStreak";
 import { PersonaGate, usePersona } from "./EduPersona";
 import EduStatus, { EduErrorBoundary } from "./EduStatus";
 import { API_BASE } from "../config/apiBase";
@@ -39,6 +37,25 @@ const PAGES = {
   practice: () => import("./EduPractice.jsx"),
 };
 const EduLanding = lazy(PAGES.landing);
+// Vỏ app (thanh điều hướng, cửa hàng, cài đặt…) + màn mừng chuỗi lửa chỉ tải khi cần: khách ở trang chủ không phải tải chúng.
+const shellPart = (name) => lazy(() => import("./EduShell").then((m) => ({ default: m[name] })));
+const EduShell = shellPart("default");
+const EduInstallGate = shellPart("EduInstallGate");
+const EduProfile = shellPart("EduProfile");
+const EduSettingsPage = shellPart("EduSettingsPage");
+const EduStore = shellPart("EduStore");
+const StreakCelebration = lazy(() => PAGES.streak().then((m) => ({ default: m.StreakCelebration })));
+
+/** Nghe sự kiện mốc chuỗi lửa (EduStreak phát) — giữ ở đây để không kéo cả EduStreak vào gói đầu. */
+function useStreakCelebration() {
+  const [event, setEvent] = useState(null);
+  useEffect(() => {
+    const on = (e) => setEvent(e.detail);
+    window.addEventListener("edu:streak-milestone", on);
+    return () => window.removeEventListener("edu:streak-milestone", on);
+  }, []);
+  return useMemo(() => ({ event, close: () => setEvent(null) }), [event]);
+}
 const EduLogin = lazy(PAGES.login);
 const EduOnboard = lazy(PAGES.onboard);
 const EduWelcome = lazy(PAGES.welcome);
@@ -195,18 +212,23 @@ export default function EducationApp() {
         .then(() => refresh()).catch(() => {});
     }
   }, [signedIn, persona, session, refresh]);
+  // Đã cho phép thông báo: đăng ký lại push mỗi lần mở app (máy chủ dọn đăng ký chết; trước đây chỉ làm khi mở Cài đặt).
+  useEffect(() => {
+    if (!signedIn || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    import("../utils/webPushHelper").then(({ webPushHelper }) => webPushHelper.registerAndSubscribe(session.email)).catch(() => {});
+  }, [signedIn, session?.email]);
   // Lời đồng ý ở màn chào chỉ nằm trên máy: gửi lên máy chủ làm bằng chứng nếu máy chủ chưa có phiên bản này.
   const consentV = learner?.consentV;
   useEffect(() => {
     const consent = readConsent();
-    if (!signedIn || consentV === undefined || !consent?.v || consentV >= consent.v) return;
+    if (welcome || !signedIn || consentV === undefined || !consent?.v || consentV >= consent.v) return;
     fetch(`${API_BASE}/me/consent`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(consent) })
       .then((r) => {
         if (!r.ok) { if (r.status === 400) setWelcome(true); return; }
         setLearner((current) => current && { ...current, consentV: consent.v });
         if (consent.guardianPhone) localStorage.setItem("edu.consent", JSON.stringify({ ...consent, guardianPhone: undefined }));
       }).catch(() => {});
-  }, [signedIn, consentV]);
+  }, [signedIn, consentV, welcome]); // welcome: đăng nhập trước rồi mới đồng ý (trang công khai không hỏi) thì gửi sau khi đồng ý
 
   // Mời tham gia cộng đồng: một lần, sau bài học đầu tiên, không chen vào màn học/onboarding.
   const [inviteSeen, setInviteSeen] = useState(() => { try { return Boolean(localStorage.getItem("edu.communityInvite")); } catch { return true; } });
@@ -223,13 +245,14 @@ export default function EducationApp() {
     && (me?.completedLessons?.length || 0) >= 1 && !me?.communityJoined && !/^\/learn\/./.test(location.pathname);
   return (
     <div className={`edu${textSize === "lg" ? " edu-text-lg" : ""}`}>
-      {gated && <EduInstallGate />}
-      {welcome && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
+      {gated && <Suspense fallback={null}><EduInstallGate /></Suspense>}
+      {/* Trang công khai hiện ngay, không bị hộp đồng ý chặn: chỉ hỏi khi bấm vào học / đăng nhập (cookie chỉ loại thiết yếu nên không cần banner). */}
+      {welcome && !publicPage && <Suspense fallback={null}><EduWelcome onDone={() => setWelcome(false)} /></Suspense>}
       {!welcome && !gated && persona && !persona.complete && <PersonaGate current={persona} onDone={setPersona} />}
       {/* Hồ sơ riêng tư (ngày sinh, tỉnh/thành, sở thích, giới tính): mới đăng ký thì hỏi ngay sau tạo nhân vật; thành viên cũ hỏi lần mở app tới. */}
       {!welcome && !gated && persona?.complete && persona.profileDone === false && <Suspense fallback={null}><ProfileGate current={persona} onDone={setPersona} /></Suspense>}
       {showInvite && <Suspense fallback={null}><CommunityInvite onLearnerUpdate={mergeLearner} onClose={closeInvite} /></Suspense>}
-      {celebration.event && <StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} />}
+      {celebration.event && <Suspense fallback={null}><StreakCelebration key={`${celebration.event.count}-${celebration.event.joy || 0}`} {...celebration.event} onClose={celebration.close} /></Suspense>}
       {!gated && <EduErrorBoundary><Suspense fallback={<Loading />}><Routes>
         <Route path="/" element={signedIn ? <Navigate to="/learn" replace /> : standalone ? <EduOnboard /> : <EduLanding />} />
         {/* Tải lại cả trang sau đăng nhập: bộ nhớ đệm bài học (401 lúc còn là khách) và phiên mới cùng sạch. */}
@@ -253,7 +276,7 @@ export default function EducationApp() {
           <Route path="/feedback" element={signedIn ? <EduFeedback /> : needsLogin} />
           <Route path="/ads" element={signedIn ? <EduCommunity /> : needsLogin} />
           <Route path="/community/*" element={<Navigate to="/ads" replace />} />
-          <Route path="/practice" element={signedIn ? <EduPractice onLearnerUpdate={mergeLearner} /> : needsLogin} />
+          <Route path="/practice" element={signedIn ? <EduPractice learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/store" element={signedIn ? <EduStore learner={me} onLearnerUpdate={mergeLearner} /> : needsLogin} />
           <Route path="/friends" element={signedIn ? <EduFriends /> : needsLogin} />
           <Route path="/friends/find" element={signedIn ? <EduFindFriends /> : needsLogin} />

@@ -10,7 +10,7 @@ import { gemText } from "./gems";
 import { STUDIO_SOCIAL_LINKS } from "../config/studioSocialLinks";
 import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
-import { EduBrand, EduInstall } from "./EduShell";
+import { EduBrand, EduInstall } from "./EduBrand";
 import { rich, useEduText } from "./eduText";
 import { playEduSound } from "./eduSound";
 import { EDU_LANGS } from "./eduCopy";
@@ -36,9 +36,6 @@ gsap.registerPlugin(ScrollTrigger);
 // Chữ của ba thẻ nằm ở eduCopy (landing.ways), theo đúng thứ tự này.
 const WAYS = [{ icon: "bolt", tone: "yellow" }, { icon: "construction", tone: "blue" }, { icon: "quiz", tone: "pink" }];
 const CARD_TILT = [-4, 3, -2];
-
-// Câu hỏi + lời giải nằm ở eduCopy (landing.sample); đáp án là mã nên không dịch.
-const SAMPLE = { options: ["<title>", "<h1>", "<header>"], answer: 1 };
 
 // Ô ngôn ngữ / khái niệm lập trình. Chữ, không dùng logo thương hiệu.
 const TILES = [
@@ -153,45 +150,6 @@ function idleHops(el, h) {
   return tl;
 }
 
-function SampleQuiz({ picked, onPick, tapping }) {
-  const { t } = useEduText();
-  const right = picked === SAMPLE.answer;
-  return (
-    <div className="edu-quiz">
-      <p className="edu-quiz-q">{t("landing.sample.question")}</p>
-      <div className="edu-quiz-options">
-        {SAMPLE.options.map((option, index) => (
-          <button
-            key={option}
-            type="button"
-            className={picked === null ? "" : index === SAMPLE.answer ? "is-right" : index === picked ? "is-wrong" : ""}
-            onClick={() => onPick(index)}
-            disabled={picked !== null}
-          >
-            <code>{option}</code>
-            {tapping && index === SAMPLE.answer && <span className="material-symbols-outlined edu-tap" aria-hidden="true">touch_app</span>}
-          </button>
-        ))}
-      </div>
-      {picked !== null && (
-        <p className={`edu-quiz-result ${right ? "is-right" : "is-wrong"}`} role="status">
-          {right ? t("landing.sample.right", { joy: GEMS_PER_CORRECT }) : t("landing.sample.wrong")} {t("landing.sample.why")}
-          <button type="button" onClick={() => onPick(null)}>{t("landing.sample.retry")}</button>
-        </p>
-      )}
-    </div>
-  );
-}
-
-const Hat = () => (
-  <svg className="edu-prof-hat" viewBox="0 0 100 50" aria-hidden="true">
-    <path d="M50 4 98 22 50 40 2 22Z" fill="#3c3c3c" />
-    <path d="M24 30v12c0 4 12 8 26 8s26-4 26-8V30L50 40Z" fill="#2b2b2b" />
-    <path d="M84 24v18" stroke="#ffc800" strokeWidth="4" strokeLinecap="round" />
-    <circle cx="84" cy="44" r="4" fill="#ffc800" />
-  </svg>
-);
-
 const Way = ({ way, text, className = "" }) => (
   <li className={`edu-way edu-way--${way.tone} ${className}`}>
     <span className="material-symbols-outlined" aria-hidden="true">{way.icon}</span>
@@ -218,7 +176,8 @@ function Hero() {
     tl.from(".h-pad", { scaleX: 0, duration: 0.45, ease: "power2.out" });
     drop(tl, ".h-buddy", 460, 0.2);                                   // bạn xanh rơi xuống giữa sân
     gsap.utils.toArray(".h-friend").forEach((el, i) => drop(tl, el, 300 + (i % 3) * 60, 0.75 + i * 0.13, { e: 0.35 }));
-    tl.from(".edu-hero-copy > *", { y: 24, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, 0.1);
+    // clearProps: .edu-btn có transition transform nên GSAP có thể đọc giá trị dở dang và kẹt lệch; xong thì trả về CSS (giữ cả hiệu ứng nhấn :active).
+    tl.from(".edu-hero-copy > *", { y: 24, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", clearProps: "transform,opacity" }, 0.1);
     const end = tl.duration();
     tl.add(idleHops(".h-buddy", 70), end + 0.4);
     gsap.utils.toArray(".h-friend").forEach((el, i) => tl.add(idleHops(el, 46), end + 1 + i * 0.55));
@@ -239,14 +198,23 @@ function Hero() {
         </div>
         <div className="edu-hero-copy">
           <h1>{t("landing.hero")}</h1>
-          {/* Điện thoại (chưa cài): một nút "Khám phá" cuộn xuống phần giới thiệu; học thì phải cài app. */}
+          {/* Điện thoại (chưa cài): học chỉ trong app, nên nút chính là Cài ứng dụng; "Khám phá" là phụ. */}
           {phone ? (
-            <button type="button" className="edu-btn edu-btn--wide" onClick={(event) => event.currentTarget.closest(".edu-hero").nextElementSibling?.scrollIntoView({ behavior: "smooth" })}>
-              {t("landing.explore")} <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
-            </button>
+            <>
+              <EduInstall className="edu-btn edu-btn--wide" />
+              <button type="button" className="edu-btn edu-btn--ghost edu-btn--wide" onClick={(event) => event.currentTarget.closest(".edu-hero").nextElementSibling?.scrollIntoView({ behavior: "smooth" })}>
+                {t("landing.explore")} <span className="material-symbols-outlined" aria-hidden="true">expand_more</span>
+              </button>
+            </>
           ) : (
             <>
               <Link className="edu-btn edu-btn--wide" to="/learn">{t("landing.startLearning")}</Link>
+              {/* Ba cam kết dạng biểu tượng + nhãn ngắn (ít chữ, nhìn là hiểu). Chữ tách theo " · " trong landing.noAccount. */}
+              <ul className="edu-hero-note">
+                {t("landing.noAccount").split(" · ").map((label, i) => (
+                  <li key={label}><span className="material-symbols-outlined" aria-hidden="true">{["person_off", "block", "visibility_off"][i] || "check"}</span>{label}</li>
+                ))}
+              </ul>
               <Link className="edu-btn edu-btn--ghost edu-btn--wide" to="/login">{t("landing.haveAccount")}</Link>
             </>
           )}
@@ -324,53 +292,6 @@ function FeatureDo() {
       </div>
     }>
       <p>{t("landing.doBody")}</p>
-    </Feature>
-  );
-}
-
-// ── Khối 3: thử một câu ─────────────────────────────────────────────────────
-function FeatureQuiz() {
-  const { t } = useEduText();
-  const [picked, setPicked] = useState(null);
-  const [tapping, setTapping] = useState(false);
-  const [walking, setWalking] = useState(false);
-  const touched = useRef(false);
-  // Câu trắc nghiệm là thật: giáo sư đi vào bấm mẫu, trừ khi người xem đã tự bấm trước.
-  const scope = useScene((tl) => {
-    tl.from(".f3-phone", { y: 60, opacity: 0, duration: 0.6, ease: "back.out(1.4)" })
-      // Đi bộ: tăng tốc rồi hãm lại, nhịp nhún bước do CSS .is-walking
-      .from(".f3-prof", { x: 300, duration: 1.6, ease: "power1.inOut", onStart: () => setWalking(true), onComplete: () => setWalking(false) })
-      .call(() => setTapping(!touched.current))
-      .to(".f3-prof", { rotate: 7, duration: 0.18, ease: "power2.out" })                // ngả ra lấy đà
-      .to(".f3-prof", { rotate: -18, duration: 0.09, ease: "power2.in" })               // gõ xuống
-      .call(() => { setTapping(false); if (!touched.current) { setPicked(SAMPLE.answer); playEduSound("success"); } })
-      .to(".f3-prof", { rotate: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, ">0.08");
-    const at = tl.duration();
-    jump(tl, ".f3-fans", 90, at);                                      // bạn xanh mừng: nhảy hai cái
-    jump(tl, ".f3-fans", 60, ">0.02");
-    tl.add(idleHops(".f3-fans", 60), tl.duration() + 1);
-  });
-  const pick = (value) => {
-    touched.current = true;
-    setTapping(false);
-    setPicked(value);
-    if (value !== null) playEduSound(value === SAMPLE.answer ? "success" : "thud", { unlock: true });
-  };
-  return (
-    <Feature scope={scope} title={t("landing.quizTitle")} art={
-      <div>
-        <div className="edu-phone edu-phone--quiz f3-phone">
-          <SampleQuiz picked={picked} onPick={pick} tapping={tapping} />
-        </div>
-        <span className="edu-fans f3-fans" aria-hidden="true">
-          <img src={`/edu/buddy-${picked === SAMPLE.answer ? "correct" : "learn"}.svg`} alt="" />
-        </span>
-        <span className={`edu-art-actor edu-actor--prof f3-prof${walking ? " is-walking" : ""}`} aria-hidden="true">
-          <img src="/edu/prof.svg" alt="" /><Hat />
-        </span>
-      </div>
-    }>
-      <p>{t("landing.quizBody")}</p>
     </Feature>
   );
 }
@@ -521,6 +442,7 @@ function EduFooter() {
       <div className="edu-footer-bottom">
         <b>EDUCATION HUGO</b>
         <span>{t("footer.of")} <HugoLogo className="h-4 w-4" aria-hidden="true" /> Hugo Studio · {t("footer.nonprofit")} · © {new Date().getFullYear()}</span>
+        <small className="edu-footer-note">{t("footer.disclaimer")}</small>
       </div>
     </footer>
   );
@@ -575,13 +497,14 @@ export default function EduLanding() {
       </header>
       <span ref={sentinel} className="edu-sentinel" aria-hidden="true" />
 
-      <Hero />
-      <FeatureFree />
-      <FeatureDo />
-      <FeatureQuiz />
-      <FeatureCourses />
-      <Anywhere />
-      <Final />
+      <main>
+        <Hero />
+        <FeatureFree />
+        <FeatureDo />
+        <FeatureCourses />
+        <Anywhere />
+        <Final />
+      </main>
 
       <EduFooter />
     </div>

@@ -6,7 +6,7 @@ import { detectInstallTarget } from "../config/platform";
 import { useStandalone } from "../hooks/usePWA";
 import { EDU_DEFAULT_PREFS, EDU_GOALS, EDU_REMINDER_HOURS, cleanEduPrefs } from "../../packages/shared/eduPrefs";
 import { changeAppLanguage } from "../i18n/config";
-import { EduInstall } from "./EduShell";
+import { EduInstall } from "./EduBrand";
 import { useEduText } from "./eduText";
 import { EDU_LANGS } from "./eduCopy";
 import { webauthnHelper } from "../utils/webauthnHelper";
@@ -201,6 +201,15 @@ export default function EduSettings({ learner, onLearnerUpdate, embedded = false
         <div className="edu-set-row">
           <div><b>{t("settings.theme")}</b></div>
           <Seg label={t("settings.theme")} value={prefs.theme} options={[["system", t("settings.themeSystem")], ["light", t("settings.themeLight")], ["dark", t("settings.themeDark")]]} onChange={(theme) => set({ theme })} />
+        </div>
+        <div className="edu-set-row">
+          <div>
+            <b>{t("settings.colorSafe")}</b>
+            <small>{t("settings.colorSafeHint")}</small>
+            {/* Mẫu xem trước: đúng/sai bằng màu + dấu, nhìn là thấy khác biệt trước khi bật. */}
+            <span className="edu-cvd-preview" aria-hidden="true"><i className="is-ok">✓</i><i className="is-bad">✕</i></span>
+          </div>
+          <Switch label={t("settings.colorSafe")} checked={prefs.colorSafe} onChange={(colorSafe) => set({ colorSafe })} />
         </div>
         <p className="edu-set-note">{t("settings.note")}</p>
       </div>
