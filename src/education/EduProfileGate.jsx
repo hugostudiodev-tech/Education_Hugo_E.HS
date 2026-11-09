@@ -176,7 +176,9 @@ export default function ProfileGate({ current, onDone, editAll = false }) {
   );
 }
 
-/** Công tắc công khai/riêng tư cho một mục. */
+const INFO_KEYS = ["birthDate", "province", "gender", "hobbies"]; // = PUBLIC_KEYS ở packages/persona/profile.js
+
+/** Công tắc Công khai / Riêng tư. */
 function VisibilitySwitch({ on, busy, onChange, label }) {
   const { t } = useEduText();
   return (
@@ -188,8 +190,9 @@ function VisibilitySwitch({ on, busy, onChange, label }) {
 }
 
 /**
- * Thẻ "Thông tin cá nhân" của chính chủ. Mỗi mục có công tắc Công khai / Riêng tư (mặc định riêng tư);
- * ngày sinh công khai chỉ hiện ngày/tháng. onSaved có → hiện công tắc (Hồ sơ của mình + Cài đặt).
+ * Thẻ "Thông tin cá nhân" của chính chủ. MỘT công tắc cho cả thẻ: Công khai hết hoặc Riêng tư hết
+ * (mặc định riêng tư) — không có trạng thái nửa vời. Ngày sinh công khai chỉ hiện ngày/tháng.
+ * onSaved có → hiện công tắc (Hồ sơ của mình + Cài đặt).
  */
 export function ProfileInfo({ profile, onEdit, onSaved }) {
   const { t, lang } = useEduText();
@@ -197,9 +200,10 @@ export function ProfileInfo({ profile, onEdit, onSaved }) {
   const p = profile || {};
   const pub = p.public || {};
   const genderKey = p.gender === "other" ? "otherAll" : p.gender;
-  const toggle = async (key, on) => {
+  const isPublic = INFO_KEYS.every((key) => pub[key]); // dữ liệu cũ bật lẻ từng mục → coi là riêng tư, bật lại là công khai hết
+  const toggle = async (on) => {
     setBusy(true);
-    try { onSaved(await persona.save({ profile: { public: { [key]: on } } })); } catch { notify.error(t("persona.failed")); } finally { setBusy(false); }
+    try { onSaved(await persona.save({ profile: { public: Object.fromEntries(INFO_KEYS.map((key) => [key, on])) } })); } catch { notify.error(t("persona.failed")); } finally { setBusy(false); }
   };
   const rows = [
     ["birthDate", "cake", p.birthDate ? new Date(`${p.birthDate}T00:00:00`).toLocaleDateString(lang, { day: "2-digit", month: "2-digit", year: "numeric" }) : null],
@@ -215,7 +219,7 @@ export function ProfileInfo({ profile, onEdit, onSaved }) {
       <header className="pg-info-head">
         <b>{t("friends.pg.infoTitle")}</b>
         {onEdit && <button type="button" className="pg-info-edit" onClick={onEdit}><span className="material-symbols-outlined" aria-hidden="true">edit</span>{t("friends.pg.edit")}</button>}
-        {onSaved && <small><span className="material-symbols-outlined" aria-hidden="true">visibility</span>{t("friends.pg.switchHint")}</small>}
+        {onSaved && <VisibilitySwitch on={isPublic} busy={busy} label={t("friends.pg.infoTitle")} onChange={toggle} />}
       </header>
       <ul className="pg-rows">
         {rows.map(([key, icon, value]) => (
@@ -225,11 +229,10 @@ export function ProfileInfo({ profile, onEdit, onSaved }) {
               <small>{t(`friends.pg.rows.${key}`)}</small>
               {value === null ? <b className="is-empty">—</b> : typeof value === "string" ? <b>{value}</b> : value}
             </div>
-            {onSaved && <VisibilitySwitch on={Boolean(pub[key])} busy={busy} label={t(`friends.pg.rows.${key}`)} onChange={(on) => toggle(key, on)} />}
           </li>
         ))}
       </ul>
-      {pub.birthDate && <small className="pg-info-note">{t("friends.pg.birthdayNote")}</small>}
+      {isPublic && <small className="pg-info-note">{t("friends.pg.birthdayNote")}</small>}
     </section>
   );
 }

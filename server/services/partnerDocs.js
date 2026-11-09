@@ -38,6 +38,36 @@ export default function HocSQL() {
         'Next.js: dùng trong Client Component ("use client").',
       ] },
     ],
+    zodiac: [
+      { h: '1. Cài gói mascot' },
+      { p: 'Gói education-hugo-zodiac: 12 nhân vật cung hoàng đạo dạng SVG tự chuyển động, không phụ thuộc thư viện nào (dùng được với React, Vue, Svelte hay HTML thuần). Lệnh dưới đã điền sẵn key của bạn.' },
+      { code: `npm i ${EDU_ORIGIN}/sdk/${key}/education-hugo-zodiac.tgz` },
+      { h: '2. Hiển thị' },
+      { code: `import { ZODIAC, zodiacUrl, zodiacSvg, zodiacOf } from "education-hugo-zodiac";
+
+// Ảnh thường — chuyển động CSS trong SVG vẫn chạy
+<img src={zodiacUrl("leo")} alt="Sư Tử" width="160" height="160" />
+
+// Hoặc chèn thẳng SVG
+el.innerHTML = zodiacSvg("pisces");
+
+// Cung theo ngày sinh
+zodiacOf("2005-04-12"); // "aries"
+
+// Danh sách 12 cung: { id, latin, symbol, vi, start }
+ZODIAC.map((z) => z.vi);
+
+// Bundler hỗ trợ import file: "education-hugo-zodiac/svg/leo.svg"` },
+      { h: 'Tên 12 cung (id)' },
+      { p: 'aries · taurus · geminus · cancer · leo · virgo · libra · scorpius · sagittarius · capricornus · aquarius · pisces' },
+      { h: 'Bản quyền' },
+      { list: [
+        '© Hugo Studio, bảo lưu mọi quyền. Mỗi file SVG có dòng bản quyền — không được gỡ.',
+        'Chỉ hiển thị trên tên miền đã đăng ký với key, trong thời hạn của key.',
+        'Không phân phối lại file, không sửa thành nhân vật khác, không dùng làm logo, hàng in ấn, NFT hay dữ liệu huấn luyện AI.',
+        'Người dùng bật "Giảm chuyển động" trong máy thì nhân vật tự đứng yên.',
+      ] },
+    ],
     api: [
       { p: `Gốc: ${api}. Gửi key qua header X-Edu-Partner-Key. Không cookie, CORS mở cho tên miền đã đăng ký.` },
       { code: `curl -H "X-Edu-Partner-Key: ${key}" \\\n  "${api}/lessons/sql12?lang=en"` },

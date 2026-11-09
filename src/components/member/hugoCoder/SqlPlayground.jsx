@@ -41,10 +41,12 @@ function sameResult(got, want, ordered) {
   return a.every((row, i) => row === b[i]);
 }
 
-export default function SqlPlayground({ id = "", query = "", setup = "", solution, hints = [], ordered = false }) {
+export default function SqlPlayground({ id = "", query = "", setup = "", solution, hints = [], ordered = false, onSolved, onReady }) {
   const { t } = useEduText();
   const db = useRef(null);
   const SQL = useRef(null);
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   const draftKey = id ? `${DRAFT}${id}` : null;
   const [text, setText] = useState(() => (draftKey && read(draftKey)) || query);
   const [out, setOut] = useState(null);
@@ -59,7 +61,9 @@ export default function SqlPlayground({ id = "", query = "", setup = "", solutio
       SQL.current = engineModule;
       db.current = freshDb(engineModule, setup);
       setReady(true);
-    }).catch(() => alive && setOut({ error: t("sqlPlay.loadFail") }));
+      onReadyRef.current?.();
+      // Engine đã tải mà vẫn lỗi = lỗi dữ liệu `setup` (vd. tạo bảng trùng): hiện lỗi thật, đừng đổ cho mạng.
+    }).catch((error) => alive && setOut({ error: SQL.current ? error.message : t("sqlPlay.loadFail") }));
     return () => { alive = false; db.current?.close(); };
   }, [setup]);
 
@@ -84,6 +88,7 @@ export default function SqlPlayground({ id = "", query = "", setup = "", solutio
     try { want = clean.exec(solution).at(-1); } finally { clean.close(); }
     if (sameResult(results.at(-1), want, ordered)) {
       setSolved(true);
+      onSolved?.(); // vd. thử thách bấm giờ ở /developers
       if (draftKey) write(`${draftKey}.ok`, "1");
       playEduSound("success");
     } else {

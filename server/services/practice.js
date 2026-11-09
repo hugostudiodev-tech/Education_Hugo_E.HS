@@ -7,7 +7,7 @@ import { addXp, XP_REVIEW } from './social.js';
 import { gradeStepQuiz, PASS_PERCENT } from './grading.js';
 import { notify } from '../lib/notify.js';
 import { fail } from '../lib/limits.js';
-import { vnClock } from '../../packages/shared/eduPrefs.js';
+import { cleanEduPrefs, clockIn, dayStartIn, vnClock } from '../../packages/shared/eduPrefs.js';
 import { findStep } from '../../packages/courses/index.js';
 import { localizeCourse } from '../../packages/courses/coding/localize.js';
 import { stepLessons } from '../../packages/courses/coding/lessons.js';
@@ -25,17 +25,19 @@ const dayStart = (day) => new Date(`${day}T00:00:00+07:00`);
 const quizOf = (found, lang) => publicQuiz((found.course.localize || localizeCourse)(found.step, lang).quiz);
 const playable = (id) => { const f = findStep(id); return f && !f.step.draft && f.step.quiz?.length ? f : null; };
 
-/** 3 nhiệm vụ hôm nay, đếm từ nhật ký học (giờ VN). */
+/** 3 nhiệm vụ hôm nay, đếm từ nhật ký học — "hôm nay" theo múi giờ thiết bị của người học. */
 export async function questsOf(email, doc) {
-  const { day } = vnClock();
-  const rows = await Activity.find({ email, createdAt: { $gte: dayStart(day) } }).select('kind stepId lesson score').lean();
+  const me = doc?.prefs ? doc : await Learner.findOne({ email }).select('prefs questDay').lean();
+  const zone = cleanEduPrefs(me?.prefs).timeZone;
+  const { day } = clockIn(new Date(), zone);
+  const rows = await Activity.find({ email, createdAt: { $gte: dayStartIn(day, zone) } }).select('kind stepId lesson score').lean();
   const lessons = new Set(rows.filter((r) => r.kind === 'lesson').map((r) => `${r.stepId}:${r.lesson}`)).size;
   const list = [
     { id: 'lessons', goal: 2, done: Math.min(2, lessons) },
     { id: 'quiz', goal: 1, done: rows.some((r) => ['quiz', 'review', 'challenge'].includes(r.kind) && r.score >= 80) ? 1 : 0 },
     { id: 'review', goal: 1, done: rows.some((r) => ['review', 'practice', 'challenge'].includes(r.kind)) ? 1 : 0 },
   ];
-  return { day, list, complete: list.every((q) => q.done >= q.goal), claimed: doc?.questDay === day, gems: QUEST_GEMS };
+  return { day, list, complete: list.every((q) => q.done >= q.goal), claimed: me?.questDay === day, gems: QUEST_GEMS };
 }
 
 export async function claimQuests(email) {
@@ -197,7 +199,7 @@ export async function playChallenge(email, id, answers) {
 }
 
 export async function practiceView(email) {
-  const doc = (await Learner.findOne({ email }).select('completed scores reviewedOn mistakes questDay').lean()) || {};
+  const doc = (await Learner.findOne({ email }).select('completed scores reviewedOn mistakes questDay prefs').lean()) || {};
   const [quests, challenges] = await Promise.all([questsOf(email, doc), challengesOf(email)]);
   return { quests, reviews: dueReviews(doc, quests.day), mistakes: countMistakes(doc.mistakes), challenges };
 }

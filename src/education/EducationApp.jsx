@@ -212,6 +212,15 @@ export default function EducationApp() {
         .then(() => refresh()).catch(() => {});
     }
   }, [signedIn, persona, session, refresh]);
+  // Giờ theo THIẾT BỊ: múi giờ máy khác múi đã lưu (mới đăng ký, đi nước khác) thì tự đồng bộ —
+  // chuỗi lửa, mục tiêu ngày, nhiệm vụ và giờ nhắc tính theo ngày nơi người học đang ở.
+  const savedZone = learner?.edu?.prefs?.timeZone;
+  useEffect(() => {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!signedIn || !savedZone || !zone || zone === savedZone) return;
+    fetch(`${API_BASE}/me/settings`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefs: { timeZone: zone } }) })
+      .then((r) => r.ok && refresh()).catch(() => {});
+  }, [signedIn, savedZone, refresh]);
   // Đã cho phép thông báo: đăng ký lại push mỗi lần mở app (máy chủ dọn đăng ký chết; trước đây chỉ làm khi mở Cài đặt).
   useEffect(() => {
     if (!signedIn || typeof Notification === "undefined" || Notification.permission !== "granted") return;

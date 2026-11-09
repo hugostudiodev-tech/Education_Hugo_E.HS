@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <!-- Scorpius (♏, Bọ Cạp / Thiên Yết) — mascot cung hoàng đạo của Education Hugo. Thiết kế gốc © Hugo Studio.
+       Theo khuôn geminus.svg (style đất sét cast-*.svg). Riêng Scorpius: thân vàng #FFBE1A, hai càng kẹp,
+       đuôi đốt cong qua đầu đung đưa, ngòi nhọn ngoắc ngoắc. -->
+  <style>
+    .s-hop{transform-box:fill-box;transform-origin:50% 100%;animation:s-hop 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .s-shadow{transform-box:fill-box;transform-origin:50% 50%;animation:s-shadow 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .s-eye{transform-box:fill-box;transform-origin:50% 50%;animation:s-blink 3.6s infinite}
+    .s-mouth{transform-box:fill-box;transform-origin:50% 0;animation:s-grin 1.2s ease-in-out infinite}
+    .s-arm{transform-box:fill-box;transform-origin:100% 100%;animation:s-wave 1.2s ease-in-out infinite}
+    .s-armR{animation-delay:-.6s}
+    .s-jawL{transform-box:fill-box;transform-origin:100% 100%;animation:s-snipL .6s ease-in-out infinite}
+    .s-jawR{transform-box:fill-box;transform-origin:0 100%;animation:s-snipR .6s ease-in-out infinite}
+    .s-tail{transform-box:view-box;transform-origin:68px 44px;animation:s-sway 1.8s ease-in-out infinite}
+    .s-sting{transform-box:view-box;transform-origin:57px 14px;animation:s-flick .9s ease-in-out infinite}
+    @keyframes s-hop{0%,100%{transform:translateY(0) scale(1.05,.94)}15%{transform:translateY(0) scale(.96,1.05)}45%{transform:translateY(-7px) rotate(-3deg)}70%{transform:translateY(0) scale(1.03,.96) rotate(2deg)}}
+    @keyframes s-shadow{0%,100%,70%{transform:scale(1)}45%{transform:scale(.72);opacity:.6}}
+    @keyframes s-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+    @keyframes s-grin{0%,100%{transform:scaleY(1)}45%{transform:scaleY(1.2)}}
+    @keyframes s-wave{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+    @keyframes s-snipL{0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+    @keyframes s-snipR{0%,100%{transform:rotate(0)}50%{transform:rotate(18deg)}}
+    @keyframes s-sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(6deg)}}
+    @keyframes s-flick{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <defs>
+    <path id="s-body" d="M27 92c-4-9-5-19-3-30 3-16 12-28 26-28s23 12 26 28c2 11 1 21-3 30-9 1.6-37 1.6-46 0"/>
+    <clipPath id="s-clip"><use href="#s-body"/></clipPath>
+    <mask id="s-lit"><use href="#s-body" fill="#fff"/><use href="#s-body" fill="#000" transform="translate(2.8 3.2)"/></mask>
+    <mask id="s-dim"><use href="#s-body" fill="#fff"/><use href="#s-body" fill="#000" transform="translate(-2.8 -3.2)"/></mask>
+    <!-- Một cánh tay + càng (bên trái); bên phải là bản lật gương -->
+    <g id="s-arm-shape">
+      <path d="M27 72Q16 68 15 56" stroke="#ffbe1a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M27 72Q16 68 15 56" stroke="#44403c" stroke-width="5" stroke-linecap="round" opacity=".1"/>
+      <g transform="translate(15 54)">
+        <path class="s-jawL" d="M0 2C-6.5 2-8.5-5.5-5.5-11c1-2 2.8-2.8 4.6-2.8l0 8.4Z" fill="#ffbe1a"/>
+        <path class="s-jawR" d="M0 2C6.5 2 8.5-5.5 5.5-11c-1-2-2.8-2.8-4.6-2.8l0 8.4Z" fill="#ffbe1a"/>
+        <path d="M-5.5-10c1-2 2.4-2.8 3.8-3" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".5"/>
+      </g>
+    </g>
+  </defs>
+
+  <ellipse class="s-shadow" cx="50" cy="92.8" rx="26" ry="3.2" fill="#44403c" opacity=".13"/>
+
+  <g class="s-hop">
+    <!-- Đuôi đốt cong qua đầu (sau thân) -->
+    <g class="s-tail" stroke="#e0a000" stroke-width="1">
+      <circle cx="68" cy="42" r="5.5" fill="#ffbe1a"/>
+      <circle cx="73" cy="33" r="5" fill="#ffbe1a"/>
+      <circle cx="72" cy="24" r="4.5" fill="#ffbe1a"/>
+      <circle cx="66" cy="17" r="4" fill="#ffbe1a"/>
+      <g class="s-sting">
+        <circle cx="58" cy="14" r="3.6" fill="#ffbe1a"/>
+        <path d="M55.5 11.5c-4.5-.5-8 2.5-8.5 8.5 2-2.6 4.6-3.6 8-3" fill="#c98700" stroke="none"/>
+      </g>
+      <path d="M71 30.5c1-1 2.2-1.4 3.2-1.2M70.5 21.5c.8-.9 1.8-1.2 2.8-1M64.5 14.6c.7-.7 1.6-1 2.5-.9" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity=".55"/>
+    </g>
+
+    <!-- Hai càng -->
+    <g class="s-arm"><use href="#s-arm-shape"/></g>
+    <g transform="translate(100 0) scale(-1 1)"><g class="s-arm s-armR"><use href="#s-arm-shape"/></g></g>
+
+    <!-- Thân + viền đất sét -->
+    <g clip-path="url(#s-clip)">
+      <rect width="100" height="100" fill="#ffbe1a"/>
+      <rect width="100" height="100" fill="#fff" opacity=".2" mask="url(#s-lit)"/>
+      <rect width="100" height="100" fill="#44403c" opacity=".12" mask="url(#s-dim)"/>
+    </g>
+
+    <!-- Mắt (eyes-even) -->
+    <g transform="translate(29 43)">
+      <circle cx="10.5" cy="11" r="7" fill="#44403c" opacity=".15"/><circle cx="32.5" cy="11" r="7" fill="#44403c" opacity=".15"/>
+      <circle cx="10" cy="10" r="7" fill="#fff"/><circle cx="32" cy="10" r="7" fill="#fff"/>
+      <g class="s-eye"><circle cx="11" cy="11.8" r="2.9" fill="#44403c"/><circle cx="10" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+      <g class="s-eye"><circle cx="31" cy="11.8" r="2.9" fill="#44403c"/><circle cx="30" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+    </g>
+
+    <ellipse cx="32" cy="64" rx="4" ry="2.4" fill="#ff8fa3" opacity=".7"/>
+    <ellipse cx="68" cy="64" rx="4" ry="2.4" fill="#ff8fa3" opacity=".7"/>
+
+    <!-- Miệng cười (mouth-laugh) -->
+    <g transform="translate(37 62)"><g class="s-mouth">
+      <path d="M4.5 1.8h17a8.5 8.5 0 0 1-17 0" fill="#44403c"/>
+      <path d="M6.3 1.8h13.4v1.6a1.2 1.2 0 0 1-1.2 1.2h-11a1.2 1.2 0 0 1-1.2-1.2Z" fill="#fff"/>
+      <path d="M10.5 7h5v.4a2.5 2.5 0 0 1-5 0Z" fill="#c96f5e"/>
+    </g></g>
+  </g>
+</svg>

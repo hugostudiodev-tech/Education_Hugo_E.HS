@@ -9,3 +9,5 @@ dist
 .env*
 dist-sdk
 sdk/dist
+zodiac/svg
+zodiac/index.js

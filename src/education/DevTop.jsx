@@ -14,8 +14,8 @@ export default function DevSite({ children }) {
       <header className="dev-top">
         <Link to="/developers" className="dev-brand"><img src="/edu/cast-1.svg" alt="" width="32" height="32" /><span>Education Hugo <small>Nhà phát triển</small></span></Link>
         <nav aria-label="Mục lục">
-          <Link to="/developers#ui">Thư viện mở</Link>
-          <Link to="/developers#step">Thư viện step</Link>
+          <Link to="/developers?tab=ui">Thư viện mở</Link>
+          <Link to="/developers?tab=step">Thư viện step</Link>
           <Link to="/partners">Quy định đối tác</Link>
         </nav>
         <Link to="/learn" className="eh-btn dev-top-cta">Vào học</Link>

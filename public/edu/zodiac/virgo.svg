@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <!-- Virgo (♍, Xử Nữ) — mascot cung hoàng đạo của Education Hugo. Thiết kế gốc © Hugo Studio.
+       Theo khuôn geminus.svg (style đất sét cast-*.svg). Riêng Virgo: cô bé tóc nâu dài có mái, mặc váy tím #9B5DE5 cổ trắng, nơ tím trên tóc — tóc đung đưa, nơ nảy. -->
+  <style>
+    .m-hop{transform-box:fill-box;transform-origin:50% 100%;animation:m-hop 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .m-shadow{transform-box:fill-box;transform-origin:50% 50%;animation:m-shadow 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .m-eye{transform-box:fill-box;transform-origin:50% 50%;animation:m-blink 3.6s infinite}
+    .m-mouth{transform-box:fill-box;transform-origin:50% 0;animation:m-grin 1.2s ease-in-out infinite}
+    .m-flick{transform-box:fill-box;transform-origin:100% 50%;animation:m-flick 2.4s ease-in-out infinite}
+    .m-sway{transform-box:fill-box;transform-origin:50% 0;animation:m-sway 1.2s ease-in-out infinite}
+    @keyframes m-hop{0%,100%{transform:translateY(0) scale(1.05,.94)}15%{transform:translateY(0) scale(.96,1.05)}45%{transform:translateY(-7px) rotate(-3deg)}70%{transform:translateY(0) scale(1.03,.96) rotate(2deg)}}
+    @keyframes m-shadow{0%,100%,70%{transform:scale(1)}45%{transform:scale(.72);opacity:.6}}
+    @keyframes m-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+    @keyframes m-grin{0%,100%{transform:scaleY(1)}45%{transform:scaleY(1.2)}}
+    @keyframes m-flick{0%,78%,100%{transform:rotate(0)}86%{transform:rotate(-20deg)}}
+    @keyframes m-sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+    .m-hair{transform-box:fill-box;transform-origin:50% 0;animation:m-hair 1.2s ease-in-out infinite}
+    .m-bow{transform-box:fill-box;transform-origin:50% 50%;animation:m-bow 1.2s ease-in-out infinite}
+    @keyframes m-hair{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+    @keyframes m-bow{0%,100%{transform:rotate(-8deg) scale(1)}45%{transform:rotate(8deg) scale(1.12)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <defs>
+    <path id="m-body" d="M27 92c-4-9-5-19-3-30 3-16 12-28 26-28s23 12 26 28c2 11 1 21-3 30-9 1.6-37 1.6-46 0"/>
+    <clipPath id="m-clip"><use href="#m-body"/></clipPath>
+    <mask id="m-lit"><use href="#m-body" fill="#fff"/><use href="#m-body" fill="#000" transform="translate(2.8 3.2)"/></mask>
+    <mask id="m-dim"><use href="#m-body" fill="#fff"/><use href="#m-body" fill="#000" transform="translate(-2.8 -3.2)"/></mask>
+  </defs>
+
+  <ellipse class="m-shadow" cx="50" cy="92.8" rx="26" ry="3.2" fill="#44403c" opacity=".13"/>
+
+  <g class="m-hop">
+    <path class="m-hair" d="M21 76C16 52 26 30 50 30s34 22 29 46c-1 4-4 6-7 6H28c-3 0-6-2-7-6Z" fill="#5a3825"/>
+    <g clip-path="url(#m-clip)">
+      <rect width="100" height="100" fill="#ffdcc3"/>
+      <path d="M0 0H100V45C92 41 84 47 76 43 68 48 59 45 52 40 44 47 34 43 27 48 18 44 9 47 0 45Z" fill="#5a3825"/>
+      <path d="M0 74H100V100H0Z" fill="#9b5de5"/><path d="M40 74l10 6 10-6" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>
+      <rect width="100" height="100" fill="#fff" opacity=".2" mask="url(#m-lit)"/>
+      <rect width="100" height="100" fill="#44403c" opacity=".12" mask="url(#m-dim)"/>
+    </g>
+    <path d="M33.2 50.5 30 48M66.8 50.5 70 48" stroke="#44403c" stroke-width="1.4" stroke-linecap="round"/>
+    <g transform="translate(29 45)">
+      <circle cx="10.5" cy="11" r="7" fill="#44403c" opacity=".15"/><circle cx="32.5" cy="11" r="7" fill="#44403c" opacity=".15"/>
+      <circle cx="10" cy="10" r="7" fill="#fff"/><circle cx="32" cy="10" r="7" fill="#fff"/>
+      <g class="m-eye"><circle cx="11" cy="11.8" r="2.9" fill="#44403c"/><circle cx="10" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+      <g class="m-eye"><circle cx="31" cy="11.8" r="2.9" fill="#44403c"/><circle cx="30" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+    </g>
+    <ellipse cx="32" cy="63" rx="4" ry="2.4" fill="#ff9ec0" opacity=".8"/>
+    <ellipse cx="68" cy="63" rx="4" ry="2.4" fill="#ff9ec0" opacity=".8"/>
+    <g transform="translate(37 61)"><g class="m-mouth">
+      <path d="M4.5 1.8h17a8.5 8.5 0 0 1-17 0" fill="#44403c"/>
+      <path d="M6.3 1.8h13.4v1.6a1.2 1.2 0 0 1-1.2 1.2h-11a1.2 1.2 0 0 1-1.2-1.2Z" fill="#fff"/>
+      <path d="M10.5 7h5v.4a2.5 2.5 0 0 1-5 0Z" fill="#c96f5e"/>
+    </g></g>
+    <g class="m-bow"><path d="M66 36l-8-5v10ZM66 36l8-5v10Z" fill="#9b5de5"/><circle cx="66" cy="36" r="2.4" fill="#7b3fc4"/></g>
+  </g>
+</svg>

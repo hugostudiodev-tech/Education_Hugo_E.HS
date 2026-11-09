@@ -95,4 +95,4 @@ assert.equal(nextLesson(5, [0, 1, 2, 3]), 4);
 
 console.log("Bài nhỏ: mỗi step 2–5 bài, đủ slide, trắc nghiệm cuối — đạt.");
 console.log("Biệt danh: chỉ chữ + emoji · nhân vật: chỉ mã trong danh sách — đạt.");
-console.log("Chuỗi lửa: ranh giới 00:00 giờ VN, 1 lần/ngày, đóng băng, mất chuỗi, phá băng, thưởng mốc — đạt.");
+console.log("Chuỗi lửa: ranh giới 00:00 theo múi giờ thiết bị, 1 lần/ngày, đóng băng, mất chuỗi, phá băng, thưởng mốc — đạt.");

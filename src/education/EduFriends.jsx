@@ -104,7 +104,7 @@ export function CommunityInvite({ onLearnerUpdate, onClose }) {
   return (
     <div className="fr-sheet-backdrop" role="presentation" onClick={onClose}>
       <div className="fr-sheet fr-invite" role="dialog" aria-modal="true" aria-labelledby="fr-invite-title" onClick={(e) => e.stopPropagation()}>
-        <img src="/edu/buddy-done.svg" alt="" width="120" height="120" />
+        <img src="/edu/zodiac/geminus.svg" alt="" width="120" height="120" />
         <h2 id="fr-invite-title">{t("friends.community.title")}</h2>
         <p>{t("friends.community.body")}</p>
         <b className="fr-invite-reward"><GemDot />{t("friends.community.reward", { n: COMMUNITY_REWARD })}</b>

@@ -5,7 +5,14 @@ import { addGems, GEMS_PER_CORRECT } from './gems.js';
 import { addXp, XP_PER_CORRECT, XP_PER_LESSON, XP_REVIEW } from './social.js';
 import { notify } from '../lib/notify.js';
 import { fail } from '../lib/limits.js';
-import { cleanEduPrefs, vnClock } from '../../packages/shared/eduPrefs.js';
+import { cleanEduPrefs, clockIn } from '../../packages/shared/eduPrefs.js';
+
+// Ngày của người học theo múi giờ thiết bị (prefs.timeZone): chuỗi lửa, mục tiêu ngày, nhắc học.
+const zoneOf = (doc) => cleanEduPrefs(doc?.prefs).timeZone;
+async function todayOf(email) {
+  const doc = await Learner.findOne({ email }).select('prefs').lean();
+  return clockIn(new Date(), zoneOf(doc)).day;
+}
 import { THAW_PRICE, addDays, nextMilestone, streakView, studyToday, thawDay } from '../../packages/shared/eduStreak.js';
 import { findStep } from '../../packages/courses/index.js';
 import { stepLessons } from '../../packages/courses/coding/lessons.js';
@@ -30,7 +37,7 @@ export async function snapshot(email, user) {
       .then((r) => r.modifiedCount && notify(email, { key: 'welcome', url: '/learn', tag: 'edu-welcome' }))
       .catch(() => {});
   }
-  const { day } = vnClock();
+  const { day } = clockIn(new Date(), zoneOf(doc));
   return {
     edu: {
       prefs: cleanEduPrefs(doc.prefs),
@@ -72,7 +79,7 @@ async function payMilestone(email, milestone) {
 
 /** Học đạt: giữ lửa hôm nay. Ôn lại một step/bài chỉ giữ lửa 1 lần mỗi 7 ngày (chống nộp script). */
 export async function noteStudy(email, { reviewOf } = {}) {
-  const { day } = vnClock();
+  const day = await todayOf(email);
   if (reviewOf) {
     const key = `reviewedOn.${reviewOf}`;
     const claimed = await Learner.updateOne(
@@ -88,8 +95,8 @@ export async function noteStudy(email, { reviewOf } = {}) {
 
 /** Phá băng một ngày bằng Ngọc: trừ trước, ghi chuỗi hỏng thì hoàn lại. */
 export async function thaw(email, frozenDay) {
-  const { day } = vnClock();
   const doc = await learnerOf(email);
+  const { day } = clockIn(new Date(), zoneOf(doc));
   try { thawDay(doc.streak, frozenDay, day); } catch (error) { throw fail(400, error.code || 'BAD_DAY', error.message); }
   const { balance } = await addGems(email, -THAW_PRICE, 'streak_thaw', { note: `Phá băng ngày ${frozenDay}` });
   let result;
@@ -104,8 +111,8 @@ export async function thaw(email, frozenDay) {
 }
 
 /** Khiên lửa: giữ một khiên có điều kiện rồi phá băng miễn phí; hỏng thì trả khiên. */
-export async function spendShield(email, frozenDay) {
-  const { day } = vnClock();
+export async function spendShield(email, frozenDay, today) {
+  const day = today || await todayOf(email);
   const held = await Learner.updateOne({ email, shields: { $gt: 0 } }, { $inc: { shields: -1 } });
   if (!held.modifiedCount) return null;
   try {
@@ -125,7 +132,7 @@ export async function savePrefs(email, input) {
 }
 
 async function noteStepDone(email) {
-  const { day } = vnClock();
+  const day = await todayOf(email);
   const reset = await Learner.updateOne({ email, day: { $ne: day } }, { $set: { day, dayDone: 1 } });
   if (!reset.matchedCount) await Learner.updateOne({ email }, { $inc: { dayDone: 1 } });
 }
@@ -218,44 +225,49 @@ export async function submitQuiz(email, lessonId, answers) {
 }
 
 /**
- * Chạy mỗi giờ: nhắc theo chuỗi lửa đúng giờ người học chọn; 21h gọi lần cuối;
- * 8h dùng Khiên lửa rồi báo lửa vừa đóng băng.
- * ponytail: limit 500–2000/lượt, đủ cho quy mô hiện tại; đông hơn thì chia lô theo _id.
+ * Chạy mỗi giờ. Mọi mốc theo GIỜ ĐỊA PHƯƠNG của từng người học (prefs.timeZone, lấy từ thiết bị):
+ * nhắc đúng giờ người học chọn; 21h gọi lần cuối; 8h dùng Khiên lửa rồi báo lửa vừa đóng băng.
+ * ponytail: lọc giờ địa phương trong JS, quét tối đa 5000 người hoạt động mỗi giờ — đủ cho quy mô hiện tại;
+ * đông hơn thì lưu sẵn thời điểm UTC của lượt nhắc kế tiếp để lọc bằng index.
  */
 export async function runReminders(now = new Date()) {
-  const { day, hour } = vnClock(now);
   const active = { $gte: new Date(now - 30 * DAY_MS) };
+  const people = await Learner.find({ lastActiveAt: active })
+    .select('email streak prefs shields remindedDay lastCallDay frozenNoticeDay').limit(5000).lean();
   let sent = 0;
-  const due = await Learner.find({ 'prefs.reminder': { $ne: false }, 'prefs.reminderHour': hour, remindedDay: { $ne: day }, lastActiveAt: active }).limit(500).lean();
-  for (const doc of due) {
-    const streak = streakView(doc.streak, day);
-    if (streak.studiedToday) continue;
-    const next = nextMilestone(streak.count);
-    const key = !streak.count ? 'remindNew' : next.day === streak.count + 1 ? 'nearMilestone' : 'remind';
-    await notify(doc.email, { key, vars: { n: streak.count, m: next.day, gems: next.gems, v: Number(day.replaceAll('-', '')) }, url: '/learn', tag: 'edu-reminder' });
-    await Learner.updateOne({ _id: doc._id }, { $set: { remindedDay: day } });
-    sent += 1;
-  }
-  if (hour === 8) {
-    const holders = await Learner.find({ shields: { $gt: 0 }, frozenNoticeDay: { $ne: day }, 'streak.count': { $gte: 1 } }).select('email streak shields prefs').limit(2000).lean();
-    for (const doc of holders) {
-      if (!streakView(doc.streak, day).frozen.includes(addDays(day, -1))) continue;
-      const saved = await spendShield(doc.email, addDays(day, -1));
-      if (!saved) continue;
-      await Learner.updateOne({ _id: doc._id }, { $set: { frozenNoticeDay: day } });
-      if (cleanEduPrefs(doc.prefs).reminder) await notify(doc.email, { key: 'shield', vars: { n: saved.count, s: doc.shields - 1 }, url: '/streak', tag: 'edu-streak' });
+  for (const doc of people) {
+    const prefs = cleanEduPrefs(doc.prefs);
+    const { day, hour } = clockIn(now, prefs.timeZone);
+    const v = Number(day.replaceAll('-', ''));
+    let streak = streakView(doc.streak, day);
+    const yesterday = addDays(day, -1);
+    if (prefs.reminder && hour === prefs.reminderHour && doc.remindedDay !== day && !streak.studiedToday) {
+      const next = nextMilestone(streak.count);
+      const key = !streak.count ? 'remindNew' : next.day === streak.count + 1 ? 'nearMilestone' : 'remind';
+      await notify(doc.email, { key, vars: { n: streak.count, m: next.day, gems: next.gems, v }, url: '/learn', tag: 'edu-reminder' });
+      await Learner.updateOne({ _id: doc._id }, { $set: { remindedDay: day } });
       sent += 1;
     }
-  }
-  if (hour === 21 || hour === 8) {
-    const field = hour === 21 ? 'lastCallDay' : 'frozenNoticeDay';
-    const list = await Learner.find({ 'prefs.reminder': { $ne: false }, [field]: { $ne: day }, 'streak.count': { $gte: hour === 21 ? 3 : 1 }, lastActiveAt: active }).select('email streak').limit(1000).lean();
-    for (const doc of list) {
-      const streak = streakView(doc.streak, day);
-      const send = hour === 21 ? !streak.studiedToday && streak.count >= 3 : streak.count > 0 && streak.frozen.includes(addDays(day, -1));
-      if (!send) continue;
-      await notify(doc.email, { key: hour === 21 ? 'lastCall' : 'frozen', vars: { n: streak.count, f: streak.freezesThisMonth, v: Number(day.replaceAll('-', '')) }, url: '/streak', tag: 'edu-streak' });
-      await Learner.updateOne({ _id: doc._id }, { $set: { [field]: day } });
+    let noticed = doc.frozenNoticeDay === day;
+    if (hour === 8 && !noticed && doc.shields > 0 && streak.count >= 1 && streak.frozen.includes(yesterday)) {
+      const saved = await spendShield(doc.email, yesterday, day);
+      if (saved) {
+        streak = saved;
+        noticed = true;
+        await Learner.updateOne({ _id: doc._id }, { $set: { frozenNoticeDay: day } });
+        if (prefs.reminder) await notify(doc.email, { key: 'shield', vars: { n: saved.count, s: doc.shields - 1 }, url: '/streak', tag: 'edu-streak' });
+        sent += 1;
+      }
+    }
+    if (!prefs.reminder) continue;
+    if (hour === 21 && doc.lastCallDay !== day && streak.count >= 3 && !streak.studiedToday) {
+      await notify(doc.email, { key: 'lastCall', vars: { n: streak.count, f: streak.freezesThisMonth, v }, url: '/streak', tag: 'edu-streak' });
+      await Learner.updateOne({ _id: doc._id }, { $set: { lastCallDay: day } });
+      sent += 1;
+    }
+    if (hour === 8 && !noticed && streak.count > 0 && streak.frozen.includes(yesterday)) {
+      await notify(doc.email, { key: 'frozen', vars: { n: streak.count, f: streak.freezesThisMonth, v }, url: '/streak', tag: 'edu-streak' });
+      await Learner.updateOne({ _id: doc._id }, { $set: { frozenNoticeDay: day } });
       sent += 1;
     }
   }

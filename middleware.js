@@ -4,6 +4,7 @@
 //    Đổi các đường dẫn công khai sang bản dựng sẵn cho SEO (scripts/generate-seo.mjs).
 // 2. Gói thư viện đối tác: /sdk/<key>/education-hugo-react.tgz → kiểm key ở API Hugo
 //    Studio → trả gói ở đường dẫn bí mật dist/_sdk/<SDK_SECRET>.tgz (scripts/publish-sdk.mjs).
+//    /sdk/<key>/education-hugo-zodiac.tgz (12 mascot) → dist/_sdk/<SDK_SECRET>-zodiac.tgz.
 export const config = { matcher: ["/", "/en", "/zh", "/courses/:id", "/sdk/:path*", "/_sdk/:path*"] };
 
 const API = "https://education.hugowishpax.studio/api";
@@ -19,7 +20,9 @@ export default async function middleware(request) {
     if (!process.env.SDK_SECRET) return deny(503, "Gói chưa phát hành.");
     const res = await fetch(`${API}/partner/verify`, { method: "POST", headers: { "x-edu-partner-key": key, "content-type": "application/json" }, body: "{}" }).catch(() => null);
     if (!res?.ok) return deny(res?.status === 401 ? 401 : 503, "Key đối tác không hợp lệ hoặc đã hết hạn. Liên hệ Hugo Studio để được cấp key.");
-    return rewrite(`/_sdk/${process.env.SDK_SECRET}.tgz`, url, { "cache-control": "no-store" });
+    const suffix = { "education-hugo-react.tgz": "", "education-hugo-zodiac.tgz": "-zodiac" }[p.split("/")[3]];
+    if (suffix === undefined) return deny(404, "Not found");
+    return rewrite(`/_sdk/${process.env.SDK_SECRET}${suffix}.tgz`, url, { "cache-control": "no-store" });
   }
   const file = p === "/" ? "/seo-vi.html" : p === "/en" || p === "/zh" ? `/seo-${p.slice(1)}.html` : `/seo-course-${p.split("/")[2]}.html`;
   return rewrite(file, url);

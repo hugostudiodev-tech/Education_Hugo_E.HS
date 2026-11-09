@@ -75,7 +75,7 @@ export default function EduFeedback() {
 
   return (
     <form className="edu-page edu-fb" onSubmit={submit}>
-      <div className="edu-ob-say"><img src="/edu/cast-3.svg" alt="" width="88" height="88" /><p>{t("feedback.intro")}</p></div>
+      <div className="edu-ob-say"><img src="/edu/zodiac/libra.svg" alt="" width="88" height="88" /><p>{t("feedback.intro")}</p></div>
       <h1 className="edu-page-title">{t("feedback.title")}</h1>
       <ol className="edu-fb-list">
         {FEEDBACK_QUESTIONS.map((q, i) => (

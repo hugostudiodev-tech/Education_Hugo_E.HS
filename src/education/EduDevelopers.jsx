@@ -1,9 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { apiFetch } from "../services/api/core/apiClient";
 import { THEME_RULES, themeVars } from "../sdk/theme";
 import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
-import { HAT_SEED } from "../../packages/courses/sql/seed.js";
 import { CONTACT } from "./legalText";
 import EduStatus from "./EduStatus";
 import DevSite from "./DevTop";
@@ -278,31 +277,26 @@ function OpenLibrary() {
       <section id="ui" className="dev-card">
         <span className="eh-badge eh-badge--success">Miễn phí · MIT</span>
         <h2>Education Hugo UI</h2>
-        <p>Thư viện giao diện mở mà Education Hugo đang dùng: nút 3D, ô chọn đáp án, thanh tiến độ, thẻ, nhãn, ô nhập, công tắc và thông báo. Thuần CSS, một tệp khoảng 6 KB (2 KB khi nén), không cần cài gói, dùng được với HTML, React, Vue hay bất kỳ framework nào. Không cần đăng ký, không cần key, dùng cả cho dự án thương mại — chỉ cần giữ dòng ghi công trong tệp.</p>
+        <ul className="dev-facts" aria-label="Đặc điểm">
+          <li><span className="material-symbols-outlined" aria-hidden="true">css</span>Thuần CSS</li>
+          <li><span className="material-symbols-outlined" aria-hidden="true">compress</span>2 KB nén</li>
+          <li><span className="material-symbols-outlined" aria-hidden="true">key_off</span>Không cần key</li>
+          <li><span className="material-symbols-outlined" aria-hidden="true">dark_mode</span>Sáng/tối</li>
+        </ul>
         <div className="dev-ui-row">
           <a className="eh-btn" href={UI_CSS} download="edu-ui.css"><span className="material-symbols-outlined" aria-hidden="true">download</span>Tải edu-ui.css</a>
-          <a className="eh-btn eh-btn--secondary" href="#ui-lab">Tuỳ biến trực tiếp</a>
         </div>
-        <p className="dev-note">Phiên bản {UI_VERSION} · Giấy phép MIT · © Hugo Wishpax Le</p>
-      </section>
-
-      <section id="ui-rules" className="dev-card">
-        <h2>Nguyên tắc</h2>
+        <UiLab tokens={tokens} setTokens={setTokens} dark={dark} setDark={setDark} />
+        <p className="dev-note">Phiên bản {UI_VERSION} · <a href="/ui/LICENSE.txt">Giấy phép MIT</a> · © Hugo Wishpax Le · giữ dòng ghi công trong tệp</p>
+        <details className="dev-more">
+          <summary>Nguyên tắc · Component · Hướng dẫn</summary>
+        <h3>Nguyên tắc</h3>
         <ul className="dev-rules">
           {PRINCIPLES.map(([icon, title, body]) => (
             <li key={icon}><span className="material-symbols-outlined" aria-hidden="true">{icon}</span><div><b>{title}</b><p>{body}</p></div></li>
           ))}
         </ul>
-      </section>
-
-      <section id="ui-lab" className="dev-card">
-        <h2>Tuỳ biến và xem trực tiếp</h2>
-        <p>Đổi màu, bo góc, phông chữ và nền tối — mọi component bên dưới đổi ngay theo.</p>
-        <UiLab tokens={tokens} setTokens={setTokens} dark={dark} setDark={setDark} />
-      </section>
-
-      <section id="ui-components" className="dev-card">
-        <h2>Component</h2>
+        <h3>Component</h3>
         {UI_COMPONENTS.map(([name, cls, demo, code]) => (
           <div key={name} className="dev-comp">
             <h3>{name} <code>.{cls.split(" · ").join(" · .")}</code></h3>
@@ -310,10 +304,7 @@ function OpenLibrary() {
             <Code>{code}</Code>
           </div>
         ))}
-      </section>
-
-      <section id="ui-guide" className="dev-card">
-        <h2>Hướng dẫn dùng</h2>
+        <h3>Hướng dẫn dùng</h3>
         <h3>1. Nạp thư viện</h3>
         <p>Tải tệp về đặt cạnh mã của bạn (khuyên dùng), hoặc nạp thẳng từ Education Hugo:</p>
         <Code>{`<link rel="stylesheet" href="${SITE}${UI_CSS}">`}</Code>
@@ -335,14 +326,115 @@ export function NutHoc({ done, onClick }) {
         <h3>4. Đổi giao diện</h3>
         <p>Ghi đè biến <code>--eh-*</code> ở <code>:root</code> (cả trang) hoặc trên một khối bất kỳ (chỉ khối đó). Chế độ tối tự theo máy; ép sáng/tối bằng <code>data-eh-theme="light"</code> hoặc <code>"dark"</code>.</p>
         <p>Cần trình duyệt hỗ trợ <code>color-mix()</code> (Chrome/Edge 111+, Safari 16.2+, Firefox 113+).</p>
+        </details>
       </section>
     </>
   );
 }
 
+// ── Tab: framework, ngôn ngữ, kỹ thuật khuyên dùng khi tích hợp Education Hugo ──
+// 12 mascot của gói education-hugo-zodiac (ảnh xem trước công khai ở public/edu/zodiac).
+const ZODIAC_IDS = ["aries", "taurus", "geminus", "cancer", "leo", "virgo", "libra", "scorpius", "sagittarius", "capricornus", "aquarius", "pisces"];
+
+const DEV_TABS = [
+  ["challenge", "Thử thách", "timer", "#ff9600"],
+  ["ui", "UI mở", "palette", "#1cb0f6"],
+  ["step", "Thư viện step", "key", "#a560f0"],
+  ["stack", "Khuyên dùng", "recommend", "#58a700"],
+  ["license", "Bản quyền", "copyright", "#3c3c3c"],
+];
+const STACK = [
+  ["Framework", "web", [["React 18+", "Bắt buộc cho thư viện step (peer dependency)"], ["Vite", "Dựng nhanh, tách gói tự động"], ["Next.js", "Đặt component trong \"use client\""], ["HTML thuần", "Đủ cho Education Hugo UI"]]],
+  ["Ngôn ngữ", "code", [["TypeScript / JavaScript ES2020+", "Thư viện xuất ES module"], ["CSS biến --eh-*", "Đổi giao diện không sửa mã"], ["SQL (SQLite)", "Ô SQL chạy ngay trong trình duyệt"]]],
+  ["Kỹ thuật", "tune", [["React.lazy + Suspense", "Chỉ tải khoá học khi người dùng mở"], ["CSP: 'wasm-unsafe-eval'", "Cần cho ô SQL (WebAssembly)"], ["Key qua biến môi trường", "Không ghi cứng key vào mã nguồn"], ["Đăng ký tên miền", "Key chỉ chạy trên tên miền đã đăng ký"]]],
+  ["Trải nghiệm", "accessibility_new", [["prefers-reduced-motion", "Tôn trọng cài đặt giảm chuyển động"], ["Màu + dấu ✓ ✕", "Không chỉ dựa vào màu (người mù màu)"], ["Vùng chạm ≥ 44px", "Theo Apple HIG"]]],
+];
+
+function DevStack() {
+  return (
+    <section className="dev-card">
+      <h2>Khuyên dùng</h2>
+      <div className="dev-stack">
+        {STACK.map(([group, icon, items]) => (
+          <div key={group} className="dev-stack-group">
+            <h3><span className="material-symbols-outlined" aria-hidden="true">{icon}</span>{group}</h3>
+            <ul>{items.map(([name, why]) => <li key={name}><b>{name}</b><small>{why}</small></li>)}</ul>
+          </div>
+        ))}
+      </div>
+      <Code>{`import { lazy, Suspense } from "react";
+import "education-hugo-react/style.css";
+const EducationHugo = lazy(() => import("education-hugo-react").then((m) => ({ default: m.EducationHugo })));
+
+<Suspense fallback={null}>
+  <EducationHugo apiKey={import.meta.env.VITE_EDU_KEY} course="sql" />
+</Suspense>`}</Code>
+    </section>
+  );
+}
+
+// ── Thử thách SQL bấm giờ: "hơn thua" với chính mình — kỷ lục lưu trên máy, hạng có CHỮ (không chỉ màu). ──
+const BEST_KEY = "edu.dev.sqlBest";
+const TIERS = [[60, "Vàng", "#ffd43b"], [180, "Bạc", "#dee2e6"], [Infinity, "Đồng", "#f0b27a"]];
+const CHALLENGE = { solution: "SELECT name, price FROM menu_items ORDER BY price DESC LIMIT 3;", query: "SELECT name, price\nFROM menu_items\n" };
+
+function DevChallenge() {
+  const [start, setStart] = useState(0);
+  const [now, setNow] = useState(0);
+  const [time, setTime] = useState(null);
+  const [best, setBest] = useState(() => { try { return Number(localStorage.getItem(BEST_KEY)) || null; } catch { return null; } });
+  useEffect(() => {
+    if (!start || time !== null) return undefined;
+    const id = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [start, time]);
+  const [round, setRound] = useState(0); // >0: đã mở ô SQL; đồng hồ chỉ chạy khi SQLite sẵn sàng (công bằng)
+  const go = () => { setRound((r) => r + 1); setStart(0); setTime(null); };
+  const ready = () => { const t = Date.now(); setStart(t); setNow(t); };
+  const solved = () => {
+    const sec = Math.round((Date.now() - start) / 100) / 10;
+    setTime(sec);
+    if (!best || sec < best) { setBest(sec); try { localStorage.setItem(BEST_KEY, String(sec)); } catch { /* riêng tư */ } }
+  };
+  const elapsed = start ? (time ?? (now - start) / 1000) : 0;
+  const tier = time !== null ? TIERS.find(([max]) => time <= max) : null;
+  return (
+    <section id="demo" className="dev-card dev-ch">
+      <div className="dev-ch-head">
+        <span className="material-symbols-outlined" aria-hidden="true">timer</span>
+        <h2>Thử thách SQL</h2>
+        <b className="dev-ch-clock">{elapsed.toFixed(1)}s</b>
+        {best && <small title="Kỷ lục của bạn"><span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>{best}s</small>}
+      </div>
+      <p className="dev-ch-task"><b>Top 3</b> món đắt nhất · <code>name</code>, <code>price</code> · giá giảm dần</p>
+      <ol className="dev-ch-tiers" aria-label="Hạng">
+        {TIERS.map(([max, name, color]) => <li key={name}><i style={{ background: color }}>{name}</i>{max === Infinity ? "trên 180s" : `tới ${max}s`}</li>)}
+      </ol>
+      {round ? (
+        <Suspense fallback={<EduStatus kind="loading" compact />}>
+          {/* Không truyền setup: SqlPlayground đã tự nạp HAT_SEED (truyền lại sẽ tạo bảng hai lần → lỗi). */}
+          <SqlPlayground key={round} query={CHALLENGE.query} solution={CHALLENGE.solution} ordered onReady={ready} onSolved={solved} />
+        </Suspense>
+      ) : (
+        <button type="button" className="eh-btn dev-ch-go" onClick={go}><span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>Bắt đầu bấm giờ</button>
+      )}
+      {tier && (
+        <p className="dev-ch-result" role="status">
+          <i style={{ background: tier[2] }}>{tier[1]}</i><b>{time}s</b>{time === best && <span>· Kỷ lục mới</span>}
+          <button type="button" className="eh-btn eh-btn--secondary" onClick={go}>Chơi lại</button>
+        </p>
+      )}
+      <p className="dev-note">Chạy SQLite ngay trong trình duyệt bằng component <code>SqlPlayground</code>, không cần key.</p>
+    </section>
+  );
+}
+
 export default function EduDevelopers() {
-  // Đến từ /partners qua link "/developers#step": cuộn tới đúng mục (router không tự cuộn theo #).
-  useEffect(() => { if (location.hash) setTimeout(() => document.querySelector(location.hash)?.scrollIntoView(), 50); }, []);
+  // Tab theo ?tab= (chia sẻ được, không dùng link #). Link cũ dạng #step/#ui vẫn mở đúng tab.
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("tab") || { "#step": "step", "#partner": "step", "#ui": "ui", "#demo": "challenge", "#license": "license" }[location.hash];
+  const tab = DEV_TABS.some(([id]) => id === asked) ? asked : "challenge";
+  const openTab = (id) => setParams({ tab: id }, { replace: true });
   const [key, setKey] = useState(() => { try { return sessionStorage.getItem(KEY_STORE) || ""; } catch { return ""; } });
   const [partner, setPartner] = useState(null);
   const [state, setState] = useState({ busy: false, error: "" });
@@ -370,24 +462,28 @@ export default function EduDevelopers() {
       <header className="dev-hero">
         <p className="dev-eyebrow">Education Hugo · Nhà phát triển</p>
         <h1 className="edu-page-title">Xây cùng Education Hugo</h1>
-        <p className="dev-lead">Hai thư viện cho người làm web: <b>Education Hugo UI</b> mở và miễn phí cho mọi người, và <b>thư viện step</b> đưa nguyên khoá học vào website của đối tác được duyệt.</p>
-        <div className="dev-pick">
-          <a href="#ui" className="dev-card"><span className="eh-badge eh-badge--success">Miễn phí · ai cũng dùng được</span><b>Education Hugo UI</b><span>Bộ component giao diện thuần CSS. Tải về, tuỳ biến, xem trực tiếp.</span></a>
-          <a href="#step" className="dev-card"><span className="eh-badge">Dành cho đối tác · cần key</span><b>Thư viện step</b><span>Bản đồ chặng, bài học, ô SQL, chấm bài — giống hệt bản gốc.</span></a>
+        <p className="dev-lead">Hai thư viện · một dòng là chạy.</p>
+        <Code>{`<link rel="stylesheet" href="${SITE}${UI_CSS}">\n<button class="eh-btn">Bắt đầu</button>`}</Code>
+        <div className="dev-tabs" role="tablist" aria-label="Khu nhà phát triển">
+          {DEV_TABS.map(([id, label, icon, color]) => (
+            <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => openTab(id)}>
+              <span className="material-symbols-outlined" aria-hidden="true" style={{ background: color }}>{icon}</span>{label}
+            </button>
+          ))}
         </div>
       </header>
 
-      <OpenLibrary />
-
+      {tab === "challenge" && <DevChallenge />}
+      {tab === "ui" && <OpenLibrary />}
+      {tab === "step" && <>
       <section id="step" className="dev-card dev-step-intro">
         <span className="eh-badge">Dành cho đối tác</span>
         <h2>Thư viện step education-hugo-react</h2>
         <p>Đưa khoá học Education Hugo vào website của trường hoặc tổ chức bạn: bản đồ chặng, bài học, ô SQL và chấm bài giống hệt <Link to="/learn">bản gốc</Link>. Bài học tải từ máy chủ Hugo Studio và chỉ đọc được bằng <b>key đối tác</b> do admin cấp.</p>
-        <p>Key được cấp miễn phí khi bạn đáp ứng đủ ba điều kiện:</p>
-        <ol>
-          <li>Từ đủ 18 tuổi và có đầy đủ năng lực hành vi dân sự.</li>
-          <li>Đã có hệ thống dự án của tổ chức hoặc dự án cá nhân, đính kèm thông tin trong mail.</li>
-          <li>Trong mail ghi rõ thời gian xin sử dụng (từ ngày … đến ngày …).</li>
+        <ol className="dev-steps" aria-label="Điều kiện cấp key">
+          <li><span className="material-symbols-outlined" aria-hidden="true">badge</span><b>18+</b><small>Đủ năng lực hành vi dân sự</small></li>
+          <li><span className="material-symbols-outlined" aria-hidden="true">work</span><b>Có dự án</b><small>Tổ chức hoặc cá nhân, đính kèm trong mail</small></li>
+          <li><span className="material-symbols-outlined" aria-hidden="true">date_range</span><b>Thời hạn</b><small>Ghi rõ từ ngày … đến ngày …</small></li>
         </ol>
         <div className="dev-ui-row">
           <a className="eh-btn" href={`mailto:${CONTACT}?subject=Xin%20key%20%C4%91%E1%BB%91i%20t%C3%A1c%20Education%20Hugo`}>Gửi mail xin key</a>
@@ -396,12 +492,8 @@ export default function EduDevelopers() {
         <p className="dev-note">Liên hệ: {CONTACT}</p>
       </section>
 
-      <nav className="dev-toc" aria-label="Mục lục thư viện step">
-        {[["partner", "Nhập key"], ["start", "Cài đặt"], ["components", "Component"], ["theme", "Tuỳ biến"], ["api", "REST API"], ["demo", "Thử ô SQL"], ["license", "Bản quyền"]].map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
-      </nav>
-
       <section id="partner" className="dev-card">
-        <h2>Nhập key đối tác</h2>
+        <h2><span className="material-symbols-outlined" aria-hidden="true">key</span> Key đối tác</h2>
         {unlocked ? (
           <p className="dev-ok"><span className="material-symbols-outlined">verified</span> Key của {partner.email} còn hiệu lực tới {new Date(partner.expiresAt).toLocaleDateString("vi-VN")}. Các mục bên dưới đã mở.</p>
         ) : (
@@ -412,59 +504,53 @@ export default function EduDevelopers() {
             {state.error && <p className="dev-bad" role="alert">{state.error}</p>}
           </form>
         )}
-      </section>
-
-      <section id="start" className="dev-card">
-        <h2>Cài đặt và chạy</h2>
+        <h3>Cài đặt và chạy</h3>
         <Locked blocks={partner?.docs?.start} />
-      </section>
-
-      <section id="components" className="dev-card">
-        <h2>Component</h2>
+        <h3>REST API</h3>
+        <Locked blocks={partner?.docs?.api} />
+        <h3>Mascot 12 cung hoàng đạo</h3>
+        <ul className="dev-zodiac" aria-label="12 mascot trong gói education-hugo-zodiac">
+          {ZODIAC_IDS.map((id) => <li key={id}><img src={`/edu/zodiac/${id}.svg`} alt="" width="64" height="64" loading="lazy" /><code>{id}</code></li>)}
+        </ul>
+        <p>Gói <code>education-hugo-zodiac</code>: SVG tự chuyển động, không phụ thuộc thư viện nào. Bản quyền Hugo Studio, chỉ dùng với key còn hiệu lực.</p>
+        <Locked blocks={partner?.docs?.zodiac} />
+        <details className="dev-more">
+          <summary>Component · Tuỳ biến</summary>
         <p>Mọi component đều xuất ra từ <code>education-hugo-react</code>. <code>EducationHugo</code> đã ghép sẵn tất cả; các component lẻ dành cho bố cục tự dựng, và vẫn cần <code>configurePartner({"{ key }"})</code> trước khi gọi API.</p>
         {COMPONENTS.map(([name, desc, props]) => (
-          <div key={name} className="dev-comp">
-            <h3><code>{name}</code></h3>
-            <p>{desc}</p>
+          <details key={name} className="dev-comp">
+            <summary><code>{name}</code><span>{desc}</span></summary>
             <div className="dev-table-wrap"><table className="dev-table">
               <thead><tr><th>Prop</th><th>Kiểu</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
               <tbody>{props.map(([p, type, def, note]) => <tr key={p}><td><code>{p}</code></td><td><code>{type}</code></td><td>{def}</td><td>{note}</td></tr>)}</tbody>
             </table></div>
-          </div>
+          </details>
         ))}
-      </section>
-
-      <section id="theme" className="dev-card">
-        <h2>Tuỳ biến theo quy tắc</h2>
+        <h3>Tuỳ biến theo quy tắc</h3>
         <p>Thư viện giữ giao diện Education Hugo nguyên vẹn. Chỉ các token dưới đây được đổi, và mỗi token có luật kiểm riêng. Giá trị sai luật bị <b>bỏ qua</b> (giữ mặc định, in cảnh báo ra console), nên bố cục không bao giờ vỡ. Không đổi được: bố cục, mascot, chữ bài học, ghi công Education Hugo.</p>
         <ThemeLab />
+        </details>
       </section>
 
-      <section id="api" className="dev-card">
-        <h2>REST API</h2>
-        <Locked blocks={partner?.docs?.api} />
-      </section>
 
-      <section id="demo" className="dev-card">
-        <h2>Thử ô SQL</h2>
-        <p>Đây chính là component <code>SqlPlayground</code>, chạy SQLite ngay trong trình duyệt của bạn, không cần key.</p>
-        <Suspense fallback={<EduStatus kind="loading" compact />}>
-          <SqlPlayground id="dev-demo" setup={HAT_SEED} query={"SELECT name, price\nFROM menu_items\nORDER BY price DESC;"} />
-        </Suspense>
-      </section>
-
+      </>}
+      {tab === "stack" && <DevStack />}
+      {tab === "license" && <>
       <section id="license" className="dev-card">
         <h2>Bản quyền và bảo mật</h2>
-        <ul>
-          <li><b>Key</b> có 32 ký tự ngẫu nhiên, gửi thẳng vào email đối tác. Máy chủ chỉ lưu bản băm SHA-256, admin cũng không xem lại được key gốc. Gửi mail không thành công thì key bị huỷ ngay, không tồn tại key "mồ côi".</li>
-          <li><b>Có hạn dùng</b> (tối đa 365 ngày, gia hạn được) và có thể bị thu hồi bất cứ lúc nào; thu hồi có hiệu lực ngay ở lượt gọi kế tiếp. Hết hạn hay bị thu hồi thì thư viện ngừng tải bài và báo lỗi trong khung, kể cả khi học viên đang học dở.</li>
-          <li><b>Khoá theo tên miền</b>: trình duyệt gọi từ tên miền chưa đăng ký bị từ chối. Mỗi lượt dùng đều được ghi nhận (số lượt, lần dùng gần nhất) và admin xem được.</li>
-          <li><b>Giới hạn tốc độ</b> mỗi IP: đọc 90 lượt/phút, chấm 20 lượt/phút, kiểm key 20 lượt/10 phút.</li>
-          <li><b>Nội dung bài học</b> do Education Hugo tự biên soạn. Không được sao chép, lưu trữ hay phân phối lại ngoài thư viện. Khung thư viện luôn có dòng ghi công Education Hugo, không prop hay token nào tắt được.</li>
-          <li>Tiến độ học viên của đối tác nằm trong trình duyệt của học viên (localStorage). Education Hugo không thu thập dữ liệu cá nhân của họ.</li>
-          <li>Chi tiết: <Link to="/partners">Quy định đối tác</Link>.</li>
+        <ul className="dev-guard">
+          {[
+            ["key", "Key 32 ký tự", "Máy chủ chỉ lưu bản băm SHA-256"],
+            ["event_busy", "Có hạn dùng", "Tối đa 365 ngày · thu hồi có hiệu lực ngay"],
+            ["language", "Khoá theo tên miền", "Mỗi lượt dùng đều được ghi nhận"],
+            ["speed", "Giới hạn tốc độ", "Đọc 90 · chấm 20 lượt/phút mỗi IP"],
+            ["copyright", "Nội dung có bản quyền", "Không sao chép · luôn ghi công Education Hugo"],
+            ["shield_person", "Không thu dữ liệu học viên", "Tiến độ nằm trên máy học viên"],
+          ].map(([icon, title, note]) => <li key={icon}><span className="material-symbols-outlined" aria-hidden="true">{icon}</span><b>{title}</b><small>{note}</small></li>)}
         </ul>
+        <p className="dev-note">© Hugo Studio · <Link to="/partners">Quy định đối tác</Link> · Giấy phép gói: chỉ dùng với key còn hiệu lực, không phân phối lại, không gỡ ghi công.</p>
       </section>
+      </>}
     </article>
     </DevSite>
   );

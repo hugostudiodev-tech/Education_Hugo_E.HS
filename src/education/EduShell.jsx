@@ -189,10 +189,10 @@ function Rail({ learner, signedIn, stats }) {
   const streak = learner?.edu?.streak;
   // MỘT biểu đồ cho cả tình hình: 4 thanh, mỗi thanh một chỉ số 0–100%.
   const rings = [
-    { key: "today", to: "/profile", color: "#58cc02", value: today ? Math.min(1, today.done / today.goal) : 0, text: today ? `${Math.min(today.done, today.goal)}/${today.goal}` : "—" },
-    { key: "stage", to: "/learn", color: "#1cb0f6", value: current?.total ? current.finished / current.total : 0, text: current ? `${current.finished}/${current.total}` : "—", label: current?.code },
-    { key: "streak", to: "/streak", color: "#ff9600", value: streak?.next?.day ? Math.min(1, streak.count / streak.next.day) : 0, text: streak ? `${streak.count}/${streak.next.day}` : "0" },
-    { key: "score", to: "/learn", color: "#ce82ff", value: (stats.average || 0) / 100, text: stats.average === null ? "—" : `${stats.average}%` },
+    { key: "today", to: "/profile", color: "var(--dash-today, #58cc02)", value: today ? Math.min(1, today.done / today.goal) : 0, text: today ? `${Math.min(today.done, today.goal)}/${today.goal}` : "—" },
+    { key: "stage", to: "/learn", color: "var(--dash-stage, #1cb0f6)", value: current?.total ? current.finished / current.total : 0, text: current ? `${current.finished}/${current.total}` : "—", label: current?.code },
+    { key: "streak", to: "/streak", color: "var(--dash-streak, #ff9600)", value: streak?.next?.day ? Math.min(1, streak.count / streak.next.day) : 0, text: streak ? `${streak.count}/${streak.next.day}` : "0" },
+    { key: "score", to: "/learn", color: "var(--dash-score, #ce82ff)", value: (stats.average || 0) / 100, text: stats.average === null ? "—" : `${stats.average}%` },
   ];
   return (
     <>

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <!-- Aquarius (♒, Bảo Bình) — mascot cung hoàng đạo của Education Hugo. Thiết kế gốc © Hugo Studio.
+       Theo khuôn geminus.svg (style đất sét cast-*.svg). Riêng Aquarius: thân là chiếc bình gốm xanh #3B9BE8
+       (miệng loe, quai bên phải, vòi bên trái), hai gợn sóng ♒ trên vai, vòi rót dòng nước chảy liên tục. -->
+  <style>
+    .a-hop{transform-box:fill-box;transform-origin:50% 100%;animation:a-hop 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .a-shadow{transform-box:fill-box;transform-origin:50% 50%;animation:a-shadow 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .a-eye{transform-box:fill-box;transform-origin:50% 50%;animation:a-blink 3.6s infinite}
+    .a-mouth{transform-box:fill-box;transform-origin:50% 0;animation:a-grin 1.2s ease-in-out infinite}
+    .a-flow{stroke-dasharray:4 3;animation:a-flow .5s linear infinite}
+    .a-drop{transform-box:fill-box;animation:a-drop 1.2s ease-in infinite}
+    .a-drop:nth-of-type(2){animation-delay:-.6s}
+    @keyframes a-hop{0%,100%{transform:translateY(0) scale(1.05,.94)}15%{transform:translateY(0) scale(.96,1.05)}45%{transform:translateY(-7px) rotate(-3deg)}70%{transform:translateY(0) scale(1.03,.96) rotate(2deg)}}
+    @keyframes a-shadow{0%,100%,70%{transform:scale(1)}45%{transform:scale(.72);opacity:.6}}
+    @keyframes a-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+    @keyframes a-grin{0%,100%{transform:scaleY(1)}45%{transform:scaleY(1.2)}}
+    @keyframes a-flow{to{stroke-dashoffset:-7}}
+    @keyframes a-drop{0%{transform:translateY(0);opacity:1}100%{transform:translateY(9px);opacity:0}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <defs>
+    <path id="a-body" d="M37 92C37 89 40 88 43 87 30 82 22 74 22 63 22 51 32 43 41 39 42 37 41 35 38 33 37 32 37 29 40 29H60C63 29 63 32 62 33 59 35 58 37 59 39 68 43 78 51 78 63 78 74 70 82 57 87 60 88 63 89 63 92Z"/>
+    <clipPath id="a-clip"><use href="#a-body"/></clipPath>
+    <mask id="a-lit"><use href="#a-body" fill="#fff"/><use href="#a-body" fill="#000" transform="translate(2.8 3.2)"/></mask>
+    <mask id="a-dim"><use href="#a-body" fill="#fff"/><use href="#a-body" fill="#000" transform="translate(-2.8 -3.2)"/></mask>
+  </defs>
+
+  <ellipse class="a-shadow" cx="50" cy="92.8" rx="22" ry="3.2" fill="#44403c" opacity=".13"/>
+
+  <g class="a-hop">
+    <!-- Dòng nước rót từ vòi -->
+    <path d="M30 28c-6 3-10 9-12 17" stroke="#9be3ff" stroke-width="3.2" stroke-linecap="round"/>
+    <path class="a-flow" d="M30 28c-6 3-10 9-12 17" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>
+    <circle class="a-drop" cx="17.5" cy="49" r="1.6" fill="#9be3ff"/>
+    <circle class="a-drop" cx="15.5" cy="52" r="1.2" fill="#9be3ff"/>
+
+    <!-- Quai + vòi (sau thân) -->
+    <path d="M60 42c15-7 27 5 16 23" stroke="#3b9be8" stroke-width="4.6" stroke-linecap="round"/>
+    <path d="M60 42c15-7 27 5 16 23" stroke="#44403c" stroke-width="4.6" stroke-linecap="round" opacity=".12"/>
+    <path d="M41 30 29 26.5c-1.2-.3-1.8 1.2-.8 1.9L40 35Z" fill="#3b9be8"/>
+
+    <!-- Thân bình + viền đất sét -->
+    <g clip-path="url(#a-clip)">
+      <rect width="100" height="100" fill="#3b9be8"/>
+      <rect width="100" height="100" fill="#fff" opacity=".2" mask="url(#a-lit)"/>
+      <rect width="100" height="100" fill="#44403c" opacity=".12" mask="url(#a-dim)"/>
+      <ellipse cx="50" cy="30.5" rx="9.5" ry="2" fill="#1d6fb8"/>
+      <ellipse cx="50" cy="31" rx="7" ry="1.2" fill="#9be3ff"/>
+      <!-- Hai gợn sóng ♒ trên vai -->
+      <path d="M41 41.5l3-2 3 2 3-2 3 2 3-2 3 2M41 46l3-2 3 2 3-2 3 2 3-2 3 2" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
+    </g>
+
+    <!-- Mắt (eyes-even) -->
+    <g transform="translate(29 52)">
+      <circle cx="10.5" cy="11" r="7" fill="#44403c" opacity=".15"/><circle cx="32.5" cy="11" r="7" fill="#44403c" opacity=".15"/>
+      <circle cx="10" cy="10" r="7" fill="#fff"/><circle cx="32" cy="10" r="7" fill="#fff"/>
+      <g class="a-eye"><circle cx="11" cy="11.8" r="2.9" fill="#44403c"/><circle cx="10" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+      <g class="a-eye"><circle cx="31" cy="11.8" r="2.9" fill="#44403c"/><circle cx="30" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+    </g>
+
+    <ellipse cx="31" cy="73" rx="4" ry="2.4" fill="#ff9ec0" opacity=".85"/>
+    <ellipse cx="69" cy="73" rx="4" ry="2.4" fill="#ff9ec0" opacity=".85"/>
+
+    <!-- Miệng cười (mouth-laugh) -->
+    <g transform="translate(37 71)"><g class="a-mouth">
+      <path d="M4.5 1.8h17a8.5 8.5 0 0 1-17 0" fill="#44403c"/>
+      <path d="M6.3 1.8h13.4v1.6a1.2 1.2 0 0 1-1.2 1.2h-11a1.2 1.2 0 0 1-1.2-1.2Z" fill="#fff"/>
+      <path d="M10.5 7h5v.4a2.5 2.5 0 0 1-5 0Z" fill="#c96f5e"/>
+    </g></g>
+  </g>
+</svg>

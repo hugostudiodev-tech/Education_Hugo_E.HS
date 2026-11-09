@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <!-- Geminus (♊, Song Tử) — mascot cung hoàng đạo của Education Hugo. Thiết kế gốc © Hugo Studio.
+       Khuôn chung cho 12 cung (public/edu/zodiac/<tên Latin>.svg), cùng style đất sét với cast-*.svg:
+       khung 100×100, thân neo chân ở y≈92, bóng đất #44403c .13, viền sáng trắng .2 + viền tối #44403c .12,
+       mắt trắng có bóng lệch, con ngươi #44403c, miệng #44403c răng trắng lưỡi #c96f5e.
+       Riêng Geminus: thân chia dọc nửa xanh #3D88EF / nửa hồng #EE5B87, mỗi nửa một ăng-ten (hai nét ♊). -->
+  <style>
+    .g-hop{transform-box:fill-box;transform-origin:50% 100%;animation:g-hop 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .g-shadow{transform-box:fill-box;transform-origin:50% 50%;animation:g-shadow 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .g-eye{transform-box:fill-box;transform-origin:50% 50%;animation:g-blink 3.6s infinite}
+    .g-antL{transform-box:fill-box;transform-origin:50% 100%;animation:g-boing 1.2s ease-in-out infinite}
+    .g-antR{transform-box:fill-box;transform-origin:50% 100%;animation:g-boing 1.2s ease-in-out infinite reverse}
+    .g-mouth{transform-box:fill-box;transform-origin:50% 0;animation:g-grin 1.2s ease-in-out infinite}
+    @keyframes g-hop{0%,100%{transform:translateY(0) scale(1.05,.94)}15%{transform:translateY(0) scale(.96,1.05)}45%{transform:translateY(-7px) rotate(-3deg)}70%{transform:translateY(0) scale(1.03,.96) rotate(2deg)}}
+    @keyframes g-shadow{0%,100%,70%{transform:scale(1)}45%{transform:scale(.72);opacity:.6}}
+    @keyframes g-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+    @keyframes g-boing{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+    @keyframes g-grin{0%,100%{transform:scaleY(1)}45%{transform:scaleY(1.2)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <defs>
+    <path id="g-body" d="M27 92c-4-9-5-19-3-30 3-16 12-28 26-28s23 12 26 28c2 11 1 21-3 30-9 1.6-37 1.6-46 0"/>
+    <clipPath id="g-clip"><use href="#g-body"/></clipPath>
+    <mask id="g-lit"><use href="#g-body" fill="#fff"/><use href="#g-body" fill="#000" transform="translate(2.8 3.2)"/></mask>
+    <mask id="g-dim"><use href="#g-body" fill="#fff"/><use href="#g-body" fill="#000" transform="translate(-2.8 -3.2)"/></mask>
+  </defs>
+
+  <ellipse class="g-shadow" cx="50" cy="92.8" rx="26" ry="3.2" fill="#44403c" opacity=".13"/>
+
+  <g class="g-hop">
+    <!-- Ăng-ten -->
+    <g class="g-antL">
+      <path d="M42 37c-1.5-6-3-11-5-16" stroke="#3d88ef" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="36.5" cy="18" r="4.2" fill="#3d88ef"/><circle cx="37.2" cy="18.8" r="4.2" fill="#44403c" opacity=".15" clip-path="circle(4.2px at 36.5px 18px)"/>
+      <circle cx="35.2" cy="16.6" r="1.1" fill="#fff" opacity=".7"/>
+    </g>
+    <g class="g-antR">
+      <path d="M58 37c1.5-6 3-11 5-16" stroke="#ee5b87" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="63.5" cy="18" r="4.2" fill="#ee5b87"/><circle cx="64.2" cy="18.8" r="4.2" fill="#44403c" opacity=".15" clip-path="circle(4.2px at 63.5px 18px)"/>
+      <circle cx="62.2" cy="16.6" r="1.1" fill="#fff" opacity=".7"/>
+    </g>
+
+    <!-- Thân chia đôi + viền đất sét -->
+    <g clip-path="url(#g-clip)">
+      <rect x="0" y="0" width="50" height="100" fill="#3d88ef"/>
+      <rect x="50" y="0" width="50" height="100" fill="#ee5b87"/>
+      <rect width="100" height="100" fill="#fff" opacity=".2" mask="url(#g-lit)"/>
+      <rect width="100" height="100" fill="#44403c" opacity=".12" mask="url(#g-dim)"/>
+      <path d="M50 30v66" stroke="#fff" stroke-width="1" stroke-dasharray=".1 3" stroke-linecap="round" opacity=".6"/>
+    </g>
+
+    <!-- Mắt (như eyes-even của bộ cast) -->
+    <g transform="translate(29 43)">
+      <circle cx="10.5" cy="11" r="7" fill="#44403c" opacity=".15"/><circle cx="32.5" cy="11" r="7" fill="#44403c" opacity=".15"/>
+      <circle cx="10" cy="10" r="7" fill="#fff"/><circle cx="32" cy="10" r="7" fill="#fff"/>
+      <g class="g-eye"><circle cx="11" cy="11.8" r="2.9" fill="#44403c"/><circle cx="10" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+      <g class="g-eye"><circle cx="31" cy="11.8" r="2.9" fill="#44403c"/><circle cx="30" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+    </g>
+
+    <!-- Má "trao màu": bên xanh má hồng, bên hồng má xanh -->
+    <ellipse cx="32" cy="64" rx="4" ry="2.4" fill="#ee5b87" opacity=".5"/>
+    <ellipse cx="68" cy="64" rx="4" ry="2.4" fill="#3d88ef" opacity=".5"/>
+
+    <!-- Miệng cười (mouth-laugh) vắt qua đường chia -->
+    <g transform="translate(37 62)"><g class="g-mouth">
+      <path d="M4.5 1.8h17a8.5 8.5 0 0 1-17 0" fill="#44403c"/>
+      <path d="M6.3 1.8h13.4v1.6a1.2 1.2 0 0 1-1.2 1.2h-11a1.2 1.2 0 0 1-1.2-1.2Z" fill="#fff"/>
+      <path d="M10.5 7h5v.4a2.5 2.5 0 0 1-5 0Z" fill="#c96f5e"/>
+    </g></g>
+  </g>
+</svg>

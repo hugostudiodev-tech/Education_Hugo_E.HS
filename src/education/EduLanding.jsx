@@ -22,13 +22,13 @@ gsap.registerPlugin(ScrollTrigger);
  * Trang giới thiệu Education Hugo — bố cục kiểu trang chủ Duolingo.
  *
  *   hero     tranh nhân vật bên trái, tiêu đề + 2 nút bên phải, dải chủ đề ở đáy màn
- *   4 khối   chữ và tranh so le trái/phải; tranh "diễn" một lần khi cuộn tới
+ *   4 khối   chữ và tranh so le trái/phải; mỗi khối là một cảnh scrollytelling (xem useScene)
  *   dải      học mọi lúc, mọi nơi (cài app)
  *   cuối     lời mời trên nền tối + chân trang
  *
  * Nhân vật: SVG clay của mình (scripts/generate-mascots.mjs), không dùng hình hay chữ của
- * Duolingo. Mỗi tranh là một GSAP timeline chạy một lần khi vào khung (ScrollTrigger,
- * scroller #root), chuyển động theo một trọng lực chung (xem "Vật lý hoạt hình");
+ * Duolingo. Mỗi tranh là một GSAP timeline gắn với thanh cuộn (ScrollTrigger scrub,
+ * trang cuộn bằng window — #root không phải khung cuộn), chuyển động theo một trọng lực chung (xem "Vật lý hoạt hình");
  * đứng yên thì thở bằng CSS và thỉnh thoảng tự nhảy. Bật "Giảm chuyển động" thì
  * bỏ qua timeline — tranh đứng ở tư thế cuối. Nền màu đặc, không gradient.
  */
@@ -45,48 +45,42 @@ const TILES = [
 ];
 
 // Bạn bè đứng trên sân quanh bạn xanh: [x, y] là chỗ đặt CHÂN (% khung tranh); y lớn = đứng gần, vẽ đè lên.
-const CROWD = [[22, 64], [40, 57], [60, 57], [78, 64], [14, 84], [86, 84], [28, 99]];
-
-/** Chớp mắt tự nhiên: mỗi 2,5–4,5 giây nhắm 140 ms. */
-function useBlink() {
-  const [closed, setClosed] = useState(false);
-  useEffect(() => {
-    let timer;
-    const loop = () => {
-      timer = setTimeout(() => {
-        setClosed(true);
-        timer = setTimeout(() => { setClosed(false); loop(); }, 140);
-      }, 2500 + Math.random() * 2000);
-    };
-    loop();
-    return () => clearTimeout(timer);
-  }, []);
-  return closed;
-}
-
-const face = (name) => ({ attr: { src: `/edu/buddy-${name}.svg` } });
+// [x%, y%, ảnh] — mascot 12 cung (public/edu/zodiac/). Hero chỉ đứng vài bạn, còn lại rải khắp web.
+const CROWD = [[22, 64, "taurus"], [80, 58, "pisces"], [14, 84, "leo"], [90, 90, "aquarius"], [28, 99, "libra"], [72, 99, "sagittarius"]];
 
 /**
- * Một tranh động: timeline chạy MỘT lần khi khung tranh lên tới 75% màn hình
- * (hero đã ở trong khung nên chạy ngay khi tải). Giảm chuyển động thì không dựng.
+ * Scrollytelling: mỗi khối cao đúng một màn hình (cả điện thoại) và là một cảnh chạy THEO
+ * thanh cuộn (scrub) — cuộn xuống truyện tiến, cuộn lên tua lại.
+ *   1. Chữ hiện dần lúc khối đang trồi lên (không bao giờ cuộn vào một màn trống).
+ *   2. Khối vừa một màn thì ghim lại giữa màn trong lúc tranh diễn; khối cao hơn màn
+ *      (chữ phóng to, màn quá thấp) thì không ghim — ghim sẽ che mất phần dưới — chỉ scrub.
+ * `story: false` (hero) chạy một lần ngay khi tải. Giảm chuyển động thì không dựng.
+ * Cảnh scrub không được chứa tween lặp vô hạn (idleHops) — nhân vật đứng yên đã tự thở bằng CSS/SVG.
  */
-function useScene(build) {
+function useScene(build, { story = true } = {}) {
   const scope = useRef(null);
   const buildRef = useRef(build);
   buildRef.current = build;
   const still = useReducedMotion();
   useLayoutEffect(() => {
     if (still) return undefined;
-    const ctx = gsap.context(() => buildRef.current(gsap.timeline({
-      scrollTrigger: {
-        trigger: scope.current,
-        scroller: document.getElementById("root"),
-        start: "top 75%",
-        toggleActions: "play none none none",
-      },
-    })), scope);
+    const el = scope.current;
+    const ctx = gsap.context(() => {
+      if (!story) {
+        buildRef.current(gsap.timeline({ scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play none none none" } }));
+        return;
+      }
+      gsap.from(":scope > .edu-feature-copy > *, :scope > h2, :scope > p", {
+        y: 40, opacity: 0, stagger: 0.15, ease: "power2.out",
+        scrollTrigger: { trigger: el, start: "top 92%", end: "top 30%", scrub: 0.6 },
+      });
+      const fits = el.offsetHeight <= window.innerHeight + 2;
+      buildRef.current(gsap.timeline({ scrollTrigger: fits
+        ? { trigger: el, start: "center center", end: "+=100%", pin: true, scrub: 0.6, anticipatePin: 1 }
+        : { trigger: el, start: "top 60%", end: "bottom 70%", scrub: 0.6 } }));
+    }, scope);
     return () => ctx.revert();
-  }, [still]);
+  }, [still, story]);
   return scope;
 }
 
@@ -171,7 +165,6 @@ function Hero() {
   const target = detectInstallTarget();
   const standalone = useStandalone();
   const phone = (target.iOS || target.android) && !standalone;
-  const blink = useBlink();
   const scope = useScene((tl) => {
     tl.from(".h-pad", { scaleX: 0, duration: 0.45, ease: "power2.out" });
     drop(tl, ".h-buddy", 460, 0.2);                                   // bạn xanh rơi xuống giữa sân
@@ -181,19 +174,19 @@ function Hero() {
     const end = tl.duration();
     tl.add(idleHops(".h-buddy", 70), end + 0.4);
     gsap.utils.toArray(".h-friend").forEach((el, i) => tl.add(idleHops(el, 46), end + 1 + i * 0.55));
-  });
+  }, { story: false });
   return (
     <section ref={scope} className="edu-hero">
       <div className="edu-hero-main">
         <div className="edu-art edu-art--hero" aria-hidden="true">
           <span className="edu-pad h-pad" />
-          {CROWD.map(([x, y], i) => (
+          {CROWD.map(([x, y, src], i) => (
             <span key={i} className="edu-friend h-friend" style={{ left: `${x}%`, bottom: `${100 - y}%`, zIndex: y }}>
-              <img src={`/edu/cast-${i + 1}.svg`} alt="" style={{ animationDelay: `${-i * 0.37}s` }} />
+              <img src={`/edu/zodiac/${src}.svg`} alt="" style={{ animationDelay: `${-i * 0.37}s` }} />
             </span>
           ))}
           <span className="edu-hero-buddy h-buddy">
-            <img src={`/edu/buddy-${blink ? "correct" : "learn"}.svg`} alt="" />
+            <img src="/edu/zodiac/geminus.svg" alt="" />
           </span>
         </div>
         <div className="edu-hero-copy">
@@ -242,13 +235,11 @@ function FeatureFree() {
   const scope = useScene((tl) => {
     tl.from(".f1-pad", { scaleX: 0, duration: 0.4, ease: "power2.out" });
     drop(tl, ".f1-buddy", 420, 0.1);
-    tl.set(".f1-buddy img", face("correct"), ">0.1");
     const at = tl.duration();
     jump(tl, ".f1-buddy", 110, at);
     tl.call(() => playEduSound("coin"), null, at + 0.3)
       .from(".f1-coin", { x: fromHeadX, duration: 0.5, ease: "none", stagger: 0.08 }, at + 0.16)
       .from(".f1-coin", { y: fromHeadY, scale: 0.3, opacity: 0, duration: 0.5, ease: "power1.out", stagger: 0.08 }, at + 0.16);
-    tl.add(idleHops(".f1-buddy", 80), tl.duration() + 0.6);
   });
   return (
     <Feature scope={scope} title={t("landing.freeTitle")} art={
@@ -280,7 +271,6 @@ function FeatureDo() {
     jump(tl, ".f2-orange", 60, ">0.02", { x: 0 });
     tl.to(".f2-orange", { rotate: -10, duration: 0.25, ease: "power2.out" }, ">0.2")   // ngó lên đống thẻ
       .to(".f2-orange", { rotate: 0, duration: 0.4, ease: "power2.inOut" }, ">0.5");
-    tl.add(idleHops(".f2-orange", 60), tl.duration() + 0.8);
   });
   return (
     <Feature scope={scope} flip title={t("landing.doTitle")} art={
@@ -288,7 +278,7 @@ function FeatureDo() {
         <ul className="edu-drop">
           {WAYS.map((way, i) => <Way key={way.icon} way={way} text={t("landing.ways")[i]} className={`f2-card-${i}`} />)}
         </ul>
-        <span className="edu-art-actor edu-art-actor--corner f2-orange"><img src="/edu/cast-5.svg" alt="" className="edu-idle" /></span>
+        <span className="edu-art-actor edu-art-actor--corner f2-orange"><img src="/edu/zodiac/cancer.svg" alt="" className="edu-idle" /></span>
       </div>
     }>
       <p>{t("landing.doBody")}</p>
@@ -304,9 +294,7 @@ function FeatureCourses() {
     gsap.utils.shuffle(gsap.utils.toArray(".f4-tile")).forEach((el, k) =>
       drop(tl, el, 220 + Math.random() * 200, k * 0.08, { e: 0.3, soft: 0.25 }));
     drop(tl, ".f4-buddy", 360, 0.9);
-    tl.set(".f4-buddy img", face("correct"), ">0.1");
     jump(tl, ".f4-buddy", 90, ">0.05");
-    tl.add(idleHops(".f4-buddy", 70), tl.duration() + 0.8);
   });
   return (
     <Feature scope={scope} flip title={t("landing.coursesTitle")} art={
@@ -341,7 +329,6 @@ function Anywhere() {
       drop(tl, el, 320, 0.6 + k * 0.25);
       jump(tl, el, 130, 1.9 + k * 0.25, { left: "50%" });
       jump(tl, el, 130, 2.9 + k * 0.25, { left: "80%" });
-      tl.add(idleHops(el, 50), 4.6 + k * 0.7);
     });
   });
   return (
@@ -355,7 +342,7 @@ function Anywhere() {
             <span className="edu-phone-bar" /><span className="edu-phone-line" /><span className="edu-phone-line is-short" />
           </div>
         ))}
-        {["/edu/buddy-correct.svg", "/edu/cast-5.svg", "/edu/prof.svg"].map((src, k) => (
+        {["/edu/buddy-correct.svg", "/edu/zodiac/scorpius.svg", "/edu/prof.svg"].map((src, k) => (
           <span key={src} className={`edu-runner a-run-${k}`} style={{ "--k": k }}><img src={src} alt="" /></span>
         ))}
       </div>
@@ -374,7 +361,6 @@ function Final() {
       tl.fromTo(el, { y: rise }, { y: -over, duration: airTime(rise + over), ease: "power1.out" }, at)
         .to(el, { y: 0, duration: airTime(over), ease: "power1.in" });
       impact(tl, el, over);
-      tl.add(idleHops(el, 50), 2.2 + i * 0.8);
     });
   });
   return (
@@ -389,7 +375,7 @@ function Final() {
         <Link className="edu-btn edu-btn--light edu-btn--wide" to="/learn">{t("landing.startLearning")}</Link>
       </div>
       <div className="edu-peek" aria-hidden="true">
-        {["/edu/cast-2.svg", "/edu/buddy-done.svg", "/edu/cast-6.svg"].map((src) => (
+        {["/edu/zodiac/pisces.svg", "/edu/buddy-done.svg", "/edu/cast-6.svg"].map((src) => (
           <span key={src} className="z-peek"><img src={src} alt="" /></span>
         ))}
       </div>
@@ -470,7 +456,6 @@ export default function EduLanding() {
         const color = colors[i] === "rgba(0, 0, 0, 0)" ? base : colors[i];
         ScrollTrigger.create({
           trigger: el,
-          scroller: document.getElementById("root"),
           start: "top 55%",
           end: "bottom 55%",
           onToggle: (self) => self.isActive && gsap.to(landing, { backgroundColor: color, duration: 0.7, ease: "power1.inOut", overwrite: true }),
@@ -482,7 +467,7 @@ export default function EduLanding() {
   // Như Duolingo: qua khỏi màn đầu thì thanh trên mọc nút "Bắt đầu".
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setPastHero(!entry.isIntersecting),
-      { root: document.getElementById("root"), threshold: 0 });
+      { threshold: 0 });
     if (sentinel.current) observer.observe(sentinel.current);
     return () => observer.disconnect();
   }, []);

@@ -81,7 +81,7 @@ export default function EduOnboard({ start = "start" }) {
               </button>
             ))}
           </div>
-          <div className="edu-ob-say"><img src="/edu/cast-6.svg" alt="" width="96" height="96" /><p>{t("onboard.goalSay")}</p></div>
+          <div className="edu-ob-say"><img src="/edu/zodiac/aquarius.svg" alt="" width="96" height="96" /><p>{t("onboard.goalSay")}</p></div>
         </main>
         <footer className="edu-ob-foot">
           <button type="button" className="edu-btn edu-btn--wide edu-ob-go" onClick={() => { write(GOAL, goal); go("create"); }}>{t("onboard.setGoal")}</button>

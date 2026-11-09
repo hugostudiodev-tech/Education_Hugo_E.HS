@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <!-- Sagittarius (♐, Nhân Mã) — mascot cung hoàng đạo của Education Hugo. Thiết kế gốc © Hugo Studio.
+       Theo khuôn geminus.svg (style đất sét cast-*.svg). Riêng Sagittarius: bé ngựa nâu #C9814B, bờm và đuôi nâu đậm #6B3F22, mõm sáng — bờm đung đưa, đuôi phất, tai vẫy. -->
+  <style>
+    .m-hop{transform-box:fill-box;transform-origin:50% 100%;animation:m-hop 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .m-shadow{transform-box:fill-box;transform-origin:50% 50%;animation:m-shadow 1.2s cubic-bezier(.3,0,.4,1) infinite}
+    .m-eye{transform-box:fill-box;transform-origin:50% 50%;animation:m-blink 3.6s infinite}
+    .m-mouth{transform-box:fill-box;transform-origin:50% 0;animation:m-grin 1.2s ease-in-out infinite}
+    .m-flick{transform-box:fill-box;transform-origin:100% 50%;animation:m-flick 2.4s ease-in-out infinite}
+    .m-sway{transform-box:fill-box;transform-origin:50% 0;animation:m-sway 1.2s ease-in-out infinite}
+    @keyframes m-hop{0%,100%{transform:translateY(0) scale(1.05,.94)}15%{transform:translateY(0) scale(.96,1.05)}45%{transform:translateY(-7px) rotate(-3deg)}70%{transform:translateY(0) scale(1.03,.96) rotate(2deg)}}
+    @keyframes m-shadow{0%,100%,70%{transform:scale(1)}45%{transform:scale(.72);opacity:.6}}
+    @keyframes m-blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+    @keyframes m-grin{0%,100%{transform:scaleY(1)}45%{transform:scaleY(1.2)}}
+    @keyframes m-flick{0%,78%,100%{transform:rotate(0)}86%{transform:rotate(-20deg)}}
+    @keyframes m-sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+    .m-tail{transform-box:fill-box;transform-origin:0 100%;animation:m-sway .9s ease-in-out infinite}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <defs>
+    <path id="m-body" d="M27 92c-4-9-5-19-3-30 3-16 12-28 26-28s23 12 26 28c2 11 1 21-3 30-9 1.6-37 1.6-46 0"/>
+    <clipPath id="m-clip"><use href="#m-body"/></clipPath>
+    <mask id="m-lit"><use href="#m-body" fill="#fff"/><use href="#m-body" fill="#000" transform="translate(2.8 3.2)"/></mask>
+    <mask id="m-dim"><use href="#m-body" fill="#fff"/><use href="#m-body" fill="#000" transform="translate(-2.8 -3.2)"/></mask>
+  </defs>
+
+  <ellipse class="m-shadow" cx="50" cy="92.8" rx="26" ry="3.2" fill="#44403c" opacity=".13"/>
+
+  <g class="m-hop">
+    <g class="m-flick"><path d="M38 39 33 26l11 8Z" fill="#c9814b"/><path d="M37.5 36 35 29l5.5 4Z" fill="#f2a98f"/></g><g transform="translate(100 0) scale(-1 1)"><g class="m-flick"><path d="M38 39 33 26l11 8Z" fill="#c9814b"/><path d="M37.5 36 35 29l5.5 4Z" fill="#f2a98f"/></g></g>
+    <path class="m-tail" d="M74 82c9 1 14-6 13-16" stroke="#6b3f22" stroke-width="4.6" stroke-linecap="round"/>
+    <g clip-path="url(#m-clip)">
+      <rect width="100" height="100" fill="#c9814b"/>
+      
+      <rect width="100" height="100" fill="#fff" opacity=".2" mask="url(#m-lit)"/>
+      <rect width="100" height="100" fill="#44403c" opacity=".12" mask="url(#m-dim)"/>
+    </g>
+    <ellipse cx="50" cy="73" rx="15" ry="11" fill="#f1c79e"/><ellipse cx="43.5" cy="67" rx="1.5" ry="2" fill="#44403c" opacity=".5"/><ellipse cx="56.5" cy="67" rx="1.5" ry="2" fill="#44403c" opacity=".5"/>
+    <g transform="translate(29 43)">
+      <circle cx="10.5" cy="11" r="7" fill="#44403c" opacity=".15"/><circle cx="32.5" cy="11" r="7" fill="#44403c" opacity=".15"/>
+      <circle cx="10" cy="10" r="7" fill="#fff"/><circle cx="32" cy="10" r="7" fill="#fff"/>
+      <g class="m-eye"><circle cx="11" cy="11.8" r="2.9" fill="#44403c"/><circle cx="10" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+      <g class="m-eye"><circle cx="31" cy="11.8" r="2.9" fill="#44403c"/><circle cx="30" cy="10.6" r=".7" fill="#fff" opacity=".7"/></g>
+    </g>
+    <ellipse cx="29" cy="64" rx="4" ry="2.4" fill="#ff9ec0" opacity=".8"/>
+    <ellipse cx="71" cy="64" rx="4" ry="2.4" fill="#ff9ec0" opacity=".8"/>
+    <g transform="translate(37 69)"><g class="m-mouth">
+      <path d="M4.5 1.8h17a8.5 8.5 0 0 1-17 0" fill="#44403c"/>
+      <path d="M6.3 1.8h13.4v1.6a1.2 1.2 0 0 1-1.2 1.2h-11a1.2 1.2 0 0 1-1.2-1.2Z" fill="#fff"/>
+      <path d="M10.5 7h5v.4a2.5 2.5 0 0 1-5 0Z" fill="#c96f5e"/>
+    </g></g>
+    <path class="m-sway" d="M42 37c2-6 8-9 14-7-2 2-2 4 0 6 4-1 7 0 9 3-6 0-10 2-12 6-3-3-7-5-11-8Z" fill="#6b3f22"/>
+  </g>
+</svg>
