@@ -1,12 +1,17 @@
 {
   "name": "education-hugo-zodiac",
   "version": "1.0.0",
-  "description": "12 mascot cung hoàng đạo của Education Hugo — SVG động, không phụ thuộc thư viện nào. Cần key đối tác do Hugo Studio cấp.",
+  "description": "12 mascot cung hoàng đạo của Education Hugo — tải từ máy chủ bằng key đối tác, không phụ thuộc thư viện nào.",
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
-  "exports": { ".": "./index.js", "./svg/*": "./svg/*" },
-  "files": ["index.js", "svg", "LICENSE.md"],
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "LICENSE.md"
+  ],
   "sideEffects": false,
   "author": "Hugo Wishpax Le (Hugo Studio) <contact@hugowishpax.studio>",
   "license": "SEE LICENSE IN LICENSE.md"

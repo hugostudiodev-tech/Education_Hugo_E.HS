@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
-import HugoLogo from "../components/HugoLogo";
 import { useStandalone } from "../hooks/usePWA";
 import { detectInstallTarget } from "../config/platform";
 import { promptInstall } from "./eduHead";
 import { useEduText } from "./eduText";
 
-/** "EDUCATION HUGO", dưới là "thuộc [giọt nước] Hugo Studio". */
+/** "EDUCATION HUGO", dưới là dòng nhỏ "Developed by Hugo Studio" (giữ nguyên tiếng Anh ở mọi ngôn ngữ). */
 export function EduBrand({ to = "/learn" }) {
-  const { t } = useEduText();
   return (
     <Link to={to} className="edu-brand">
       <img src="/edu/buddy-learn.svg" alt="" className="edu-brand-mark" />
       <span className="edu-brand-text">
         <b>EDUCATION HUGO</b>
-        <small>{t("brand.of")} <HugoLogo className="h-3.5 w-3.5" aria-hidden="true" /> Hugo Studio</small>
+        <small>Developed by Hugo Studio</small>
       </span>
     </Link>
   );

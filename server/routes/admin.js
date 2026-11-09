@@ -2,7 +2,7 @@
 // Mọi thao tác ghi đều để lại một dòng AdminLog.
 import express from 'express';
 import mongoose from 'mongoose';
-import { requireAdmin } from '../lib/auth.js';
+import { ADMIN_EMAILS, requireAdmin } from '../lib/auth.js';
 import { fail, handle, limit } from '../lib/limits.js';
 import { Activity, AdminLog, DevSignup, Promo, Feedback, GemTxn, Learner, LessonFeedback, Post, Product, Receipt, Report } from '../models.js';
 import { addGems } from '../services/gems.js';
@@ -15,10 +15,19 @@ import { streakView } from '../../packages/shared/eduStreak.js';
 import { checkNickname } from '../../packages/persona/nickname.js';
 import { issuePartnerKey, listPartnerKeys, revokePartnerKey, updatePartnerKey } from '../services/partner.js';
 import { vnClock } from '../../packages/shared/eduPrefs.js';
+import { fingerprintOf } from '../services/zodiac.js';
 
 const router = express.Router();
 router.use(requireAdmin, limit(120));
-const log = (req, action, target, detail) => AdminLog.create({ admin: req.admin, action, target: String(target || ''), detail }).catch(() => {});
+const log = (req, action, target, detail) => AdminLog.create({ admin: req.admin, action, target: String(target || ''), detail, ip: req.ip, ua: String(req.get('user-agent') || '').slice(0, 200) }).catch(() => {});
+// Thao tác tối mật (xoá, khoá, Ngọc, key đối tác, xem dữ liệu riêng tư, đăng xuất máy khác) cần vừa xác thực
+// trong 10 phút. Quá hạn → 403 REAUTH_REQUIRED, trang quản trị hỏi Face ID / mã email rồi tự làm lại.
+const FRESH_MS = 10 * 60_000;
+const fresh = (req, res, next) => (Date.now() - new Date(req.adminSession?.createdAt || 0) < FRESH_MS ? next()
+  : res.status(403).json({ code: 'REAUTH_REQUIRED', error: 'Thao tác tối mật: xác thực lại để tiếp tục.' }));
+// Dữ liệu cá nhân nhạy cảm: ẩn mặc định, chỉ trả qua /learners/:email/private (fresh + ghi nhật ký).
+const PRIVATE = [['profile', 'birthDate'], ['profile', 'province'], ['profile', 'gender'], ['consent', 'ageGroup']];
+const maskIp = (ip) => String(ip || '').replace(/(\d+)\.(\d+)$/, 'x.x').replace(/(:[0-9a-f]*){2}$/i, ':x:x');
 const oid = (v) => { if (!mongoose.isValidObjectId(v)) throw fail(400, 'BAD_ID', 'id không hợp lệ.'); return v; };
 const esc = (s) => String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -107,7 +116,7 @@ router.patch('/learners/:email', handle(async (req) => {
   return { success: true };
 }));
 // Xoá hẳn: mọi dữ liệu học (services/erase.js) + đăng xuất mọi máy. Tài khoản đăng nhập giữ — vào lại là bắt đầu từ đầu.
-router.delete('/learners/:email', handle(async (req) => {
+router.delete('/learners/:email', fresh, handle(async (req) => {
   const email = emailOf(req);
   if (req.body?.confirm !== email) throw fail(400, 'CONFIRM_REQUIRED', 'Gõ đúng email để xác nhận xoá.');
   await mustExist(email);
@@ -119,7 +128,7 @@ router.delete('/learners/:email', handle(async (req) => {
   return { success: true };
 }));
 // Hoàn tất / gỡ một step thay member. Không cộng Ngọc, XP hay thưởng chặng — chỉ sửa tiến độ.
-router.post('/learners/:email/steps', handle(async (req) => {
+router.post('/learners/:email/steps', fresh, handle(async (req) => {
   const email = emailOf(req);
   const ids = [].concat(req.body?.stepIds ?? req.body?.stepId ?? []).map(String).slice(0, 200);
   const done = Boolean(req.body?.done);
@@ -152,9 +161,11 @@ router.get('/activity', handle(async (req) => {
 }));
 // Nghi một người nhiều tài khoản: nhóm phiên Better Auth theo IP + trình duyệt.
 // Thông báo từ tài khoản chính thức tới người theo dõi.
-router.post('/announce', handle(async (req) => {
+router.post('/announce', fresh, handle(async (req) => {
   const { announce } = await import('../services/social.js');
-  return announce(req.body || {});
+  const out = await announce(req.body || {});
+  await log(req, 'announce', req.body?.title, { sent: out?.sent });
+  return out;
 }));
 router.get('/duplicates', handle(async () => {
   const groups = await mongoose.connection.db.collection('session').aggregate([
@@ -164,7 +175,7 @@ router.get('/duplicates', handle(async () => {
     { $sort: { lastAt: -1 } }, { $limit: 200 },
     { $lookup: { from: 'user', localField: 'users', foreignField: '_id', as: 'u' } },
   ]).toArray();
-  return { items: groups.map((g) => ({ ip: g._id.ip, emails: g.u.map((u) => u.email), lastAt: g.lastAt })).filter((g) => g.emails.length > 1) };
+  return { items: groups.map((g) => ({ ip: maskIp(g._id.ip), emails: g.u.map((u) => u.email), lastAt: g.lastAt })).filter((g) => g.emails.length > 1) };
 }));
 router.get('/learners/:email', handle(async (req) => {
   const email = emailOf(req);
@@ -177,8 +188,10 @@ router.get('/learners/:email', handle(async (req) => {
     Report.find({ targetEmail: email }).sort({ createdAt: -1 }).limit(50).lean(),
     Activity.find({ email }).sort({ createdAt: -1 }).limit(50).lean(),
   ]);
-  const rest = { ...learner, streak: streakView(learner.streak, day) };
+  const rest = { ...learner, streak: streakView(learner.streak, day), profile: { ...learner.profile }, consent: { ...learner.consent } };
   for (const k of ['completed', 'lessonsDone', 'lastStep', 'scores', 'reviewedOn']) delete rest[k];
+  rest.hasPrivate = PRIVATE.some(([a, b]) => rest[a]?.[b]);
+  for (const [a, b] of PRIVATE) delete rest[a][b];
   return {
     learner: rest,
     learning: nowLearning(learner),
@@ -187,7 +200,14 @@ router.get('/learners/:email', handle(async (req) => {
     gems, receipts, reports,
   };
 }));
-router.post('/learners/:email/gems', handle(async (req) => {
+router.get('/learners/:email/private', fresh, handle(async (req) => {
+  const email = emailOf(req);
+  const l = await Learner.findOne({ email }).select('profile consent').lean();
+  if (!l) throw fail(404, 'NOT_FOUND', 'Không có người học này.');
+  await log(req, 'private_view', email);
+  return Object.fromEntries(PRIVATE.map(([a, b]) => [b, l[a]?.[b] || null]));
+}));
+router.post('/learners/:email/gems', fresh, handle(async (req) => {
   const email = String(req.params.email).toLowerCase();
   const amount = Math.trunc(Number(req.body?.amount));
   const note = String(req.body?.note || '').trim().slice(0, 200);
@@ -198,7 +218,7 @@ router.post('/learners/:email/gems', handle(async (req) => {
   await log(req, 'gems', email, { amount, note });
   return { success: true, ...out };
 }));
-router.post('/learners/:email/ban', handle(async (req) => {
+router.post('/learners/:email/ban', fresh, handle(async (req) => {
   const email = String(req.params.email).toLowerCase();
   const ban = Boolean(req.body?.ban);
   const r = await Learner.updateOne({ email }, ban ? { $set: { bannedAt: new Date() } } : { $unset: { bannedAt: 1 } });
@@ -268,8 +288,8 @@ router.patch('/products/:id', handle(async (req) => {
 router.get('/receipts', handle(async () => ({ items: await Receipt.find().sort({ createdAt: -1 }).limit(200).lean() })));
 
 // ── Đối tác ───────────────────────────────────────────────────────────────────
-router.get('/partners', handle(async () => ({ items: await listPartnerKeys() })));
-router.post('/partners', handle(async (req) => {
+router.get('/partners', handle(async () => ({ items: (await listPartnerKeys()).map((k) => ({ ...k, fingerprint: fingerprintOf(k) })) })));
+router.post('/partners', fresh, handle(async (req) => {
   try {
     const issued = await issuePartnerKey({ ...req.body, admin: req.admin });
     await log(req, 'partner_issue', issued.email, { last4: issued.last4, expiresAt: issued.expiresAt });
@@ -279,12 +299,12 @@ router.post('/partners', handle(async (req) => {
     throw fail(400, 'ISSUE_FAILED', error.message);
   }
 }));
-router.post('/partners/:id', handle(async (req) => {
+router.post('/partners/:id', fresh, handle(async (req) => {
   const out = await updatePartnerKey(oid(req.params.id), { days: req.body?.days, origins: req.body?.origins });
   await log(req, 'partner_update', req.params.id, { expiresAt: out.expiresAt, origins: out.origins });
   return out;
 }));
-router.post('/partners/:id/revoke', handle(async (req) => {
+router.post('/partners/:id/revoke', fresh, handle(async (req) => {
   const r = await revokePartnerKey(oid(req.params.id));
   if (!r.matchedCount) throw fail(404, 'NOT_FOUND', 'Không có key đang hoạt động này.');
   await log(req, 'partner_revoke', req.params.id);
@@ -386,6 +406,37 @@ router.delete('/articles/:id', handle(async (req) => {
   await log(req, 'article_delete', req.params.id, { title: post.title });
   return { success: true };
 }));
-router.get('/log', handle(async () => ({ items: await AdminLog.find().sort({ createdAt: -1 }).limit(300).lean() })));
+router.get('/log', handle(async (req) => {
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  const filter = q ? { $or: ['admin', 'action', 'target'].map((k) => ({ [k]: { $regex: esc(q), $options: 'i' } })) } : {};
+  return { items: (await AdminLog.find(filter).sort({ createdAt: -1 }).limit(300).lean()).map((l) => ({ ...l, ip: maskIp(l.ip) })) };
+}));
+
+// ── Bảo mật: phiên đăng nhập của mọi admin. Admin nào cũng toàn quyền, kể cả đăng xuất admin khác. ──
+const sessions = () => mongoose.connection.db.collection('admin_session');
+router.get('/security', handle(async (req) => {
+  const [rows, users] = await Promise.all([
+    sessions().find({ expiresAt: { $gt: new Date() } }).sort({ updatedAt: -1 }).limit(100).toArray(),
+    mongoose.connection.db.collection('admin_user').find({}, { projection: { email: 1 } }).toArray(),
+  ]);
+  const emailOfUser = new Map(users.map((u) => [String(u._id), u.email]));
+  return {
+    admins: [...ADMIN_EMAILS],
+    freshUntil: new Date(new Date(req.adminSession.createdAt).getTime() + FRESH_MS),
+    sessions: rows.map((r) => ({ id: String(r._id), email: emailOfUser.get(String(r.userId)) || '—', ip: maskIp(r.ipAddress), ua: r.userAgent || '', createdAt: r.createdAt, updatedAt: r.updatedAt, expiresAt: r.expiresAt, current: String(r._id) === String(req.adminSession.id) })),
+  };
+}));
+router.post('/sessions/:id/revoke', fresh, handle(async (req) => {
+  if (String(req.params.id) === String(req.adminSession.id)) throw fail(400, 'CURRENT', 'Đây là phiên đang dùng — bấm Đăng xuất.');
+  const r = await sessions().deleteOne({ _id: new mongoose.Types.ObjectId(oid(req.params.id)) });
+  if (!r.deletedCount) throw fail(404, 'NOT_FOUND', 'Phiên này đã hết.');
+  await log(req, 'session_revoke', req.params.id);
+  return { success: true };
+}));
+router.post('/sessions/revoke-others', fresh, handle(async (req) => {
+  const r = await sessions().deleteMany({ _id: { $ne: new mongoose.Types.ObjectId(String(req.adminSession.id)) } });
+  await log(req, 'session_revoke_all', `${r.deletedCount} phiên`);
+  return { success: true, count: r.deletedCount };
+}));
 
 export default router;

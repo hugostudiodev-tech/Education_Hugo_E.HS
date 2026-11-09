@@ -52,8 +52,9 @@ export function initAuth() {
     appName: 'Education Hugo Admin',
     basePath: '/api/admin-auth',
     advanced: advanced('edu-admin'),
-    // 30 ngày, tự gia hạn mỗi lần vào trang (updateAge): admin dùng thường xuyên gần như không phải xin mã lại.
-    session: { expiresIn: 30 * DAY, updateAge: DAY, modelName: 'admin_session', cookieCache: { enabled: true, maxAge: 5 * 60 } },
+    // Phiên admin ngắn: 12 giờ không dùng là hết (mỗi giờ dùng tự gia hạn). Không đệm phiên trong cookie —
+    // mỗi yêu cầu đọc DB, nên "đăng xuất máy khác" ở mục Bảo mật có hiệu lực ngay lập tức.
+    session: { expiresIn: 12 * 3600, updateAge: 3600, modelName: 'admin_session', cookieCache: { enabled: false } },
     user: { modelName: 'admin_user' },
     account: { modelName: 'admin_account' },
     verification: { modelName: 'admin_verification' },
@@ -161,5 +162,6 @@ export async function requireAdmin(req, res, next) {
   if (!ADMIN_EMAILS.has(email)) return res.status(403).json({ code: 'NOT_ADMIN', error: 'Tài khoản này không phải quản trị viên.' });
   req.email = email;
   req.admin = email;
+  req.adminSession = data.session;
   return next();
 }

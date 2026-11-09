@@ -198,7 +198,7 @@ export const PartnerKey = model('PartnerKey', new Schema({
 
 // Nhật ký thao tác admin.
 export const AdminLog = model('AdminLog', new Schema({
-  admin: String, action: String, target: String, detail: Mixed,
+  admin: String, action: String, target: String, detail: Mixed, ip: String, ua: String,
 }, { timestamps: true }));
 
 // Nhật ký học (admin xem trực tiếp ai đang học gì). Tự xoá sau 30 ngày.

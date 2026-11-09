@@ -1,33 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { API_BASE } from "../../config/apiBase";
 import { OUTLINE } from "../../../packages/courses/python/stages.js";
+import {
+  act, ago, ask, Badge, Btn, call, confirmAction, DialogHost, Dot, Empty, Field, fmt, Group, Icon, Input, Loading, num,
+  onReauth, Search, Segmented, Select, Sheet, Table, Textarea, toast, ToastHost,
+} from "./ui.jsx";
 
 /**
- * /admin — quản trị Education Hugo. Đăng nhập kiểu Hugo Studio: nhập email, nhận mã 6 số
- * (Better Auth emailOTP ở /api/admin-auth, cookie edu-admin.*). Chỉ email trong ADMIN_EMAILS
- * nhận được mã. Phiên học (cookie edu.*) không mở được trang này.
+ * /admin — quản trị Education Hugo. Đăng nhập: Face ID / vân tay (passkey) hoặc mã 6 số qua email
+ * (Better Auth ở /api/admin-auth, cookie edu-admin.*). Chỉ email trong ADMIN_EMAILS. Phiên 12 giờ.
+ * Thao tác tối mật cần vừa xác thực trong 10 phút — ui.jsx tự hỏi lại khi máy chủ báo REAUTH_REQUIRED.
+ * Bố cục: thanh bên nhóm theo chủ đề (iPad/Mac), trên điện thoại là danh sách kiểu Cài đặt iOS → trang con.
  * ponytail: chỉ tiếng Việt — trang nội bộ.
  */
-async function call(path, { method = "GET", body } = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method, credentials: "include",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(data.error || data.message || `Lỗi ${res.status}`), { status: res.status });
-  return data;
-}
-
-const fmt = (d) => (d ? new Date(d).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }) : "—");
-const Btn = ({ tone, ...p }) => (
-  <button type="button" {...p} className={`min-h-[40px] rounded-lg px-3 text-[14px] font-semibold disabled:opacity-50 ${tone === "danger" ? "bg-red-600 text-white" : tone === "ghost" ? "border border-border text-foreground" : "bg-foreground text-background"} ${p.className || ""}`} />
-);
-const Input = (p) => <input {...p} className={`min-h-[40px] w-full rounded-lg border border-border bg-card px-3 text-[15px] text-foreground ${p.className || ""}`} />;
-const Card = ({ children, className = "" }) => <div className={`rounded-xl border border-border bg-card p-4 ${className}`}>{children}</div>;
 
 // ── Kênh trực tiếp: một EventSource cho cả trang (/admin/live, SSE từ change stream MongoDB) ──
-// Sự kiện: learner {id, op, fields} · activity {dòng nhật ký học} · resync (vừa nối lại → tải lại hết).
 const live = new EventTarget();
 function useLiveConnection(enabled) {
   const [state, setState] = useState("connecting");
@@ -39,7 +26,6 @@ function useLiveConnection(enabled) {
       es = new EventSource(`${API_BASE}/admin/live`, { withCredentials: true });
       for (const type of ["learner", "activity", "resync"]) es.addEventListener(type, (e) => fire(type, JSON.parse(e.data || "{}")));
       es.onopen = () => { setState("on"); if (opened) fire("resync", {}); opened = true; };
-      // Mất mạng → EventSource tự nối lại. Server trả lỗi (502 khi Render deploy, 401) → nó bỏ hẳn, nên tự mở lại.
       es.onerror = () => { setState("connecting"); if (es.readyState === EventSource.CLOSED) timer = setTimeout(connect, 5000); };
     };
     connect();
@@ -47,19 +33,17 @@ function useLiveConnection(enabled) {
   }, [enabled]);
   return state;
 }
-/** Nghe sự kiện trực tiếp; fn(type, detail). */
 function useLive(types, fn) {
   const ref = useRef(fn);
   ref.current = fn;
   const key = types.join();
   useEffect(() => {
     const h = (e) => ref.current(e.type, e.detail);
-    const list = key.split(",");
+    const list = key.split(",").filter(Boolean);
     list.forEach((t) => live.addEventListener(t, h));
     return () => list.forEach((t) => live.removeEventListener(t, h));
   }, [key]);
 }
-/** Gộp nhiều lần gọi dồn dập thành một (sự kiện tới liên tục khi người học đang làm bài). */
 function useDebounced(fn, ms) {
   const ref = useRef(fn);
   ref.current = fn;
@@ -67,18 +51,19 @@ function useDebounced(fn, ms) {
   useEffect(() => () => clearTimeout(timer.current), []);
   return useCallback(() => { clearTimeout(timer.current); timer.current = setTimeout(() => ref.current(), ms); }, [ms]);
 }
+function useTick() {
+  const [, set] = useState(0);
+  useEffect(() => { const t = setInterval(() => set((n) => n + 1), 30_000); return () => clearInterval(t); }, []);
+}
 
-// ponytail: cache RAM theo path — đổi tab hiện ngay dữ liệu lần trước, rồi tải lại nền.
+// ponytail: cache RAM theo path — đổi trang hiện ngay dữ liệu lần trước, rồi tải lại nền.
 const listCache = new Map();
-/**
- * Tải một danh sách; reload() sau mỗi thao tác ghi.
- * `follow(type, detail, items)` → true thì tải lại (gộp trong 3 giây, giữ dưới giới hạn 120 lần/phút). Có follow thì tự tải lại khi nối lại kênh.
- */
 function useList(path, follow) {
   const [state, setState] = useState(() => ({ items: listCache.get(path) ?? null, error: "" }));
   const reload = useCallback(() => {
     if (listCache.has(path)) setState({ items: listCache.get(path), error: "" });
-    call(path).then((d) => { const items = d.items ?? d; listCache.set(path, items); setState({ items, error: "" }); }).catch((e) => setState((s) => ({ items: s.items ?? [], error: e.message })));
+    call(path).then((d) => { const items = d.items ?? d; listCache.set(path, items); setState({ items, error: "" }); })
+      .catch((e) => setState((s) => ({ items: s.items ?? [], error: e.message })));
   }, [path]);
   useEffect(reload, [reload]);
   const later = useDebounced(reload, 3000);
@@ -89,13 +74,7 @@ function useList(path, follow) {
   return { ...state, reload, setItems };
 }
 
-function act(fn, reload) {
-  return async (...args) => {
-    try { await fn(...args); reload?.(); } catch (e) { window.alert(e.message); }
-  };
-}
-
-// Client Better Auth của admin (/api/admin-auth) — chỉ để dùng passkey. Nạp động: trang học không cần.
+// ── Đăng nhập / xác thực lại ──────────────────────────────────────────────────
 let adminClient;
 async function adminAuthClient() {
   if (adminClient) return adminClient;
@@ -104,45 +83,22 @@ async function adminAuthClient() {
   adminClient = createAuthClient({ baseURL: api.origin, basePath: `${api.pathname.replace(/\/$/, "")}/admin-auth`, fetchOptions: { credentials: "include" }, plugins: [passkeyClient()] });
   return adminClient;
 }
-const PASSKEY_SET = "edu.admin.passkey";
+const hasPasskeyApi = () => typeof window !== "undefined" && Boolean(window.PublicKeyCredential);
 
-/** Gợi ý bật passkey sau khi đăng nhập bằng mã: lần sau vào bằng Face ID, không tốn thư. */
-function PasskeyOffer() {
-  const [state, setState] = useState(() => { try { return localStorage.getItem(PASSKEY_SET) ? "done" : "offer"; } catch { return "offer"; } });
-  if (state === "done" || !window.PublicKeyCredential) return null;
-  const add = async () => {
-    setState("busy");
-    const client = await adminAuthClient();
-    const r = await client.passkey.addPasskey({ name: navigator.platform || "Admin" });
-    if (r?.error) { setState("offer"); window.alert("Chưa bật được passkey: " + (r.error.message || "bị huỷ")); return; }
-    try { localStorage.setItem(PASSKEY_SET, "1"); } catch { /* riêng tư */ }
-    setState("done");
-  };
-  return (
-    <Card className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <span className="text-[14px] text-foreground">Bật đăng nhập bằng Face ID / vân tay cho máy này — lần sau vào không cần mã email.</span>
-      <div className="flex gap-2">
-        <Btn onClick={add} disabled={state === "busy"}>Bật passkey</Btn>
-        <Btn tone="ghost" onClick={() => { try { localStorage.setItem(PASSKEY_SET, "skip"); } catch { /* riêng tư */ } setState("done"); }}>Để sau</Btn>
-      </div>
-    </Card>
-  );
-}
-
-function Login({ onDone }) {
-  const [email, setEmail] = useState("");
+/** Hai cách vào: passkey (một chạm) hoặc mã email. Dùng cho cả màn đăng nhập lẫn hộp xác thực lại. */
+function AuthForm({ email: fixedEmail, onDone, compact }) {
+  const [email, setEmail] = useState(fixedEmail || "");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState("email");
+  const [step, setStep] = useState("start");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const run = (fn) => async (e) => {
-    e.preventDefault(); setBusy(true); setError("");
+    e?.preventDefault(); setBusy(true); setError("");
     try { await fn(); } catch (err) { setError(err.message); } finally { setBusy(false); }
   };
   const withPasskey = run(async () => {
-    const client = await adminAuthClient();
-    const r = await client.signIn.passkey();
-    if (r?.error) throw new Error("Không đăng nhập được bằng passkey. Máy này chưa bật passkey thì dùng mã email bên dưới.");
+    const r = await (await adminAuthClient()).signIn.passkey();
+    if (r?.error) throw new Error("Không xác thực được bằng Face ID / vân tay. Máy này chưa bật passkey thì dùng mã email.");
     onDone();
   });
   const send = run(async () => {
@@ -154,196 +110,216 @@ function Login({ onDone }) {
     onDone();
   });
   return (
+    <div className="space-y-3">
+      {step === "start" ? (<>
+        {hasPasskeyApi() && <Btn tone="primary" icon="fingerprint" onClick={withPasskey} disabled={busy} className="w-full">Dùng Face ID / vân tay</Btn>}
+        <form onSubmit={send} className="space-y-3">
+          {!fixedEmail && <Field label="Email quản trị"><Input type="email" required autoFocus={!compact} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>}
+          <Btn type="submit" tone={hasPasskeyApi() ? "plain" : "primary"} icon="mail" disabled={busy || !email.trim()} className="w-full">{fixedEmail ? `Gửi mã tới ${fixedEmail}` : "Gửi mã đăng nhập"}</Btn>
+        </form>
+      </>) : (
+        <form onSubmit={verify} className="space-y-3">
+          <p className="text-[15px] text-muted-foreground">Nếu {email} là quản trị viên, mã 6 số vừa được gửi tới hộp thư. Mã hết hạn sau 5 phút.</p>
+          <Field label="Mã 6 số"><Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} required autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} className="text-center text-[22px] tracking-[.4em] tabular-nums" /></Field>
+          <Btn type="submit" tone="primary" disabled={busy || otp.length !== 6} className="w-full">Xác nhận</Btn>
+          <Btn tone="ghost" className="w-full" onClick={() => { setStep("start"); setOtp(""); }}>Quay lại</Btn>
+        </form>
+      )}
+      {error && <p role="alert" className="text-[14px] text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+function Login({ onDone }) {
+  return (
     <main className="grid min-h-dvh place-items-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <h1 className="text-[20px] font-bold text-foreground">Quản trị Education Hugo</h1>
-        {step === "email" && window.PublicKeyCredential && (
-          <form onSubmit={withPasskey} className="mt-4">
-            <Btn type="submit" disabled={busy} className="w-full">Đăng nhập bằng Face ID / vân tay</Btn>
-            <p className="mt-3 text-center text-[13px] text-muted-foreground">hoặc nhận mã qua email</p>
-          </form>
-        )}
-        {step === "email" ? (
-          <form onSubmit={send} className="mt-4 space-y-3">
-            <Input type="email" required autoFocus autoComplete="email" placeholder="Email quản trị" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Btn type="submit" tone="ghost" disabled={busy} className="w-full">Gửi mã đăng nhập</Btn>
-          </form>
-        ) : (
-          <form onSubmit={verify} className="mt-4 space-y-3">
-            <p className="text-[14px] text-muted-foreground">Nếu {email} là quản trị viên, mã 6 số đã được gửi tới hộp thư (hiệu lực 5 phút).</p>
-            <Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} required autoFocus placeholder="Mã 6 số" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} />
-            <Btn type="submit" disabled={busy || otp.length !== 6} className="w-full">Đăng nhập</Btn>
-            <Btn tone="ghost" className="w-full" onClick={() => { setStep("email"); setOtp(""); }}>Đổi email</Btn>
-          </form>
-        )}
-        {error && <p role="alert" className="mt-3 text-[14px] text-red-600">{error}</p>}
-      </Card>
+      <div className="w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <span className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-foreground text-background"><Icon name="admin_panel_settings" className="text-[30px]" /></span>
+          <h1 className="text-[24px] font-bold text-foreground">Quản trị Education Hugo</h1>
+          <p className="mt-1 text-[15px] text-muted-foreground">Chỉ dành cho quản trị viên.</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-5"><AuthForm onDone={onDone} /></div>
+      </div>
     </main>
   );
 }
 
-const ago = (d) => {
-  if (!d) return "—";
-  const s = (Date.now() - new Date(d)) / 1000;
-  return s < 60 ? "vừa xong" : s < 3600 ? `${Math.floor(s / 60)} phút trước` : s < 86400 ? `${Math.floor(s / 3600)} giờ trước` : fmt(d);
-};
-const isOnline = (d) => Boolean(d) && Date.now() - new Date(d) < 10 * 60_000;
-const Dot = ({ on }) => <span title={on ? "Đang online" : "Offline"} className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${on ? "bg-green-500" : "bg-border"}`} />;
-/** Vẽ lại mỗi 30 giây để "x phút trước" và chấm online tự đúng mà không gọi API. */
-function useTick() {
-  const [, set] = useState(0);
-  useEffect(() => { const t = setInterval(() => set((n) => n + 1), 30_000); return () => clearInterval(t); }, []);
+/** Hộp xác thực lại cho thao tác tối mật. Mở bằng onReauth (ui.jsx), trả true khi xác thực xong. */
+function ReauthHost({ email }) {
+  const ref = useRef(null);
+  const [pending, setPending] = useState(null);
+  useEffect(() => {
+    onReauth(() => new Promise((resolve) => setPending({ resolve })));
+    return () => onReauth(null);
+  }, []);
+  useEffect(() => { if (pending && !ref.current.open) ref.current.showModal(); }, [pending]);
+  const finish = (ok) => { pending?.resolve(ok); setPending(null); ref.current?.close(); };
+  return (
+    <dialog ref={ref} onCancel={(e) => { e.preventDefault(); finish(false); }} aria-labelledby="adm-reauth"
+      className="w-[min(400px,calc(100vw-32px))] rounded-2xl border border-border bg-card p-0 text-foreground shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm">
+      {pending && (
+        <div className="space-y-4 p-5">
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-warning/15 text-[hsl(30_90%_35%)] dark:text-warning"><Icon name="lock" /></span>
+            <div>
+              <h2 id="adm-reauth" className="text-[18px] font-bold">Xác thực lại</h2>
+              <p className="mt-1 text-[15px] text-muted-foreground">Đây là thao tác tối mật. Xác nhận bạn vẫn là {email} — hiệu lực 10 phút.</p>
+            </div>
+          </div>
+          <AuthForm email={email} compact onDone={() => finish(true)} />
+          <Btn className="w-full" onClick={() => finish(false)}>Huỷ</Btn>
+        </div>
+      )}
+    </dialog>
+  );
 }
-// Một learner trong danh sách vừa đổi, hoặc có người mới/bị xoá → cần tải lại.
-// Danh sách xếp theo lần hoạt động: ai vừa hoạt động (kể cả ngoài danh sách) cũng làm đổi thứ tự.
+
+// ── Dùng chung ────────────────────────────────────────────────────────────────
+const isOnline = (d) => Boolean(d) && Date.now() - new Date(d) < 10 * 60_000;
 const touches = (type, d, items) => type === "learner" && (d.op !== "update" || d.fields.includes("lastActiveAt") || items.some((l) => l._id === d.id));
 
 function activityText(a) {
   if (a.kind === "lesson") return `học xong bài ${a.lesson + 1}`;
-  if (a.kind === "quiz") return `làm trắc nghiệm ${a.score}% · ${a.passed ? "qua step ✓" : "chưa đạt"}`;
+  if (a.kind === "quiz") return `trắc nghiệm ${a.score}% · ${a.passed ? "qua step" : "chưa đạt"}`;
   if (a.kind === "review") return `ôn lại trắc nghiệm ${a.score}%`;
   if (a.kind === "practice") return `ôn sổ câu sai ${a.score}%`;
-  if (a.kind === "challenge") return `làm thách đấu ${a.score}%`;
+  if (a.kind === "challenge") return `thách đấu ${a.score}%`;
   if (a.kind === "admin_done") return `được admin hoàn tất (${a.by})`;
   if (a.kind === "admin_undo") return `bị admin gỡ (${a.by})`;
   return a.kind;
 }
 function ActivityList({ items, onOpen }) {
-  if (!items) return <p className="text-muted-foreground">Đang tải…</p>;
-  if (!items.length) return <p className="text-[14px] text-muted-foreground">Chưa có hoạt động.</p>;
+  if (!items) return <Loading />;
+  if (!items.length) return <Empty icon="history">Chưa có hoạt động.</Empty>;
   return (
     <ul className="divide-y divide-border text-[14px] text-foreground">
       {items.map((a) => (
-        <li key={a._id} className="flex flex-wrap items-baseline gap-x-2 py-2">
-          <span className="w-24 shrink-0 text-[13px] text-muted-foreground">{ago(a.createdAt)}</span>
-          {onOpen && <button type="button" onClick={() => onOpen(a.email)} className="font-semibold underline-offset-2 hover:underline">{a.email}</button>}
-          <span className={a.kind === "quiz" && !a.passed ? "text-amber-600" : a.kind.startsWith("admin") ? "text-sky-600" : ""}>{activityText(a)}</span>
-          <span className="min-w-0 basis-full truncate pl-[6.5rem] text-[13px] text-muted-foreground">{a.label}</span>
+        <li key={a._id} className="flex gap-3 px-4 py-2.5">
+          <span className="w-24 shrink-0 pt-px text-[13px] text-muted-foreground">{ago(a.createdAt)}</span>
+          <span className="min-w-0 flex-1">
+            {onOpen && <button type="button" onClick={() => onOpen(a.email)} className="mr-1.5 font-semibold hover:underline">{a.email}</button>}
+            <span className={a.kind === "quiz" && !a.passed ? "text-[hsl(30_90%_35%)] dark:text-warning" : a.kind.startsWith("admin") ? "text-info" : ""}>{activityText(a)}</span>
+            {a.label && <span className="block truncate text-[13px] text-muted-foreground">{a.label}</span>}
+          </span>
         </li>
       ))}
     </ul>
   );
 }
+function LearningLine({ learning: n }) {
+  if (!n) return <span className="block text-[13px] text-muted-foreground">Chưa học step nào</span>;
+  return <span className="block text-[13px] text-muted-foreground">{n.passed ? "Vừa qua: " : `Đang học (bài ${n.lessons}/${n.total}): `}<span className="text-foreground">{n.label}</span></span>;
+}
+const Toolbar = ({ children }) => <div className="flex flex-wrap items-center gap-2">{children}</div>;
 
-function Overview() {
-  const [d, setD] = useState(null);
-  const [open, setOpen] = useState(null);
-  const loadStats = useCallback(() => { call("/admin/overview").then(setD).catch(() => setD((x) => x || {})); }, []);
-  useEffect(loadStats, [loadStats]);
-  const statsLater = useDebounced(loadStats, 10_000);
+// ── Trang: Bảng điều khiển ────────────────────────────────────────────────────
+function Overview({ stats, openLearner, go }) {
   useTick();
-  // Online: ai đổi lastActiveAt là có thể vừa vào/ra danh sách.
   const online = useList("/admin/learners?online=1", touches);
   const feed = useList("/admin/activity");
-  // Dòng hoạt động mới đẩy thẳng vào đầu luồng, không gọi API.
-  useLive(["activity", "learner", "resync"], (type, d) => {
+  useLive(["activity", "resync"], (type, d) => {
     if (type === "activity") feed.setItems((items) => [d, ...items.filter((x) => x._id !== d._id)].slice(0, 100));
     if (type === "resync") feed.reload();
-    statsLater();
   });
-  const rows = d ? [
-    ["Người học", d.learners], ["Hoạt động 24h", d.active1], ["Hoạt động 7 ngày", d.active7], ["Mới hôm nay", d.newToday],
-    ["Bài đăng 7 ngày", d.posts7], ["Báo cáo chờ xử lý", d.pendingReports], ["Góp ý bài học mới", d.newLessonFb],
-    ["Phiếu đánh giá", d.feedback], ["Ngọc đang lưu hành", d.gemsOut], ["Đơn cửa hàng 30 ngày", d.sold30],
-  ] : [];
+  const d = stats || {};
+  const tiles = [
+    ["Người học", d.learners, "group"], ["Hoạt động 24 giờ", d.active1, "bolt"], ["Hoạt động 7 ngày", d.active7, "calendar_month"],
+    ["Mới hôm nay", d.newToday, "person_add"], ["Bài đăng 7 ngày", d.posts7, "forum"], ["Ngọc đang lưu hành", d.gemsOut, "diamond"],
+    ["Đơn cửa hàng 30 ngày", d.sold30, "shopping_bag"], ["Phiếu đánh giá", d.feedback, "reviews"],
+  ];
+  const todo = [
+    [d.pendingReports, "báo cáo chờ xử lý", "moderation", "flag"],
+    [d.newLessonFb, "góp ý bài học mới", "feedback", "rate_review"],
+  ].filter(([n]) => n > 0);
   return (
-    <div className="space-y-4">
-      {open && <LearnerDetail email={open} onClose={() => setOpen(null)} />}
-      {!d ? <p className="text-muted-foreground">Đang tải…</p> : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {rows.map(([k, v]) => <Card key={k}><p className="text-[13px] text-muted-foreground">{k}</p><p className="mt-1 text-[24px] font-bold tabular-nums text-foreground">{(v ?? 0).toLocaleString("vi-VN")}</p></Card>)}
+    <div className="space-y-6">
+      {todo.length > 0 && (
+        <Group title="Cần xử lý">
+          <ul className="divide-y divide-border">
+            {todo.map(([n, text, page, icon]) => (
+              <li key={page}><button type="button" onClick={() => go(page)} className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left text-[15px] hover:bg-muted/60">
+                <Icon name={icon} className="text-destructive" /><span className="flex-1"><b className="tabular-nums">{num(n)}</b> {text}</span><Icon name="chevron_right" className="text-muted-foreground" />
+              </button></li>
+            ))}
+          </ul>
+        </Group>
+      )}
+      {!stats ? <Loading /> : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {tiles.map(([k, v, icon]) => (
+            <div key={k} className="rounded-2xl border border-border bg-card p-4">
+              <p className="flex items-center gap-1.5 text-[13px] text-muted-foreground"><Icon name={icon} className="text-[18px]" />{k}</p>
+              <p className="mt-1 text-[26px] font-bold tabular-nums text-foreground">{num(v)}</p>
+            </div>
+          ))}
         </div>
       )}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <Card>
-          <h2 className="mb-2 flex items-center gap-2 font-semibold text-foreground"><Dot on />Đang online ({online.items?.length ?? 0}) <small className="font-normal text-muted-foreground">· 10 phút qua</small></h2>
-          {!online.items ? <p className="text-muted-foreground">Đang tải…</p> : !online.items.length ? <p className="text-[14px] text-muted-foreground">Không ai online.</p> : (
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <Group title={`Đang online · ${online.items?.length ?? 0}`} footer="Hoạt động trong 10 phút qua.">
+          {!online.items ? <Loading /> : !online.items.length ? <Empty icon="bedtime">Không ai online.</Empty> : (
             <ul className="divide-y divide-border text-[14px]">
               {online.items.map((l) => (
-                <li key={l._id}><button type="button" onClick={() => setOpen(l.email)} className="w-full py-2 text-left hover:bg-muted">
-                  <b className="text-foreground">{l.nickname || l.email}</b> <span className="text-[13px] text-muted-foreground">{ago(l.lastActiveAt)}</span>
-                  <LearningLine learning={l.learning} />
+                <li key={l._id}><button type="button" onClick={() => openLearner(l.email)} className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-muted/60">
+                  <span className="pt-1.5"><Dot on /></span>
+                  <span className="min-w-0 flex-1"><b className="text-foreground">{l.nickname || l.email}</b> <span className="text-[13px] text-muted-foreground">· {ago(l.lastActiveAt)}</span><LearningLine learning={l.learning} /></span>
                 </button></li>
               ))}
             </ul>
           )}
-        </Card>
-        <Card>
-          <h2 className="mb-2 font-semibold text-foreground">Hoạt động học trực tiếp <small className="font-normal text-muted-foreground">· trực tiếp</small></h2>
-          {feed.error && <p className="text-red-600">{feed.error}</p>}
-          <ActivityList items={feed.items} onOpen={setOpen} />
-        </Card>
+        </Group>
+        <Group title="Hoạt động học trực tiếp">
+          {feed.error && <p role="alert" className="p-4 text-destructive">{feed.error}</p>}
+          <ActivityList items={feed.items} onOpen={openLearner} />
+        </Group>
       </div>
     </div>
   );
 }
 
-function LearningLine({ learning: n }) {
-  if (!n) return <span className="block text-[13px] text-muted-foreground">Chưa học step nào</span>;
-  return (
-    <span className="block text-[13px] text-muted-foreground">
-      {n.passed ? "Vừa qua: " : `Đang học (bài ${n.lessons}/${n.total}): `}<span className="text-foreground">{n.label}</span>
-    </span>
-  );
-}
-
-function Learners() {
-  const [q, setQ] = useState("");
+// ── Trang: Người học ──────────────────────────────────────────────────────────
+function Learners({ openLearner }) {
   const [query, setQuery] = useState("");
-  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [filter, setFilter] = useState("all");
   useTick();
-  const list = useList(`/admin/learners?q=${encodeURIComponent(query)}${onlineOnly ? "&online=1" : ""}`, touches);
-  const [open, setOpen] = useState(null);
-  const [adding, setAdding] = useState(false);
+  const list = useList(`/admin/learners?q=${encodeURIComponent(query)}${filter === "online" ? "&online=1" : ""}`, touches);
+  const add = act(async () => {
+    const v = await ask({ title: "Thêm người học", confirm: "Tạo", fields: [
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "name", label: "Tên" }, { name: "nickname", label: "Biệt danh", hint: "2–20 ký tự, chỉ chữ và emoji." },
+    ] });
+    if (!v) return false;
+    await call("/admin/learners", { method: "POST", body: v });
+    openLearner(v.email.trim().toLowerCase());
+  }, list.reload, "Đã tạo người học.");
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <form onSubmit={(e) => { e.preventDefault(); setQuery(q); }} className="flex min-w-[260px] flex-1 gap-2">
-          <Input placeholder="Email, biệt danh hoặc mã bạn" value={q} onChange={(e) => setQ(e.target.value)} />
-          <Btn type="submit">Tìm</Btn>
-        </form>
-        <label className="flex min-h-[40px] items-center gap-2 text-[14px] text-foreground"><input type="checkbox" checked={onlineOnly} onChange={(e) => setOnlineOnly(e.target.checked)} />Chỉ đang online</label>
-        <Btn tone="ghost" onClick={() => setAdding((v) => !v)}>+ Thêm member</Btn>
-      </div>
-      {adding && <AddLearner onDone={(email) => { setAdding(false); list.reload(); if (email) setOpen(email); }} />}
-      {open && <LearnerDetail email={open} onClose={() => { setOpen(null); list.reload(); }} />}
-      {list.items && <p className="text-[13px] text-muted-foreground">{list.items.length} người{list.items.length >= 200 ? " (200 hoạt động gần nhất)" : ""}</p>}
-      <Table list={list} onRow={(l) => setOpen(l.email)} head={["Người học", "Đang học", "Step qua", "Ngọc", "Chuỗi", "Hoạt động"]} row={(l) => [
-        <span key="n" className="flex items-start gap-2"><span className="pt-1.5"><Dot on={isOnline(l.lastActiveAt)} /></span><span className="min-w-0">
-          <b>{l.nickname || l.name || "—"}</b>{l.bannedAt && <span className="ml-2 rounded bg-red-100 px-1.5 text-[12px] text-red-700">Đã khoá</span>}
-          <br /><small className="text-muted-foreground">{l.email}</small></span></span>,
-        <span key="l" className="block max-w-[340px]"><LearningLine learning={l.learning} /></span>,
-        l.steps, (l.gems ?? 0).toLocaleString("vi-VN"), l.streak ? `🔥 ${l.streak}` : "—",
-        <span key="t" className="whitespace-nowrap">{ago(l.lastActiveAt)}</span>,
-      ]} />
+    <div className="space-y-4">
+      <Toolbar>
+        <Search placeholder="Email, biệt danh hoặc mã bạn" onSearch={setQuery} />
+        <Segmented label="Lọc" value={filter} onChange={setFilter} options={[["all", "Tất cả"], ["online", "Đang online"]]} />
+        <Btn tone="primary" icon="person_add" onClick={add}>Thêm</Btn>
+      </Toolbar>
+      <Group footer={list.items ? `${num(list.items.length)} người${list.items.length >= 200 ? " · 200 người hoạt động gần nhất" : ""}` : null}>
+        <Table list={list} onRow={(l) => openLearner(l.email)} empty="Không tìm thấy ai." head={["Người học", "Đang học", "Step qua", "Ngọc", "Chuỗi", "Hoạt động"]} row={(l) => [
+          <span key="n" className="flex items-start gap-2.5"><span className="pt-1.5"><Dot on={isOnline(l.lastActiveAt)} /></span><span className="min-w-0">
+            <b>{l.nickname || l.name || "—"}</b> {l.bannedAt && <Badge tone="red">Đã khoá</Badge>}
+            <br /><small className="text-muted-foreground">{l.email}</small></span></span>,
+          <span key="l" className="block max-w-[320px]"><LearningLine learning={l.learning} /></span>,
+          <span key="s" className="tabular-nums">{l.steps}</span>, <span key="g" className="tabular-nums">{num(l.gems)}</span>,
+          l.streak ? `${l.streak} ngày` : "—",
+          <span key="t" className="whitespace-nowrap text-muted-foreground">{ago(l.lastActiveAt)}</span>,
+        ]} />
+      </Group>
     </div>
   );
 }
 
-function AddLearner({ onDone }) {
-  const [f, setF] = useState({ email: "", name: "", nickname: "" });
-  const [err, setErr] = useState("");
-  const submit = async (e) => {
-    e.preventDefault(); setErr("");
-    try { await call("/admin/learners", { method: "POST", body: f }); onDone(f.email.trim().toLowerCase()); } catch (x) { setErr(x.message); }
-  };
-  return (
-    <Card>
-      <form onSubmit={submit} className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-        <Input type="email" required placeholder="Email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
-        <Input placeholder="Tên" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-        <Input placeholder="Biệt danh" value={f.nickname} onChange={(e) => setF({ ...f, nickname: e.target.value })} />
-        <Btn type="submit">Tạo</Btn>
-      </form>
-      {err && <p className="mt-2 text-[14px] text-red-600">{err}</p>}
-    </Card>
-  );
-}
+const PRIVATE_LABELS = { birthDate: "Ngày sinh", province: "Tỉnh/thành", gender: "Giới tính", ageGroup: "Nhóm tuổi" };
 
 function LearnerDetail({ email, onClose }) {
   const [d, setD] = useState(null);
   const [err, setErr] = useState("");
-  const [edit, setEdit] = useState(null);
+  const [priv, setPriv] = useState(null);
   const path = `/admin/learners/${encodeURIComponent(email)}`;
   const load = useCallback(() => { call(path).then((x) => { setD(x); setErr(""); }).catch((e) => setErr(e.message)); }, [path]);
   useEffect(load, [load]);
@@ -354,161 +330,170 @@ function LearnerDetail({ email, onClose }) {
   useLive(["learner", "activity", "resync"], (type, x) => {
     if (type === "resync" || (type === "learner" && x.id === idRef.current) || (type === "activity" && x.email === email)) loadLater();
   });
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  const gems = act(async () => {
-    const amount = window.prompt("Cộng/trừ bao nhiêu Ngọc? (số âm để trừ)");
-    if (!amount) return;
-    const note = window.prompt("Lý do điều chỉnh:");
-    if (!note) return;
-    await call(`${path}/gems`, { method: "POST", body: { amount: Number(amount), note } });
-  }, load);
-  const ban = act(async (on) => {
-    const reason = on ? window.prompt("Lý do khoá tài khoản:") : "";
-    if (on && !reason) return;
-    await call(`${path}/ban`, { method: "POST", body: { ban: on, reason } });
-  }, load);
-  const removeLink = act(async (key) => { if (window.confirm(`Gỡ link ${key}?`)) await call(`${path}/links`, { method: "POST", body: { key } }); }, load);
-  const reset = act(async () => { if (window.confirm("Xoá biệt danh, giới thiệu và nhân vật của người này?")) await call(`${path}/reset-persona`, { method: "POST" }); }, load);
-  const erase = async () => {
-    const typed = window.prompt(`XOÁ VĨNH VIỄN mọi dữ liệu của ${email}. Gõ lại email để xác nhận:`);
-    if (typed?.trim().toLowerCase() !== email) return;
-    try { await call(path, { method: "DELETE", body: { confirm: email } }); onClose(); } catch (e) { window.alert(e.message); }
-  };
-  const steps = act(async (ids, done) => {
-    if (!done && !window.confirm(`Gỡ ${ids.length} step (xoá cả bài đã học và điểm)?`)) return;
-    if (done && ids.length > 1 && !window.confirm(`Hoàn tất ${ids.length} step?`)) return;
-    await call(`${path}/steps`, { method: "POST", body: { stepIds: ids, done } });
-  }, load);
-  const saveEdit = async (e) => {
-    e.preventDefault();
-    try { await call(path, { method: "PATCH", body: edit }); setEdit(null); load(); } catch (x) { window.alert(x.message); }
-  };
 
   const l = d?.learner;
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={onClose}>
-      <aside role="dialog" aria-label={email} onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-3xl space-y-4 overflow-y-auto bg-background p-4 shadow-xl md:p-6">
-        <div className="sticky -top-4 z-10 -mx-4 -mt-4 flex items-center justify-between gap-2 border-b border-border bg-background px-4 py-3 md:-top-6 md:-mx-6 md:-mt-6 md:px-6">
-          <h2 className="flex min-w-0 items-center gap-2 text-[17px] font-bold text-foreground"><Dot on={isOnline(l?.lastActiveAt)} /><span className="truncate">{l?.nickname || email}</span></h2>
-          <Btn tone="ghost" onClick={onClose}>Đóng</Btn>
-        </div>
-        {err && <p className="text-red-600">{err}</p>}
-        {!d ? <p className="text-muted-foreground">Đang tải…</p> : (<>
-          <Card>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[14px] sm:grid-cols-3">
-              {[["Email", l.email], ["Tên", l.name || "—"], ["Biệt danh", l.nickname || "—"], ["Mã bạn", l.friendCode || "—"],
-                ["Ngọc", (l.gems ?? 0).toLocaleString("vi-VN")], ["Khiên lửa", l.shields ?? 0],
-                ["Chuỗi lửa", `${l.streak?.count ?? 0} ngày${l.streak?.studiedToday ? " · đã học hôm nay" : ""}`],
-                ["Hoạt động", ago(l.lastActiveAt)], ["Tạo lúc", fmt(l.createdAt)], ["Nhóm tuổi", l.consent?.ageGroup || "—"],
-                ["Ngày sinh", l.profile?.birthDate || "—"], ["Tỉnh/thành", l.profile?.province || "—"], ["Giới tính", l.profile?.gender || "—"],
-              ].map(([k, v]) => <div key={k} className="min-w-0"><dt className="text-[12px] text-muted-foreground">{k}</dt><dd className="break-words text-foreground">{v}</dd></div>)}
-            </dl>
-            {l.bannedAt && <p className="mt-2 text-[14px] font-semibold text-red-600">Đã khoá từ {fmt(l.bannedAt)}</p>}
-            {l.ageMismatch && <p className="mt-2 text-[14px] font-semibold text-red-600">Ngày sinh dưới 16 nhưng đã chọn 16+ (thiếu xác nhận phụ huynh)</p>}
-            {l.intro && <p className="mt-2 text-[14px] text-muted-foreground">“{l.intro}”</p>}
-            <div className="mt-3"><LearningLine learning={d.learning} /></div>
-          </Card>
+  const edit = act(async () => {
+    const v = await ask({ title: "Sửa thông tin", confirm: "Lưu", fields: [
+      { name: "name", label: "Tên", value: l.name || "" }, { name: "nickname", label: "Biệt danh", value: l.nickname || "" },
+      { name: "shields", label: "Khiên lửa", type: "number", min: 0, max: 99, value: String(l.shields ?? 0) },
+      { name: "intro", label: "Giới thiệu", type: "textarea", maxLength: 300, value: l.intro || "" },
+    ] });
+    if (!v) return false;
+    await call(path, { method: "PATCH", body: v });
+  }, load, "Đã lưu.");
+  const gems = act(async () => {
+    const v = await ask({ title: "Điều chỉnh Ngọc", message: `Hiện có ${num(l.gems)} Ngọc. Số âm để trừ.`, confirm: "Điều chỉnh", fields: [
+      { name: "amount", label: "Số Ngọc", type: "number", required: true, placeholder: "vd. 50 hoặc -20" },
+      { name: "note", label: "Lý do", required: true, maxLength: 200, hint: "Ghi vào sổ Ngọc và nhật ký quản trị." },
+    ] });
+    if (!v) return false;
+    await call(`${path}/gems`, { method: "POST", body: { amount: Number(v.amount), note: v.note } });
+  }, load, "Đã điều chỉnh Ngọc.");
+  const reset = act(async () => {
+    if (!(await confirmAction("Xoá hồ sơ công khai?", "Xoá biệt danh, giới thiệu, nhân vật và link mạng xã hội của người này.", "Xoá hồ sơ"))) return false;
+    await call(`${path}/reset-persona`, { method: "POST" });
+  }, load, "Đã xoá hồ sơ công khai.");
+  const ban = act(async (on) => {
+    if (on) {
+      const v = await ask({ title: "Khoá tài khoản?", message: "Người này bị đăng xuất khỏi mọi máy ngay và không học được nữa.", confirm: "Khoá", tone: "danger", fields: [{ name: "reason", label: "Lý do", required: true, maxLength: 200 }] });
+      if (!v) return false;
+      await call(`${path}/ban`, { method: "POST", body: { ban: true, reason: v.reason } });
+    } else await call(`${path}/ban`, { method: "POST", body: { ban: false } });
+  }, load, "Đã cập nhật.");
+  const erase = async () => {
+    const v = await ask({ title: "Xoá vĩnh viễn?", tone: "danger", confirm: "Xoá vĩnh viễn",
+      message: `Mọi dữ liệu học của ${email} bị xoá và không khôi phục được.`,
+      fields: [{ name: "confirm", label: "Gõ lại email để xác nhận", match: email, placeholder: email }] });
+    if (!v) return;
+    try { await call(path, { method: "DELETE", body: { confirm: email } }); toast("Đã xoá tài khoản."); onClose(); } catch (e) { if (!e.cancelled) toast(e.message, "error"); }
+  };
+  const showPrivate = act(async () => { setPriv(await call(`${path}/private`)); });
+  const steps = act(async (ids, done) => {
+    if (!done && !(await confirmAction(`Gỡ ${ids.length} step?`, "Xoá cả bài đã học và điểm của các step này.", "Gỡ"))) return false;
+    if (done && ids.length > 1 && !(await confirmAction(`Hoàn tất ${ids.length} step?`, "Không cộng Ngọc, XP hay thưởng chặng — chỉ sửa tiến độ.", "Hoàn tất", "primary"))) return false;
+    await call(`${path}/steps`, { method: "POST", body: { stepIds: ids, done } });
+  }, load, "Đã cập nhật tiến độ.");
+  const removeLink = act(async (key) => {
+    if (!(await confirmAction(`Gỡ link ${key}?`, null, "Gỡ"))) return false;
+    await call(`${path}/links`, { method: "POST", body: { key } });
+  }, load, "Đã gỡ link.");
 
-          {edit ? (
-            <Card>
-              <form onSubmit={saveEdit} className="grid gap-2 sm:grid-cols-2">
-                {[["name", "Tên"], ["nickname", "Biệt danh"], ["shields", "Khiên lửa"]].map(([k, label]) => (
-                  <label key={k} className="text-[13px] text-muted-foreground">{label}<Input className="mt-1" value={edit[k]} onChange={(e) => setEdit({ ...edit, [k]: e.target.value })} /></label>
-                ))}
-                <label className="text-[13px] text-muted-foreground sm:col-span-2">Giới thiệu
-                  <textarea rows={2} maxLength={300} value={edit.intro} onChange={(e) => setEdit({ ...edit, intro: e.target.value })} className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" /></label>
-                <div className="flex gap-2 sm:col-span-2"><Btn type="submit">Lưu</Btn><Btn tone="ghost" onClick={() => setEdit(null)}>Huỷ</Btn></div>
-              </form>
-            </Card>
+  return (
+    <Sheet onClose={onClose} title={<span className="flex items-center gap-2"><Dot on={isOnline(l?.lastActiveAt)} />{l?.nickname || email}</span>}
+      toolbar={l && <Btn small tone="ghost" icon="edit" onClick={edit}>Sửa</Btn>}>
+      {err && <p role="alert" className="text-destructive">{err}</p>}
+      {!d ? <Loading /> : (<>
+        {(l.bannedAt || l.ageMismatch) && (
+          <div className="space-y-1 rounded-2xl bg-destructive/10 p-4 text-[15px] font-semibold text-destructive">
+            {l.bannedAt && <p>Đã khoá từ {fmt(l.bannedAt)}</p>}
+            {l.ageMismatch && <p>Ngày sinh dưới 16 nhưng đã chọn 16+ (thiếu xác nhận phụ huynh)</p>}
+          </div>
+        )}
+        <Group title="Thông tin">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 text-[14px] sm:grid-cols-3">
+            {[["Email", l.email], ["Tên", l.name || "—"], ["Biệt danh", l.nickname || "—"], ["Mã bạn", l.friendCode || "—"],
+              ["Ngọc", num(l.gems)], ["Khiên lửa", l.shields ?? 0],
+              ["Chuỗi lửa", `${l.streak?.count ?? 0} ngày${l.streak?.studiedToday ? " · đã học hôm nay" : ""}`],
+              ["Hoạt động", ago(l.lastActiveAt)], ["Tạo lúc", fmt(l.createdAt)],
+            ].map(([k, v]) => <div key={k} className="min-w-0"><dt className="text-[12px] text-muted-foreground">{k}</dt><dd className="break-words text-foreground">{v}</dd></div>)}
+          </dl>
+          {l.intro && <p className="border-t border-border px-4 py-3 text-[14px] text-muted-foreground">“{l.intro}”</p>}
+          <div className="border-t border-border px-4 py-3"><LearningLine learning={d.learning} /></div>
+        </Group>
+
+        <Group title="Dữ liệu riêng tư" footer="Ẩn mặc định. Mỗi lần xem cần xác thực lại và được ghi vào nhật ký quản trị.">
+          {priv ? (
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 p-4 text-[14px] sm:grid-cols-4">
+              {Object.entries(PRIVATE_LABELS).map(([k, label]) => <div key={k}><dt className="text-[12px] text-muted-foreground">{label}</dt><dd className="text-foreground">{priv[k] || "—"}</dd></div>)}
+            </dl>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              <Btn onClick={() => setEdit({ name: l.name || "", nickname: l.nickname || "", intro: l.intro || "", shields: l.shields ?? 0 })}>Sửa thông tin</Btn>
-              <Btn tone="ghost" onClick={gems}>Điều chỉnh Ngọc</Btn>
-              <Btn tone="ghost" onClick={reset}>Xoá hồ sơ công khai</Btn>
-              {l.bannedAt ? <Btn tone="ghost" onClick={() => ban(false)}>Mở khoá</Btn> : <Btn tone="danger" onClick={() => ban(true)}>Khoá tài khoản</Btn>}
-              <Btn tone="danger" onClick={erase}>Xoá tài khoản</Btn>
+            <div className="flex items-center justify-between gap-3 p-4">
+              <span className="text-[15px] text-muted-foreground">{l.hasPrivate ? "Ngày sinh, tỉnh/thành, giới tính, nhóm tuổi" : "Người này chưa khai báo."}</span>
+              {l.hasPrivate && <Btn small icon="visibility" onClick={showPrivate}>Hiện</Btn>}
             </div>
           )}
+        </Group>
 
-          {Object.values(l.links || {}).some(Boolean) && (
-            <ul className="space-y-1 text-[14px]">
+        {Object.values(l.links || {}).some(Boolean) && (
+          <Group title="Link mạng xã hội">
+            <ul className="divide-y divide-border text-[14px]">
               {Object.entries(l.links).filter(([, v]) => v).map(([k, v]) => (
-                <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="min-w-0 break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a>
-                  <Btn tone="ghost" onClick={() => removeLink(k)}>Gỡ</Btn></li>
+                <li key={k} className="flex items-center gap-3 px-4 py-2"><b className="w-20 shrink-0 capitalize">{k}</b>
+                  <a className="min-w-0 flex-1 break-all text-primary hover:underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a>
+                  <Btn small tone="danger-plain" onClick={() => removeLink(k)}>Gỡ</Btn></li>
               ))}
             </ul>
-          )}
+          </Group>
+        )}
 
-          <section className="space-y-2">
-            <h3 className="font-semibold text-foreground">Tiến độ học</h3>
-            {d.progress.map((c) => <CourseProgress key={c.key} course={c} current={d.learning?.stepId} onSteps={steps} />)}
-          </section>
-
-          <section>
-            <h3 className="mb-1 font-semibold text-foreground">Hoạt động học (30 ngày)</h3>
-            <ActivityList items={d.activity} />
-          </section>
-
-          <section>
-            <h3 className="mb-1 font-semibold text-foreground">Sổ Ngọc</h3>
-            <ul className="max-h-60 space-y-1 overflow-auto text-[14px] text-foreground">
-              {d.gems.map((g) => <li key={g._id}>{fmt(g.createdAt)} · <b className="tabular-nums">{g.amount > 0 ? "+" : ""}{g.amount}</b> · {g.reason} {g.note ? `· ${g.note}` : ""}</li>)}
-              {!d.gems.length && <li className="text-muted-foreground">Chưa có giao dịch.</li>}
+        <Group title="Tiến độ học">
+          <div className="divide-y divide-border">{d.progress.map((c) => <CourseProgress key={c.key} course={c} current={d.learning?.stepId} onSteps={steps} />)}</div>
+        </Group>
+        <Group title="Hoạt động học · 30 ngày"><ActivityList items={d.activity} /></Group>
+        <Group title="Sổ Ngọc">
+          {!d.gems.length ? <Empty icon="diamond">Chưa có giao dịch.</Empty> : (
+            <ul className="max-h-72 divide-y divide-border overflow-auto text-[14px]">
+              {d.gems.map((g) => <li key={g._id} className="flex gap-3 px-4 py-2"><span className="w-28 shrink-0 text-muted-foreground">{fmt(g.createdAt)}</span>
+                <b className={`w-16 shrink-0 text-right tabular-nums ${g.amount > 0 ? "text-success" : "text-destructive"}`}>{g.amount > 0 ? "+" : ""}{g.amount}</b>
+                <span className="min-w-0 flex-1">{g.reason}{g.note ? ` · ${g.note}` : ""}</span></li>)}
             </ul>
-          </section>
-          {d.receipts.length > 0 && (
-            <section>
-              <h3 className="mb-1 font-semibold text-foreground">Đơn cửa hàng</h3>
-              <ul className="space-y-1 text-[14px] text-foreground">{d.receipts.map((r) => <li key={r._id}>{fmt(r.createdAt)} · {r.slug || r.productId} · {r.price} Ngọc</li>)}</ul>
-            </section>
           )}
-          {d.reports.length > 0 && (
-            <section>
-              <h3 className="mb-1 font-semibold text-red-600">{d.reports.length} báo cáo về người này</h3>
-              <ul className="space-y-1 text-[14px] text-foreground">{d.reports.map((r) => <li key={r._id}>{fmt(r.createdAt)} · {r.reason}{r.note ? ` · ${r.note}` : ""} · {r.status}</li>)}</ul>
-            </section>
-          )}
-        </>)}
-      </aside>
-    </div>
+        </Group>
+        {d.receipts.length > 0 && (
+          <Group title="Đơn cửa hàng">
+            <ul className="divide-y divide-border text-[14px]">{d.receipts.map((r) => <li key={r._id} className="px-4 py-2">{fmt(r.createdAt)} · {r.slug || r.productId} · {r.price} Ngọc</li>)}</ul>
+          </Group>
+        )}
+        {d.reports.length > 0 && (
+          <Group title={`${d.reports.length} báo cáo về người này`}>
+            <ul className="divide-y divide-border text-[14px]">{d.reports.map((r) => <li key={r._id} className="px-4 py-2">{fmt(r.createdAt)} · {r.reason}{r.note ? ` · ${r.note}` : ""} · {REPORT_STATUS[r.status] || r.status}</li>)}</ul>
+          </Group>
+        )}
+
+        <Group title="Quản lý tài khoản">
+          <div className="flex flex-wrap gap-2 p-4">
+            <Btn icon="diamond" onClick={gems}>Điều chỉnh Ngọc</Btn>
+            <Btn icon="person_off" onClick={reset}>Xoá hồ sơ công khai</Btn>
+            {l.bannedAt ? <Btn icon="lock_open" onClick={() => ban(false)}>Mở khoá</Btn> : <Btn tone="danger-plain" icon="block" onClick={() => ban(true)}>Khoá tài khoản</Btn>}
+            <Btn tone="danger" icon="delete_forever" onClick={erase}>Xoá vĩnh viễn</Btn>
+          </div>
+        </Group>
+      </>)}
+    </Sheet>
   );
 }
 
-/** Một khoá: thanh tiến độ + từng step (đã qua / đang học / chưa), nút hoàn tất, gỡ, hoàn tất tới đây. */
 function CourseProgress({ course: c, current, onSteps }) {
   const started = c.done > 0 || c.steps.some((s) => s.lessons);
   const ready = c.steps.filter((s) => !s.draft);
   return (
-    <details open={started} className="rounded-xl border border-border bg-card">
-      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-3">
+    <details open={started}>
+      <summary className="flex min-h-[52px] cursor-pointer list-none flex-wrap items-center gap-3 px-4 py-2">
         <b className="text-[15px] text-foreground">{c.title}</b>
         <span className="text-[13px] tabular-nums text-muted-foreground">{c.done}/{c.total} step</span>
-        <span className="h-2 min-w-[80px] flex-1 overflow-hidden rounded-full bg-muted"><span className="block h-full rounded-full bg-green-500" style={{ width: `${c.total ? (c.done / c.total) * 100 : 0}%` }} /></span>
+        <span className="h-2 min-w-[80px] flex-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={c.done} aria-valuemax={c.total} aria-label={c.title}>
+          <span className="block h-full rounded-full bg-success" style={{ width: `${c.total ? (c.done / c.total) * 100 : 0}%` }} />
+        </span>
       </summary>
-      <div className="flex flex-wrap gap-2 border-t border-border px-3 py-2">
-        <Btn tone="ghost" onClick={() => onSteps(ready.filter((s) => !s.done).map((s) => s.id), true)} disabled={c.done === c.total}>Hoàn tất cả khoá</Btn>
-        <Btn tone="ghost" onClick={() => onSteps(ready.filter((s) => s.done || s.lessons).map((s) => s.id), false)} disabled={!started}>Gỡ cả khoá</Btn>
+      <div className="flex flex-wrap gap-2 px-4 pb-2">
+        <Btn small onClick={() => onSteps(ready.filter((s) => !s.done).map((s) => s.id), true)} disabled={c.done === c.total}>Hoàn tất cả khoá</Btn>
+        <Btn small tone="danger-plain" onClick={() => onSteps(ready.filter((s) => s.done || s.lessons).map((s) => s.id), false)} disabled={!started}>Gỡ cả khoá</Btn>
       </div>
       <ul className="divide-y divide-border border-t border-border">
         {c.steps.map((s, i) => {
           const state = s.done ? "done" : s.lessons ? "doing" : "todo";
           return (
-            <li key={s.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-[14px] ${s.id === current ? "bg-sky-50" : ""} ${s.draft ? "opacity-50" : ""}`}>
-              <span className={`w-5 text-center ${state === "done" ? "text-green-600" : state === "doing" ? "text-amber-500" : "text-muted-foreground"}`}>{state === "done" ? "✓" : state === "doing" ? "◐" : "○"}</span>
+            <li key={s.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-[14px] ${s.id === current ? "bg-info/10" : ""} ${s.draft ? "opacity-50" : ""}`}>
+              <Badge tone={state === "done" ? "green" : state === "doing" ? "amber" : "gray"}>{state === "done" ? "Đã qua" : state === "doing" ? "Đang học" : "Chưa"}</Badge>
               <span className="min-w-0 flex-1 text-foreground">{s.title}</span>
-              <span className="text-[13px] tabular-nums text-muted-foreground">
-                {s.total ? `bài ${s.lessons}/${s.total}` : ""}{s.score ? ` · điểm ${s.score.best}% (${s.score.attempts} lần)` : ""}
-              </span>
-              {!s.draft && (s.done || s.lessons
-                ? <span className="flex gap-1">{!s.done && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], true)}>Hoàn tất</Btn>}<Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], false)}>Gỡ</Btn></span>
-                : <span className="flex gap-1">
-                  <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" onClick={() => onSteps([s.id], true)}>Hoàn tất</Btn>
-                  {i > 0 && <Btn tone="ghost" className="min-h-[32px] px-2 text-[13px]" title="Hoàn tất mọi step từ đầu khoá tới step này" onClick={() => onSteps(ready.slice(0, ready.indexOf(s) + 1).filter((x) => !x.done).map((x) => x.id), true)}>Tới đây</Btn>}
-                </span>)}
+              <span className="text-[13px] tabular-nums text-muted-foreground">{s.total ? `bài ${s.lessons}/${s.total}` : ""}{s.score ? ` · điểm ${s.score.best}% (${s.score.attempts} lần)` : ""}</span>
+              {!s.draft && (
+                <span className="flex gap-1">
+                  {!s.done && <Btn small tone="ghost" onClick={() => onSteps([s.id], true)}>Hoàn tất</Btn>}
+                  {!s.done && !s.lessons && i > 0 && <Btn small tone="ghost" title="Hoàn tất mọi step từ đầu khoá tới step này" onClick={() => onSteps(ready.slice(0, ready.indexOf(s) + 1).filter((x) => !x.done).map((x) => x.id), true)}>Tới đây</Btn>}
+                  {(s.done || s.lessons) && <Btn small tone="danger-plain" onClick={() => onSteps([s.id], false)}>Gỡ</Btn>}
+                </span>
+              )}
             </li>
           );
         })}
@@ -517,416 +502,568 @@ function CourseProgress({ course: c, current, onSteps }) {
   );
 }
 
-
-/** Nhiều email đăng nhập từ cùng một máy (cùng IP + trình duyệt). Gợi ý thôi — trường học/gia đình dùng chung máy là bình thường. */
 function Duplicates() {
   const list = useList("/admin/duplicates");
   return (
-    <div className="space-y-3">
-      <Table list={list} head={["Email", "Số tài khoản", "IP", "Lần cuối"]} row={(g) => [
-        <span key="e" className="whitespace-pre-line">{g.emails.join("\n")}</span>, g.emails.length, g.ip, fmt(g.lastAt),
+    <Group footer="Nhiều email đăng nhập từ cùng IP và trình duyệt. Chỉ là gợi ý — trường học, gia đình dùng chung máy là bình thường. IP đã được che bớt.">
+      <Table list={list} empty="Không có nhóm nào." head={["Email", "Số tài khoản", "IP", "Lần cuối"]} row={(g) => [
+        <span key="e" className="whitespace-pre-line">{g.emails.join("\n")}</span>, g.emails.length, <code key="i">{g.ip}</code>, fmt(g.lastAt),
       ]} />
-    </div>
+    </Group>
   );
 }
 
-/** Link MXH member tự gắn: admin xem hết (mới sửa lên trước), gỡ từng link hoặc cả bộ. */
 function MemberLinks() {
   const list = useList("/admin/links");
-  const remove = async (email, key) => {
-    if (!window.confirm(key ? `Gỡ link ${key} của ${email}?` : `Gỡ TẤT CẢ link của ${email}?`)) return;
-    try { await call(`/admin/learners/${encodeURIComponent(email)}/links`, { method: "POST", body: { key } }); list.reload(); }
-    catch (e) { window.alert(e.message); }
-  };
+  const remove = (email, key) => act(async () => {
+    if (!(await confirmAction(key ? `Gỡ link ${key}?` : "Gỡ mọi link?", `Của ${email}.`, "Gỡ"))) return false;
+    await call(`/admin/learners/${encodeURIComponent(email)}/links`, { method: "POST", body: { key } });
+  }, list.reload, "Đã gỡ link.");
   return (
-    <div className="space-y-3">
-      <Table list={list} head={["Người học", "Link", "Sửa lúc", ""]} row={(l) => [
+    <Group footer="Link member tự gắn vào hồ sơ, mới sửa lên trước. Gỡ link quảng cáo hoặc độc hại.">
+      <Table list={list} empty="Chưa ai gắn link." head={["Người học", "Link", "Sửa lúc", ""]} row={(l) => [
         <span key="n">{l.nickname || "—"}<br /><small className="text-muted-foreground">{l.email}</small></span>,
         <ul key="l" className="space-y-1">{Object.entries(l.links || {}).filter(([, v]) => v).map(([k, v]) => (
-          <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0">{k}</b><a className="break-all text-blue-600 underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a><Btn tone="ghost" onClick={() => remove(l.email, k)}>Gỡ</Btn></li>
+          <li key={k} className="flex items-center gap-2"><b className="w-20 shrink-0 capitalize">{k}</b><a className="break-all text-primary hover:underline" href={v} target="_blank" rel="noopener noreferrer nofollow">{v}</a><Btn small tone="danger-plain" onClick={remove(l.email, k)}>Gỡ</Btn></li>
         ))}</ul>,
-        fmt(l.updatedAt),
-        <Btn key="x" tone="danger" onClick={() => remove(l.email)}>Gỡ hết</Btn>,
+        <span key="t" className="whitespace-nowrap">{fmt(l.updatedAt)}</span>,
+        <Btn key="x" small tone="danger-plain" onClick={remove(l.email)}>Gỡ hết</Btn>,
       ]} />
-    </div>
+    </Group>
   );
 }
 
-/** Gửi thông báo từ tài khoản chính thức Education Hugo tới mọi người đang theo dõi (hộp thư + đẩy). */
+// ── Nội dung ──────────────────────────────────────────────────────────────────
 function Announce() {
-  const [f, setF] = useState({ title: "", body: "", url: "/learn" });
+  const empty = { title: "", body: "", url: "/learn" };
+  const [f, setF] = useState(empty);
   const [busy, setBusy] = useState(false);
   const send = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Gửi thông báo này tới mọi người theo dõi Education Hugo?")) return;
+    if (!(await confirmAction("Gửi thông báo?", `“${f.title}” sẽ tới hộp thư và máy của mọi người theo dõi Education Hugo. Không thu hồi được.`, "Gửi", "primary"))) return;
     setBusy(true);
-    try { const r = await call("/admin/announce", { method: "POST", body: f }); window.alert(`Đã gửi tới ${r.sent} người.`); setF({ title: "", body: "", url: "/learn" }); }
-    catch (err) { window.alert(err.message); } finally { setBusy(false); }
+    try { const r = await call("/admin/announce", { method: "POST", body: f }); toast(`Đã gửi tới ${num(r.sent)} người.`); setF(empty); }
+    catch (err) { if (!err.cancelled) toast(err.message, "error"); } finally { setBusy(false); }
   };
-  const input = "w-full rounded-lg border border-border bg-background px-3 py-2 text-[15px]";
   return (
-    <form onSubmit={send} className="max-w-xl space-y-3">
-      <input className={input} placeholder="Tiêu đề" maxLength={120} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} required />
-      <textarea className={input} rows={4} placeholder="Nội dung" maxLength={500} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} required />
-      <input className={input} placeholder="Đường dẫn khi bấm (vd. /store)" value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} />
-      <Btn type="submit" disabled={busy}>{busy ? "Đang gửi…" : "Gửi thông báo"}</Btn>
+    <form onSubmit={send} className="max-w-xl space-y-4">
+      <Group footer="Gửi từ tài khoản chính thức Education Hugo.">
+        <div className="space-y-3 p-4">
+          <Field label={`Tiêu đề · ${f.title.length}/120`}><Input maxLength={120} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} required /></Field>
+          <Field label={`Nội dung · ${f.body.length}/500`}><Textarea rows={4} maxLength={500} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} required /></Field>
+          <Field label="Mở trang khi bấm" hint="Đường dẫn trong app, vd. /store"><Input value={f.url} onChange={(e) => setF({ ...f, url: e.target.value })} /></Field>
+        </div>
+      </Group>
+      <Btn type="submit" tone="primary" icon="send" disabled={busy || !f.title.trim() || !f.body.trim()}>{busy ? "Đang gửi…" : "Gửi thông báo"}</Btn>
     </form>
   );
 }
 
-function Store() {
-  const list = useList("/admin/products");
-  const receipts = useList("/admin/receipts");
-  const create = act(async () => {
-    const slug = window.prompt("Slug (a-z, 0-9, -):");
-    const name = slug && window.prompt("Tên tiếng Việt:");
-    const price = name && window.prompt("Giá (Ngọc):");
-    const kind = price && window.prompt("Loại: badge · xp_boost · streak_shield", "badge");
-    if (!kind) return;
-    await call("/admin/products", { method: "POST", body: { slug, name: { vi: name }, price: Number(price), kind } });
-  }, list.reload);
-  const edit = (p, field, label) => act(async () => {
-    const v = window.prompt(label, String(p[field] ?? ""));
-    if (v === null) return;
-    await call(`/admin/products/${p._id}`, { method: "PATCH", body: { [field]: v } });
-  }, list.reload);
-  const toggle = (p) => act(() => call(`/admin/products/${p._id}`, { method: "PATCH", body: { active: !p.active } }), list.reload);
-  return (
-    <div className="space-y-4">
-      <Btn onClick={create}>Thêm sản phẩm</Btn>
-      <Table list={list} head={["Slug", "Tên", "Loại", "Giá", "Kho", "Trạng thái", ""]} row={(p) => [
-        p.slug, p.name?.vi, p.kind, p.price, p.stock ?? "∞", p.active ? "Đang bán" : "Ẩn",
-        <span key="a" className="flex flex-wrap gap-2">
-          <Btn tone="ghost" onClick={edit(p, "price", "Giá mới (Ngọc):")}>Giá</Btn>
-          <Btn tone="ghost" onClick={edit(p, "stock", "Số lượng kho (để trống = không giới hạn):")}>Kho</Btn>
-          <Btn tone="ghost" onClick={toggle(p)}>{p.active ? "Ẩn" : "Bán"}</Btn>
-        </span>,
-      ]} />
-      <h3 className="font-semibold text-foreground">Đơn gần đây</h3>
-      <Table list={receipts} head={["Lúc", "Email", "Sản phẩm", "Giá"]} row={(r) => [fmt(r.createdAt), r.email, r.slug || r.productId, r.price]} />
-    </div>
-  );
-}
-
-function Partners() {
-  const list = useList("/admin/partners");
-  const [form, setForm] = useState({ email: "", days: 30, origins: "", note: "" });
-  const [issued, setIssued] = useState(null);
-  const issue = act(async (e) => {
-    e.preventDefault();
-    const out = await call("/admin/partners", { method: "POST", body: { ...form, origins: form.origins.split(/[\s,]+/).filter(Boolean) } });
-    setIssued(out);
-    setForm({ email: "", days: 30, origins: "", note: "" });
-  }, list.reload);
-  const revoke = (k) => act(async () => { if (window.confirm(`Thu hồi key …${k.last4} của ${k.email}?`)) await call(`/admin/partners/${k._id}/revoke`, { method: "POST" }); }, list.reload);
-  const extend = (k) => act(async () => {
-    const days = window.prompt(`Gia hạn key …${k.last4} thêm bao nhiêu ngày? (còn lại tối đa 365 ngày)`, "30");
-    if (days) await call(`/admin/partners/${k._id}`, { method: "POST", body: { days } });
-  }, list.reload);
-  const domains = (k) => act(async () => {
-    const origins = window.prompt(`Tên miền cho key …${k.last4} (cách nhau dấu phẩy):`, (k.origins || []).join(", "));
-    if (origins !== null) await call(`/admin/partners/${k._id}`, { method: "POST", body: { origins: origins.split(/[\s,]+/).filter(Boolean) } });
-  }, list.reload);
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-  return (
-    <div className="space-y-4">
-      <Card>
-        <form onSubmit={issue} className="grid gap-2 sm:grid-cols-2">
-          <Input type="email" required placeholder="Email đối tác" value={form.email} onChange={set("email")} />
-          <Input type="number" min={1} max={365} placeholder="Số ngày hiệu lực" value={form.days} onChange={set("days")} />
-          <Input required placeholder="Tên miền được phép, bắt buộc (vd. https://truong.edu.vn, http://localhost:5173)" value={form.origins} onChange={set("origins")} />
-          <Input placeholder="Ghi chú" value={form.note} onChange={set("note")} />
-          <Btn type="submit" className="sm:col-span-2">Cấp key và gửi mail</Btn>
-        </form>
-        {issued && <p className="mt-3 text-[14px] text-foreground">Đã gửi key …{issued.last4} tới {issued.email}, hết hạn {fmt(issued.expiresAt)}. Key chỉ hiện trong thư, máy chủ không lưu bản rõ.</p>}
-      </Card>
-      <Table list={list} head={["Email", "Key", "Tên miền", "Hết hạn", "Lượt dùng", "Dùng gần nhất", "Trạng thái", ""]} row={(k) => [
-        k.email, `…${k.last4}`, k.origins?.join(", ") || "Mọi nơi (key cũ)", fmt(k.expiresAt), k.uses ?? 0, fmt(k.lastUsedAt),
-        k.revokedAt ? "Đã thu hồi" : new Date(k.expiresAt) < new Date() ? "Hết hạn" : "Hoạt động",
-        !k.revokedAt && <div key="a" className="flex flex-wrap gap-2"><Btn tone="ghost" onClick={extend(k)}>Gia hạn</Btn><Btn tone="ghost" onClick={domains(k)}>Tên miền</Btn><Btn tone="danger" onClick={revoke(k)}>Thu hồi</Btn></div>,
-      ]} />
-    </div>
-  );
-}
-
-function Moderation() {
-  const [status, setStatus] = useState("pending");
-  const reports = useList(`/admin/reports?status=${status}`);
-  const posts = useList("/admin/posts");
-  const decide = (r, s) => act(() => call(`/admin/reports/${r._id}`, { method: "POST", body: { status: s } }), reports.reload);
-  const hide = (p) => act(() => call(`/admin/posts/${p._id}/hide`, { method: "POST", body: { hide: !p.removed } }), posts.reload);
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        {[["pending", "Chờ xử lý"], ["actioned", "Đã xử lý"], ["dismissed", "Bỏ qua"]].map(([id, label]) => (
-          <Btn key={id} tone={status === id ? undefined : "ghost"} onClick={() => setStatus(id)}>{label}</Btn>
-        ))}
-      </div>
-      <Table list={reports} head={["Lúc", "Người báo", "Bị báo", "Lý do", ""]} row={(r) => [
-        fmt(r.createdAt), r.reporterEmail, r.targetEmail, [r.reason, r.note].filter(Boolean).join(" · "),
-        status === "pending" && <span key="a" className="flex gap-2"><Btn onClick={decide(r, "actioned")}>Đã xử lý</Btn><Btn tone="ghost" onClick={decide(r, "dismissed")}>Bỏ qua</Btn></span>,
-      ]} />
-      <h3 className="font-semibold text-foreground">Bài đăng cộng đồng</h3>
-      <Table list={posts} head={["Lúc", "Tác giả", "Nội dung", "Thích", ""]} row={(p) => [
-        fmt(p.createdAt), p.authorEmail, <span key="t" className="line-clamp-2">{p.text}</span>, p.likeCount ?? 0,
-        <Btn key="a" tone={p.removed ? "ghost" : "danger"} onClick={hide(p)}>{p.removed ? "Hiện lại" : "Ẩn"}</Btn>,
-      ]} />
-    </div>
-  );
-}
-
-function Feedback() {
-  const lesson = useList("/admin/lesson-feedback");
-  const survey = useList("/admin/feedback");
-  const mark = (f, status) => act(() => call(`/admin/lesson-feedback/${f._id}`, { method: "POST", body: { status } }), lesson.reload);
-  return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-foreground">Góp ý bài học</h3>
-      <Table list={lesson} head={["Lúc", "Email", "Bài", "Nội dung", "Trạng thái", ""]} row={(f) => [
-        fmt(f.createdAt), f.email, f.lessonId, f.message, f.status,
-        <span key="a" className="flex gap-2"><Btn tone="ghost" onClick={mark(f, "seen")}>Đã xem</Btn><Btn tone="ghost" onClick={mark(f, "fixed")}>Đã sửa</Btn></span>,
-      ]} />
-      <h3 className="font-semibold text-foreground">Phiếu đánh giá</h3>
-      <Table list={survey} head={["Lúc", "Email", "Điểm", "Góp ý"]} row={(f) => [
-        fmt(f.createdAt), f.email, Object.values(f.ratings || {}).join(" · "), f.comment || "—",
-      ]} />
-    </div>
-  );
-}
-
-function Developers() {
-  const list = useList("/admin/developers");
-  const STATUS = { new: "Mới đăng ký", contacted: "Đã liên hệ", accepted: "Nhận vào", declined: "Chưa phù hợp" };
-  const set = (d, status) => act(() => call(`/admin/developers/${d._id}`, { method: "POST", body: { status } }), list.reload);
-  return (
-    <div className="space-y-3">
-      <p className="text-[14px] text-muted-foreground">{list.items ? `${list.items.length} người đăng ký` : ""}</p>
-      <Table list={list} head={["Lúc đăng ký", "Email", "Tên", "Trạng thái", ""]} row={(d) => [
-        fmt(d.createdAt), d.email, d.name || "—", STATUS[d.status] || d.status,
-        <select key="s" value={d.status} onChange={(e) => set(d, e.target.value)()} className="min-h-[40px] rounded-lg border border-border bg-card px-2 text-[14px] text-foreground">
-          {Object.entries(STATUS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-        </select>,
-      ]} />
-    </div>
-  );
-}
-
-function Log() {
-  const list = useList("/admin/log");
-  return <Table list={list} head={["Lúc", "Admin", "Thao tác", "Đối tượng"]} row={(l) => [fmt(l.createdAt), l.admin, l.action, l.target]} />;
-}
-
-function Table({ list, head, row, onRow }) {
-  if (list.error) return <p className="text-red-600">{list.error}</p>;
-  if (!list.items) return <p className="text-muted-foreground">Đang tải…</p>;
-  if (!list.items.length) return <p className="text-muted-foreground">Chưa có dữ liệu.</p>;
-  return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full text-left text-[14px] text-foreground">
-        <thead className="bg-muted text-muted-foreground"><tr>{head.map((h) => <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold">{h}</th>)}</tr></thead>
-        <tbody>{list.items.map((item, i) => (
-          <tr key={item._id || i} onClick={onRow && (() => onRow(item))} className={`border-t border-border align-top ${onRow ? "cursor-pointer hover:bg-muted" : ""}`}>{row(item).map((c, j) => <td key={j} className="px-3 py-2">{c}</td>)}</tr>
-        ))}</tbody>
-      </table>
-    </div>
-  );
-}
-
-/** Ads: chỉ admin đăng, chọn mascot đại diện cho từng bài. */
 function Articles() {
   const list = useList("/admin/articles");
   const [mascots, setMascots] = useState([]);
   const empty = { _id: null, title: "", text: "", mascot: "cast-1" };
   const [form, setForm] = useState(empty);
-  const [msg, setMsg] = useState("");
   useEffect(() => { call("/admin/articles").then((d) => setMascots(d.mascots || [])).catch(() => {}); }, []);
-  const save = async () => {
-    try {
-      await call(form._id ? `/admin/articles/${form._id}` : "/admin/articles", { method: form._id ? "PUT" : "POST", body: form });
-      setForm(empty); setMsg(form._id ? "Đã sửa bài." : "Đã đăng bài."); list.reload();
-    } catch (e) { setMsg(e.message); }
-  };
-  const remove = (a) => act(async () => { if (window.confirm(`Xoá Ads "${a.title || a.text.slice(0, 40)}"?`)) await call(`/admin/articles/${a._id}`, { method: "DELETE" }); }, list.reload);
+  const save = act(async () => {
+    await call(form._id ? `/admin/articles/${form._id}` : "/admin/articles", { method: form._id ? "PUT" : "POST", body: form });
+    setForm(empty);
+  }, list.reload, form._id ? "Đã lưu bài." : "Đã đăng bài.");
+  const remove = (a) => act(async () => {
+    if (!(await confirmAction("Xoá bài này?", `“${a.title || a.text.slice(0, 40)}” và mọi bình luận sẽ bị xoá.`, "Xoá"))) return false;
+    await call(`/admin/articles/${a._id}`, { method: "DELETE" });
+  }, list.reload, "Đã xoá bài.");
   return (
-    <div className="space-y-4">
-      <Card className="space-y-3">
-        <b className="block text-[16px]">{form._id ? "Sửa bài" : "Viết bài mới"}</b>
-        <div>
-          <p className="mb-2 text-[14px] text-muted-foreground">Mascot đại diện</p>
+    <div className="space-y-6">
+      <Group title={form._id ? "Sửa bài" : "Viết bài mới"}>
+        <div className="space-y-4 p-4">
+          <div>
+            <p className="mb-2 text-[13px] font-medium text-muted-foreground">Mascot đại diện</p>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Mascot đại diện">
+              {mascots.map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={form.mascot === m} aria-label={m} onClick={() => setForm({ ...form, mascot: m })}
+                  className={`grid h-[60px] w-[60px] place-items-center rounded-xl border-2 ${form.mascot === m ? "border-primary bg-primary-muted" : "border-border"}`}>
+                  <img src={`/edu/${m}.svg`} alt="" className="h-11 w-11 object-contain" />
+                </button>
+              ))}
+            </div>
+          </div>
+          <Field label="Tiêu đề (không bắt buộc)"><Input maxLength={120} value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} /></Field>
+          <Field label="Nội dung" hint="Dán link YouTube, GitHub hoặc ảnh sẽ tự có xem trước."><Textarea rows={8} value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} /></Field>
           <div className="flex flex-wrap gap-2">
-            {mascots.map((m) => (
-              <button key={m} type="button" onClick={() => setForm({ ...form, mascot: m })} aria-pressed={form.mascot === m}
-                className={`grid h-[60px] w-[60px] place-items-center rounded-xl border-2 ${form.mascot === m ? "border-sky-500 bg-sky-50" : "border-border"}`}>
-                <img src={`/edu/${m}.svg`} alt={m} className="h-11 w-11 object-contain" />
-              </button>
-            ))}
+            <Btn tone="primary" onClick={save} disabled={!form.text.trim()}>{form._id ? "Lưu thay đổi" : "Đăng bài"}</Btn>
+            {form._id && <Btn onClick={() => setForm(empty)}>Huỷ sửa</Btn>}
           </div>
         </div>
-        <Input placeholder="Tiêu đề (không bắt buộc)" maxLength={120} value={form.title || ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-        <textarea placeholder="Nội dung chia sẻ… (dán link YouTube/GitHub/ảnh sẽ tự có xem trước)" rows={8} value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })}
-          className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" />
-        <div className="flex flex-wrap items-center gap-2">
-          <Btn onClick={save} disabled={!form.text.trim()}>{form._id ? "Lưu thay đổi" : "Đăng bài"}</Btn>
-          {form._id && <Btn tone="ghost" onClick={() => setForm(empty)}>Huỷ sửa</Btn>}
-          {msg && <span className="text-[14px] text-muted-foreground">{msg}</span>}
-        </div>
-      </Card>
-      <Table list={list} head={["", "Bài", "Tim", "Bình luận", "Lúc đăng", ""]} row={(a) => [
-        <img key="m" src={`/edu/${a.mascot || "cast-1"}.svg`} alt="" className="h-9 w-9" />,
-        <span key="t"><b>{a.title || "(không tiêu đề)"}</b><br /><span className="text-muted-foreground">{a.text.slice(0, 90)}{a.text.length > 90 ? "…" : ""}</span></span>,
-        a.likeCount || 0, a.replyCount || 0, fmt(a.createdAt),
-        <div key="a" className="flex gap-2"><Btn tone="ghost" onClick={() => { setForm({ _id: a._id, title: a.title || "", text: a.text, mascot: a.mascot || "cast-1" }); window.scrollTo(0, 0); }}>Sửa</Btn><Btn tone="danger" onClick={remove(a)}>Xoá</Btn></div>,
-      ]} />
+      </Group>
+      <Group title="Đã đăng">
+        <Table list={list} empty="Chưa có bài." head={["", "Bài", "Tim", "Bình luận", "Lúc đăng", ""]} row={(a) => [
+          <img key="m" src={`/edu/${a.mascot || "cast-1"}.svg`} alt="" className="h-9 w-9" />,
+          <span key="t"><b>{a.title || "(không tiêu đề)"}</b><br /><span className="text-muted-foreground">{a.text.slice(0, 90)}{a.text.length > 90 ? "…" : ""}</span></span>,
+          a.likeCount || 0, a.replyCount || 0, <span key="d" className="whitespace-nowrap">{fmt(a.createdAt)}</span>,
+          <div key="a" className="flex gap-2"><Btn small onClick={() => { setForm({ _id: a._id, title: a.title || "", text: a.text, mascot: a.mascot || "cast-1" }); window.scrollTo(0, 0); }}>Sửa</Btn><Btn small tone="danger-plain" onClick={remove(a)}>Xoá</Btn></div>,
+        ]} />
+      </Group>
     </div>
   );
 }
 
 const LANGS = [["vi", "Tiếng Việt"], ["en", "English"], ["zh", "中文"]];
 const PROMO_FIELDS = [["badge", "Nhãn", 30], ["title", "Tiêu đề", 80], ["body", "Nội dung", 240], ["cta", "Nút", 30]];
-
-/** Quảng cáo Hugo Developer ở Hồ sơ: chữ theo ngôn ngữ, ảnh, link, bật/tắt. Ô trống → app dùng chữ mặc định. */
 function Promos() {
   const [form, setForm] = useState(null);
   const [lang, setLang] = useState("vi");
-  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
   useEffect(() => {
-    call("/admin/promo/developer").then((d) => setForm({ enabled: true, image: "", href: "/developer-team", text: {}, ...d.promo }))
-      .catch((e) => setMsg(e.message));
+    call("/admin/promo/developer").then((d) => setForm({ enabled: true, image: "", href: "/developer-team", text: {}, ...d.promo })).catch((e) => setErr(e.message));
   }, []);
-  if (!form) return <p className="text-muted-foreground">{msg || "Đang tải…"}</p>;
-  const setText = (field, value) => setForm({ ...form, text: { ...form.text, [lang]: { ...form.text?.[lang], [field]: value } } });
+  if (!form) return err ? <p role="alert" className="text-destructive">{err}</p> : <Loading />;
+  const setText = (k, value) => setForm({ ...form, text: { ...form.text, [lang]: { ...form.text?.[lang], [k]: value } } });
   const upload = (file) => {
     if (!file) return;
-    if (file.size > 150_000) return setMsg("Ảnh quá 150 KB — nén lại (WebP) rồi tải lên.");
+    if (file.size > 150_000) return toast("Ảnh quá 150 KB — nén lại (WebP) rồi tải lên.", "error");
     const reader = new FileReader();
-    reader.onload = () => { setForm((f) => ({ ...f, image: reader.result })); setMsg(""); };
+    reader.onload = () => setForm((f) => ({ ...f, image: reader.result }));
     reader.readAsDataURL(file);
   };
-  const save = async () => {
-    try { const d = await call("/admin/promo/developer", { method: "PUT", body: form }); setForm({ ...form, ...d.promo }); setMsg("Đã lưu. App cập nhật trong khoảng 1 phút."); } catch (e) { setMsg(e.message); }
-  };
+  const save = act(async () => { const d = await call("/admin/promo/developer", { method: "PUT", body: form }); setForm({ ...form, ...d.promo }); }, null, "Đã lưu. App cập nhật trong khoảng 1 phút.");
   const t = form.text?.[lang] || {};
-  const image = form.image || "/edu/dev-rocket.webp";
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-      <Card className="space-y-3">
-        <label className="flex items-center gap-2 text-[15px]"><input type="checkbox" checked={form.enabled !== false} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} /> Hiện quảng cáo ở Hồ sơ</label>
-        <div className="flex gap-2">{LANGS.map(([id, label]) => <Btn key={id} tone={lang === id ? undefined : "ghost"} onClick={() => setLang(id)}>{label}</Btn>)}</div>
-        {PROMO_FIELDS.map(([field, label, max]) => (
-          <label key={field} className="block text-[14px] text-muted-foreground">{label} ({(t[field] || "").length}/{max})
-            {field === "body"
-              ? <textarea value={t[field] || ""} maxLength={max} rows={3} onChange={(e) => setText(field, e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-[15px] text-foreground" />
-              : <Input value={t[field] || ""} maxLength={max} onChange={(e) => setText(field, e.target.value)} className="mt-1" />}
-          </label>
-        ))}
-        <label className="block text-[14px] text-muted-foreground">Ảnh (đường dẫn /…, https://… hoặc tải lên ≤ 150 KB)
-          <Input value={form.image?.startsWith("data:") ? "(ảnh đã tải lên)" : form.image || ""} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="/edu/dev-rocket.webp" className="mt-1" />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <label className="inline-flex min-h-[40px] cursor-pointer items-center rounded-lg border border-border px-3 text-[14px] font-semibold">Tải ảnh lên<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => upload(e.target.files?.[0])} /></label>
-          <Btn tone="ghost" onClick={() => setForm({ ...form, image: "" })}>Dùng ảnh mặc định</Btn>
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <Group footer="Ô để trống thì app dùng chữ mặc định.">
+        <div className="space-y-4 p-4">
+          <label className="flex min-h-[44px] items-center justify-between gap-3 text-[15px] text-foreground">Hiện quảng cáo ở Hồ sơ
+            <input type="checkbox" role="switch" className="h-6 w-6 accent-[hsl(var(--success))]" checked={form.enabled !== false} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} /></label>
+          <Segmented label="Ngôn ngữ" value={lang} onChange={setLang} options={LANGS} />
+          {PROMO_FIELDS.map(([k, label, max]) => (
+            <Field key={k} label={`${label} · ${(t[k] || "").length}/${max}`}>
+              {k === "body" ? <Textarea value={t[k] || ""} maxLength={max} rows={3} onChange={(e) => setText(k, e.target.value)} /> : <Input value={t[k] || ""} maxLength={max} onChange={(e) => setText(k, e.target.value)} />}
+            </Field>
+          ))}
+          <Field label="Ảnh" hint="Đường dẫn /…, https://… hoặc tải lên (tối đa 150 KB).">
+            <Input value={form.image?.startsWith("data:") ? "(ảnh đã tải lên)" : form.image || ""} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="/edu/dev-rocket.webp" />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-[10px] bg-muted px-4 text-[15px] font-semibold text-foreground"><Icon name="upload" />Tải ảnh lên<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => upload(e.target.files?.[0])} /></label>
+            <Btn tone="ghost" onClick={() => setForm({ ...form, image: "" })}>Dùng ảnh mặc định</Btn>
+          </div>
+          <Field label="Link khi bấm"><Input value={form.href || ""} onChange={(e) => setForm({ ...form, href: e.target.value })} placeholder="/developer-team" /></Field>
+          <Btn tone="primary" onClick={save}>Lưu</Btn>
         </div>
-        <label className="block text-[14px] text-muted-foreground">Link khi bấm
-          <Input value={form.href || ""} onChange={(e) => setForm({ ...form, href: e.target.value })} placeholder="/developer-team" className="mt-1" />
-        </label>
-        <div className="flex items-center gap-3"><Btn onClick={save}>Lưu</Btn>{msg && <span className="text-[14px] text-muted-foreground">{msg}</span>}</div>
-      </Card>
-      <div>
-        <Card className={`flex items-center gap-3 ${form.enabled === false ? "opacity-40" : ""}`}>
+      </Group>
+      <Group title="Xem trước">
+        <div className={`flex items-center gap-3 p-4 ${form.enabled === false ? "opacity-40" : ""}`}>
           <div className="min-w-0 flex-1 space-y-1">
             <span className="inline-block rounded-md bg-yellow-400 px-2 py-0.5 text-[12px] font-black italic text-blue-900">{t.badge || "HUGO DEVELOPER"}</span>
-            <b className="block text-[17px]">{t.title || "(tiêu đề mặc định)"}</b>
+            <b className="block text-[17px] text-foreground">{t.title || "(tiêu đề mặc định)"}</b>
             <p className="text-[14px] text-muted-foreground">{t.body || "(nội dung mặc định)"}</p>
-            <span className="text-[13px] font-black uppercase text-sky-500">{t.cta || "Tìm hiểu"}</span>
+            <span className="text-[13px] font-black uppercase text-primary">{t.cta || "Tìm hiểu"}</span>
           </div>
-          <img src={image} alt="" className="h-[112px] w-[112px] flex-none rounded-2xl object-cover" />
-        </Card>
-      </div>
+          <img src={form.image || "/edu/dev-rocket.webp"} alt="" className="h-[112px] w-[112px] flex-none rounded-2xl object-cover" />
+        </div>
+      </Group>
     </div>
   );
 }
 
-/** Slide dạy 10 buổi Python cơ bản (public/slides): mở tab mới để chia sẻ màn hình, code chạy ngay trên slide. */
 function Slides() {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {Array.from({ length: 10 }, (_, i) => (
-        <a key={i} href={`/slides/buoi${i + 1}.html`} target="_blank" rel="noreferrer">
-          <Card className="space-y-1 text-[14px] text-foreground hover:border-primary">
-            <h2 className="text-[16px] font-bold">Buổi {i + 1} · step {i * 4 + 1}–{i * 4 + 4}</h2>
-            <ol className="list-decimal pl-5 text-muted-foreground" start={i * 4 + 1}>{OUTLINE.slice(i * 4, i * 4 + 4).map(([, title]) => <li key={title}>{title}</li>)}</ol>
-          </Card>
+        <a key={i} href={`/slides/buoi${i + 1}.html`} target="_blank" rel="noreferrer" className="block rounded-2xl border border-border bg-card p-4 text-[14px] text-foreground transition hover:border-primary">
+          <h2 className="flex items-center justify-between text-[16px] font-bold">Buổi {i + 1} · step {i * 4 + 1}–{i * 4 + 4}<Icon name="open_in_new" className="text-muted-foreground" /></h2>
+          <ol className="mt-1 list-decimal pl-5 text-muted-foreground" start={i * 4 + 1}>{OUTLINE.slice(i * 4, i * 4 + 4).map(([, title]) => <li key={title}>{title}</li>)}</ol>
         </a>
       ))}
     </div>
   );
 }
 
-/** Một mục trong tab: bấm tiêu đề để mở/đóng. Đóng thì không gắn (không tải API). */
-function Section({ title, open: initial, children }) {
-  const [open, setOpen] = useState(initial);
+// ── Kinh doanh ────────────────────────────────────────────────────────────────
+const KINDS = [["badge", "Huy hiệu"], ["xp_boost", "Tăng XP"], ["streak_shield", "Khiên lửa"]];
+function Store() {
+  const list = useList("/admin/products");
+  const receipts = useList("/admin/receipts");
+  const create = act(async () => {
+    const v = await ask({ title: "Thêm sản phẩm", confirm: "Thêm", fields: [
+      { name: "slug", label: "Slug", required: true, hint: "Chữ thường a-z, số, dấu gạch ngang." },
+      { name: "name", label: "Tên tiếng Việt", required: true },
+      { name: "price", label: "Giá (Ngọc)", type: "number", min: 0, required: true },
+      { name: "kind", label: "Loại", type: "select", value: "badge", options: KINDS },
+    ] });
+    if (!v) return false;
+    await call("/admin/products", { method: "POST", body: { slug: v.slug, name: { vi: v.name }, price: Number(v.price), kind: v.kind } });
+  }, list.reload, "Đã thêm sản phẩm.");
+  const edit = (p, k, label, hint) => act(async () => {
+    const v = await ask({ title: `${label} · ${p.name?.vi || p.slug}`, confirm: "Lưu", fields: [{ name: k, label, type: "number", min: 0, value: String(p[k] ?? ""), hint }] });
+    if (!v) return false;
+    await call(`/admin/products/${p._id}`, { method: "PATCH", body: v });
+  }, list.reload, "Đã lưu.");
+  const toggle = (p) => act(() => call(`/admin/products/${p._id}`, { method: "PATCH", body: { active: !p.active } }), list.reload, p.active ? "Đã ẩn." : "Đang bán.");
   return (
-    <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="rounded-xl border border-border bg-card">
-      <summary className="flex min-h-[48px] cursor-pointer items-center px-4 text-[16px] font-semibold text-foreground">{title}</summary>
-      {open && <div className="border-t border-border p-3 md:p-4">{children}</div>}
-    </details>
+    <div className="space-y-6">
+      <Group title="Sản phẩm" action={<Btn small tone="primary" icon="add" onClick={create}>Thêm</Btn>}>
+        <Table list={list} empty="Chưa có sản phẩm." head={["Sản phẩm", "Loại", "Giá", "Kho", "Trạng thái", ""]} row={(p) => [
+          <span key="n"><b>{p.name?.vi}</b><br /><code className="text-[12px] text-muted-foreground">{p.slug}</code></span>,
+          KINDS.find(([k]) => k === p.kind)?.[1] || p.kind, <span key="p" className="tabular-nums">{num(p.price)}</span>, p.stock ?? "Không giới hạn",
+          <Badge key="s" tone={p.active ? "green" : "gray"}>{p.active ? "Đang bán" : "Đã ẩn"}</Badge>,
+          <span key="a" className="flex flex-wrap gap-1.5">
+            <Btn small onClick={edit(p, "price", "Giá (Ngọc)")}>Giá</Btn>
+            <Btn small onClick={edit(p, "stock", "Kho", "Để trống = không giới hạn.")}>Kho</Btn>
+            <Btn small tone="ghost" onClick={toggle(p)}>{p.active ? "Ẩn" : "Bán"}</Btn>
+          </span>,
+        ]} />
+      </Group>
+      <Group title="Đơn gần đây">
+        <Table list={receipts} empty="Chưa có đơn." head={["Lúc", "Email", "Sản phẩm", "Giá"]} row={(r) => [fmt(r.createdAt), r.email, r.slug || r.productId, num(r.price)]} />
+      </Group>
+    </div>
   );
 }
 
-// [id, nhãn, icon, [[tiêu đề mục, View, mở sẵn?]]]
-const TABS = [
-  ["home", "Trung tâm", "space_dashboard", [["Tổng quan trực tiếp", Overview, true], ["Người học", Learners, true]]],
-  ["content", "Nội dung", "slideshow", [["Slide dạy", Slides, true], ["Ads (bài viết)", Articles], ["Quảng cáo trong app", Promos], ["Gửi thông báo", Announce]]],
-  ["business", "Cửa hàng & đối tác", "storefront", [["Cửa hàng", Store, true], ["Đối tác (API key)", Partners], ["Hugo Developer", Developers]]],
-  ["safety", "Kiểm duyệt", "shield", [["Báo cáo & bài đăng", Moderation, true], ["Góp ý", Feedback], ["Nghi trùng tài khoản", Duplicates], ["Link MXH", MemberLinks], ["Nhật ký admin", Log]]],
+const keyStatus = (k) => (k.revokedAt ? ["red", "Đã thu hồi"] : new Date(k.expiresAt) < new Date() ? ["gray", "Hết hạn"] : ["green", "Hoạt động"]);
+function Partners() {
+  const list = useList("/admin/partners");
+  const blank = { email: "", days: 30, origins: "", note: "" };
+  const [form, setForm] = useState(blank);
+  const [q, setQ] = useState("");
+  const issue = act(async (e) => {
+    e.preventDefault();
+    const out = await call("/admin/partners", { method: "POST", body: { ...form, origins: form.origins.split(/[\s,]+/).filter(Boolean) } });
+    setForm(blank);
+    return out;
+  }, list.reload, (o) => `Đã gửi key …${o.last4} tới ${o.email}.`);
+  const revoke = (k) => act(async () => {
+    if (!(await confirmAction(`Thu hồi key …${k.last4}?`, `Của ${k.email}. Có hiệu lực ngay lập tức: thư viện, REST API và 12 mascot trên trang của đối tác ngừng hoạt động từ yêu cầu kế tiếp. Không hoàn tác được — muốn dùng lại phải cấp key mới.`, "Thu hồi"))) return false;
+    await call(`/admin/partners/${k._id}/revoke`, { method: "POST" });
+  }, list.reload, "Đã thu hồi key.");
+  const extend = (k) => act(async () => {
+    const v = await ask({ title: `Gia hạn key …${k.last4}`, message: `Hết hạn hiện tại: ${fmt(k.expiresAt)}. Còn lại tối đa 365 ngày.`, confirm: "Gia hạn", fields: [{ name: "days", label: "Thêm số ngày", type: "number", min: 1, max: 365, value: "30", required: true }] });
+    if (!v) return false;
+    await call(`/admin/partners/${k._id}`, { method: "POST", body: v });
+  }, list.reload, "Đã gia hạn.");
+  const domains = (k) => act(async () => {
+    const v = await ask({ title: `Tên miền của key …${k.last4}`, confirm: "Lưu", fields: [{ name: "origins", label: "Tên miền được phép", type: "textarea", value: (k.origins || []).join("\n"), required: true, hint: "Mỗi dòng một tên miền, vd. https://truong.edu.vn" }] });
+    if (!v) return false;
+    await call(`/admin/partners/${k._id}`, { method: "POST", body: { origins: v.origins.split(/[\s,]+/).filter(Boolean) } });
+  }, list.reload, "Đã lưu tên miền.");
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const needle = q.toLowerCase();
+  const shown = { ...list, items: list.items && (needle ? list.items.filter((k) => [k.email, k.last4, k.fingerprint, k.note, ...(k.origins || [])].some((x) => String(x || "").toLowerCase().includes(needle))) : list.items) };
+  return (
+    <div className="space-y-6">
+      <form onSubmit={issue}>
+        <Group title="Cấp key mới" footer="Key chỉ nằm trong thư gửi đối tác — máy chủ không lưu bản rõ. Key luôn khoá theo tên miền.">
+          <div className="grid gap-3 p-4 sm:grid-cols-2">
+            <Field label="Email đối tác"><Input type="email" required value={form.email} onChange={set("email")} /></Field>
+            <Field label="Số ngày hiệu lực"><Input type="number" min={1} max={365} value={form.days} onChange={set("days")} /></Field>
+            <Field label="Tên miền được phép" hint="Cách nhau dấu phẩy, vd. https://truong.edu.vn, http://localhost:5173"><Input required value={form.origins} onChange={set("origins")} /></Field>
+            <Field label="Ghi chú"><Input value={form.note} onChange={set("note")} maxLength={200} /></Field>
+            <Btn type="submit" tone="primary" icon="key" className="sm:col-span-2">Cấp key và gửi thư</Btn>
+          </div>
+        </Group>
+      </form>
+      <div className="space-y-2">
+        <Search placeholder="Tìm email, 4 ký tự cuối, tên miền hoặc mã dấu mascot" onSearch={setQ} />
+        <p className="px-1 text-[13px] text-muted-foreground">Gặp mascot bị sao chép? Mở file SVG, tìm <code>data-lic="…"</code> rồi dán mã đó vào ô tìm để biết key nào làm rò rỉ.</p>
+      </div>
+      <Group title="Key đã cấp">
+        <Table list={shown} empty="Không có key nào khớp." head={["Đối tác", "Tên miền", "Hết hạn", "Lượt dùng", "Trạng thái", ""]} row={(k) => {
+          const [tone, text] = keyStatus(k);
+          return [
+            <span key="e"><b>{k.email}</b><br /><small className="text-muted-foreground">key …{k.last4} · dấu <code>{k.fingerprint}</code>{k.note ? ` · ${k.note}` : ""}</small></span>,
+            <span key="o" className="whitespace-pre-line text-[13px]">{k.origins?.join("\n") || "Mọi nơi (key cũ)"}</span>,
+            <span key="x" className="whitespace-nowrap">{fmt(k.expiresAt)}</span>,
+            <span key="u" className="tabular-nums">{num(k.uses)}<br /><small className="text-muted-foreground">{ago(k.lastUsedAt)}</small></span>,
+            <Badge key="s" tone={tone}>{text}</Badge>,
+            !k.revokedAt && <span key="a" className="flex flex-wrap gap-1.5"><Btn small onClick={extend(k)}>Gia hạn</Btn><Btn small onClick={domains(k)}>Tên miền</Btn><Btn small tone="danger" onClick={revoke(k)}>Thu hồi</Btn></span>,
+          ];
+        }} />
+      </Group>
+    </div>
+  );
+}
+
+const DEV_STATUS = { new: "Mới đăng ký", contacted: "Đã liên hệ", accepted: "Nhận vào", declined: "Chưa phù hợp" };
+function Developers() {
+  const list = useList("/admin/developers");
+  const set = (d, status) => act(() => call(`/admin/developers/${d._id}`, { method: "POST", body: { status } }), list.reload, "Đã cập nhật.");
+  return (
+    <Group footer={list.items ? `${num(list.items.length)} người đăng ký` : null}>
+      <Table list={list} empty="Chưa ai đăng ký." head={["Lúc đăng ký", "Người đăng ký", "Trạng thái"]} row={(d) => [
+        <span key="t" className="whitespace-nowrap">{fmt(d.createdAt)}</span>,
+        <span key="n"><b>{d.name || "—"}</b><br /><small className="text-muted-foreground">{d.email}</small></span>,
+        <Select key="s" aria-label={`Trạng thái của ${d.email}`} value={d.status} onChange={(e) => set(d, e.target.value)()} className="min-w-[160px]">
+          {Object.entries(DEV_STATUS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+        </Select>,
+      ]} />
+    </Group>
+  );
+}
+
+// ── An toàn ───────────────────────────────────────────────────────────────────
+const REPORT_STATUS = { pending: "Chờ xử lý", actioned: "Đã xử lý", dismissed: "Bỏ qua" };
+function Moderation() {
+  const [status, setStatus] = useState("pending");
+  const reports = useList(`/admin/reports?status=${status}`);
+  const posts = useList("/admin/posts");
+  const decide = (r, s) => act(() => call(`/admin/reports/${r._id}`, { method: "POST", body: { status: s } }), reports.reload, s === "actioned" ? "Đã đánh dấu xử lý." : "Đã bỏ qua.");
+  const hide = (p) => act(async () => {
+    if (!p.removed && !(await confirmAction("Ẩn bài đăng?", "Bài biến mất khỏi cộng đồng. Có thể hiện lại sau.", "Ẩn"))) return false;
+    await call(`/admin/posts/${p._id}/hide`, { method: "POST", body: { hide: !p.removed } });
+  }, posts.reload, p.removed ? "Đã hiện lại." : "Đã ẩn bài.");
+  return (
+    <div className="space-y-6">
+      <Group title="Báo cáo" action={<Segmented label="Trạng thái báo cáo" value={status} onChange={setStatus} options={Object.entries(REPORT_STATUS)} />}>
+        <Table list={reports} empty="Không có báo cáo." head={["Lúc", "Người báo → Bị báo", "Lý do", ""]} row={(r) => [
+          <span key="t" className="whitespace-nowrap">{fmt(r.createdAt)}</span>,
+          <span key="w">{r.reporterEmail}<br /><small className="text-muted-foreground">→ {r.targetEmail}</small></span>,
+          [r.reason, r.note].filter(Boolean).join(" · "),
+          status === "pending" && <span key="a" className="flex gap-1.5"><Btn small tone="primary" onClick={decide(r, "actioned")}>Đã xử lý</Btn><Btn small onClick={decide(r, "dismissed")}>Bỏ qua</Btn></span>,
+        ]} />
+      </Group>
+      <Group title="Bài đăng cộng đồng">
+        <Table list={posts} empty="Chưa có bài." head={["Lúc", "Tác giả", "Nội dung", "Thích", ""]} row={(p) => [
+          <span key="t" className="whitespace-nowrap">{fmt(p.createdAt)}</span>, p.authorEmail,
+          <span key="x" className="line-clamp-2 max-w-[420px]">{p.removed && <Badge tone="red">Đã ẩn</Badge>} {p.text}</span>, p.likeCount ?? 0,
+          <Btn key="a" small tone={p.removed ? "plain" : "danger-plain"} onClick={hide(p)}>{p.removed ? "Hiện lại" : "Ẩn"}</Btn>,
+        ]} />
+      </Group>
+    </div>
+  );
+}
+
+const FB_STATUS = { new: ["blue", "Mới"], seen: ["gray", "Đã xem"], fixed: ["green", "Đã sửa"] };
+function Feedback() {
+  const lesson = useList("/admin/lesson-feedback");
+  const survey = useList("/admin/feedback");
+  const mark = (f, status) => act(() => call(`/admin/lesson-feedback/${f._id}`, { method: "POST", body: { status } }), lesson.reload, "Đã cập nhật.");
+  return (
+    <div className="space-y-6">
+      <Group title="Góp ý bài học">
+        <Table list={lesson} empty="Chưa có góp ý." head={["Lúc", "Bài", "Nội dung", "Trạng thái", ""]} row={(f) => {
+          const [tone, text] = FB_STATUS[f.status] || ["gray", f.status];
+          return [
+            <span key="t" className="whitespace-nowrap">{fmt(f.createdAt)}<br /><small className="text-muted-foreground">{f.email}</small></span>,
+            <code key="l">{f.lessonId}</code>, <span key="m" className="block max-w-[420px]">{f.message}</span>, <Badge key="s" tone={tone}>{text}</Badge>,
+            <span key="a" className="flex gap-1.5">{f.status !== "seen" && f.status !== "fixed" && <Btn small onClick={mark(f, "seen")}>Đã xem</Btn>}{f.status !== "fixed" && <Btn small tone="primary" onClick={mark(f, "fixed")}>Đã sửa</Btn>}</span>,
+          ];
+        }} />
+      </Group>
+      <Group title="Phiếu đánh giá">
+        <Table list={survey} empty="Chưa có phiếu." head={["Lúc", "Email", "Điểm", "Góp ý"]} row={(f) => [
+          <span key="t" className="whitespace-nowrap">{fmt(f.createdAt)}</span>, f.email, Object.values(f.ratings || {}).join(" · "), f.comment || "—",
+        ]} />
+      </Group>
+    </div>
+  );
+}
+
+// ── Bảo mật ───────────────────────────────────────────────────────────────────
+const PASSKEY_SET = "edu.admin.passkey";
+const device = (ua) => {
+  const os = /iPhone|iPad/.test(ua) ? "iOS" : /Mac OS/.test(ua) ? "macOS" : /Android/.test(ua) ? "Android" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Thiết bị lạ";
+  const br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "";
+  return [br, os].filter(Boolean).join(" trên ");
+};
+function Security({ me, signOut }) {
+  const [d, setD] = useState(null);
+  const [err, setErr] = useState("");
+  const [passkey, setPasskey] = useState(() => { try { return localStorage.getItem(PASSKEY_SET) === "1"; } catch { return false; } });
+  const load = useCallback(() => { call("/admin/security").then(setD).catch((e) => setErr(e.message)); }, []);
+  useEffect(load, [load]);
+  useTick();
+  const revoke = (s) => act(async () => {
+    if (!(await confirmAction("Đăng xuất phiên này?", `${s.email} · ${device(s.ua)} · IP ${s.ip}. Có hiệu lực ngay.`, "Đăng xuất"))) return false;
+    await call(`/admin/sessions/${s.id}/revoke`, { method: "POST" });
+  }, load, "Đã đăng xuất phiên.");
+  const revokeOthers = act(async () => {
+    if (!(await confirmAction("Đăng xuất mọi phiên khác?", "Mọi máy khác — của bạn và của các admin khác — bị đăng xuất ngay. Dùng khi nghi lộ phiên hoặc mất máy.", "Đăng xuất tất cả"))) return false;
+    return call("/admin/sessions/revoke-others", { method: "POST" });
+  }, load, (r) => `Đã đăng xuất ${r.count} phiên.`);
+  const addPasskey = act(async () => {
+    const r = await (await adminAuthClient()).passkey.addPasskey({ name: device(navigator.userAgent) || "Admin" });
+    if (r?.error) throw new Error("Chưa bật được: " + (r.error.message || "bị huỷ"));
+    try { localStorage.setItem(PASSKEY_SET, "1"); } catch { /* riêng tư */ }
+    setPasskey(true);
+  }, null, "Đã bật Face ID / vân tay cho máy này.");
+  if (err) return <p role="alert" className="text-destructive">{err}</p>;
+  if (!d) return <Loading />;
+  const freshLeft = Math.max(0, Math.round((new Date(d.freshUntil) - Date.now()) / 60_000));
+  return (
+    <div className="space-y-6">
+      <Group title="Tài khoản" footer="Phiên quản trị tự hết sau 12 giờ không dùng. Thao tác tối mật (xoá, khoá, Ngọc, key đối tác, xem dữ liệu riêng tư, đăng xuất máy khác) cần xác thực lại nếu đã quá 10 phút.">
+        <ul className="divide-y divide-border text-[15px]">
+          <li className="flex min-h-[52px] items-center justify-between gap-3 px-4"><span className="text-muted-foreground">Email</span><b className="truncate">{me.email}</b></li>
+          <li className="flex min-h-[52px] items-center justify-between gap-3 px-4"><span className="text-muted-foreground">Xác thực tối mật</span>
+            {freshLeft > 0 ? <Badge tone="green">Còn {freshLeft} phút</Badge> : <Badge tone="amber">Sẽ hỏi lại</Badge>}</li>
+          {hasPasskeyApi() && (
+            <li className="flex min-h-[52px] items-center justify-between gap-3 px-4"><span className="text-muted-foreground">Face ID / vân tay trên máy này</span>
+              {passkey ? <Badge tone="green">Đã bật</Badge> : <Btn small tone="primary" icon="fingerprint" onClick={addPasskey}>Bật</Btn>}</li>
+          )}
+          <li><button type="button" onClick={signOut} className="flex min-h-[52px] w-full items-center gap-2 px-4 text-left font-semibold text-destructive hover:bg-muted/60"><Icon name="logout" />Đăng xuất</button></li>
+        </ul>
+      </Group>
+
+      <Group title={`Phiên đang mở · ${d.sessions.length}`} action={d.sessions.length > 1 && <Btn small tone="danger-plain" onClick={revokeOthers}>Đăng xuất mọi phiên khác</Btn>}
+        footer="Mọi admin đều có toàn quyền, kể cả đăng xuất admin khác. IP đã được che bớt.">
+        <ul className="divide-y divide-border text-[14px]">
+          {d.sessions.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+              <Icon name={/iPhone|Android/.test(s.ua) ? "smartphone" : "computer"} className="text-muted-foreground" />
+              <span className="min-w-0 flex-1"><b className="text-foreground">{device(s.ua)}</b> {s.current && <Badge tone="blue">Máy này</Badge>}
+                <span className="block text-[13px] text-muted-foreground">{s.email} · IP {s.ip || "—"} · đăng nhập {fmt(s.createdAt)} · dùng {ago(s.updatedAt)}</span></span>
+              {!s.current && <Btn small tone="danger-plain" onClick={revoke(s)}>Đăng xuất</Btn>}
+            </li>
+          ))}
+        </ul>
+      </Group>
+
+      <Group title="Quản trị viên" footer="Danh sách lấy từ biến ADMIN_EMAILS trên Render. Thêm hoặc gỡ admin: sửa biến đó rồi deploy lại — người bị gỡ mất quyền ngay ở yêu cầu kế tiếp.">
+        <ul className="divide-y divide-border text-[15px]">
+          {d.admins.map((e) => <li key={e} className="flex min-h-[48px] items-center gap-2 px-4"><Icon name="shield_person" className="text-muted-foreground" />{e}{e === me.email && <Badge tone="blue">Bạn</Badge>}</li>)}
+        </ul>
+      </Group>
+    </div>
+  );
+}
+
+const LOG_LABEL = {
+  learner_create: "Tạo người học", learner_update: "Sửa người học", learner_delete: "Xoá người học", step_done: "Hoàn tất step", step_undo: "Gỡ step",
+  gems: "Điều chỉnh Ngọc", ban: "Khoá tài khoản", unban: "Mở khoá", reset_persona: "Xoá hồ sơ công khai", private_view: "Xem dữ liệu riêng tư",
+  partner_issue: "Cấp key đối tác", partner_update: "Sửa key đối tác", partner_revoke: "Thu hồi key đối tác", announce: "Gửi thông báo",
+  session_revoke: "Đăng xuất một phiên", session_revoke_all: "Đăng xuất mọi phiên khác", article_delete: "Xoá bài viết",
+};
+const SENSITIVE = new Set(["learner_delete", "gems", "ban", "private_view", "partner_issue", "partner_revoke", "session_revoke", "session_revoke_all", "announce"]);
+function Log() {
+  const [q, setQ] = useState("");
+  const list = useList(`/admin/log?q=${encodeURIComponent(q)}`);
+  return (
+    <div className="space-y-4">
+      <Search placeholder="Tìm admin, thao tác hoặc đối tượng" onSearch={setQ} />
+      <Group footer="300 thao tác gần nhất. Mọi thao tác ghi đều được lưu kèm IP (đã che bớt) và trình duyệt.">
+        <Table list={list} empty="Không có thao tác nào khớp." head={["Lúc", "Admin", "Thao tác", "Đối tượng"]} row={(l) => [
+          <span key="t" className="whitespace-nowrap">{fmt(l.createdAt)}</span>,
+          <span key="a">{l.admin}<br /><small className="text-muted-foreground">{l.ip ? `IP ${l.ip}` : ""}{l.ua ? ` · ${device(l.ua)}` : ""}</small></span>,
+          <span key="x" className="flex flex-wrap items-center gap-1.5">{SENSITIVE.has(l.action) && <Badge tone="amber">Tối mật</Badge>}{LOG_LABEL[l.action] || l.action}</span>,
+          <span key="g" className="break-all">{l.target}</span>,
+        ]} />
+      </Group>
+    </div>
+  );
+}
+
+// ── Khung trang ───────────────────────────────────────────────────────────────
+// [tiêu đề nhóm, [[id, nhãn, icon, View, mô tả ngắn]]]
+const NAV = [
+  ["", [["home", "Bảng điều khiển", "space_dashboard", Overview, "Số liệu, việc cần xử lý, ai đang học."]]],
+  ["Người học", [
+    ["learners", "Người học", "group", Learners, "Tìm, xem tiến độ, sửa, khoá hoặc xoá tài khoản."],
+    ["duplicates", "Nghi trùng tài khoản", "content_copy", Duplicates],
+    ["links", "Link mạng xã hội", "link", MemberLinks],
+  ]],
+  ["Nội dung", [
+    ["articles", "Bài viết", "article", Articles], ["promo", "Quảng cáo trong app", "campaign", Promos],
+    ["announce", "Gửi thông báo", "notifications", Announce], ["slides", "Slide dạy", "slideshow", Slides, "10 buổi Python cơ bản, mở tab mới để trình chiếu."],
+  ]],
+  ["Kinh doanh", [
+    ["store", "Cửa hàng", "storefront", Store], ["partners", "Đối tác & key", "key", Partners, "Cấp, gia hạn, thu hồi key và tra mascot rò rỉ."],
+    ["developers", "Hugo Developer", "code", Developers],
+  ]],
+  ["An toàn", [["moderation", "Kiểm duyệt", "flag", Moderation], ["feedback", "Góp ý", "rate_review", Feedback]]],
+  ["Bảo mật", [["security", "Phiên & quyền", "lock", Security, "Phiên đăng nhập, Face ID, danh sách quản trị viên."], ["log", "Nhật ký quản trị", "history", Log]]],
 ];
+const PAGES = NAV.flatMap(([, items]) => items);
+const OLD = { content: "articles", business: "store", safety: "moderation" };
+const pageFromPath = () => {
+  const id = window.location.pathname.replace(/^\/admin\/?/, "").split("/")[0];
+  return PAGES.some(([p]) => p === OLD[id] || p === id) ? OLD[id] || id : "";
+};
 
 export default function EduAdmin() {
   const [me, setMe] = useState(undefined);
-  const tabFromPath = () => TABS.find(([id]) => window.location.pathname === `/admin/${id}`)?.[0] || "home";
-  const [tab, setTab] = useState(tabFromPath);
+  const [page, setPage] = useState(pageFromPath);
+  const [learner, setLearner] = useState(null);
+  const [stats, setStats] = useState(null);
   const check = useCallback(() => { call("/admin/me").then(setMe).catch(() => setMe(null)); }, []);
   useEffect(() => {
     document.title = "Quản trị · Education Hugo";
-    document.documentElement.dataset.theme = "light";
+    // Sáng/tối theo máy (HIG). Trang học có cài đặt riêng — ở đây chỉ nghe hệ thống.
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => { document.documentElement.classList.toggle("dark", mq.matches); document.documentElement.dataset.theme = mq.matches ? "dark" : "light"; };
+    apply();
+    mq.addEventListener("change", apply);
     check();
-    const onPop = () => setTab(tabFromPath());
+    const onPop = () => setPage(pageFromPath());
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    return () => { mq.removeEventListener("change", apply); window.removeEventListener("popstate", onPop); };
   }, [check]);
 
   const liveState = useLiveConnection(Boolean(me));
-  if (me === undefined) return <p className="p-6 text-muted-foreground">Đang tải…</p>;
-  if (!me) return <Login onDone={check} />;
+  const loadStats = useCallback(() => { call("/admin/overview").then(setStats).catch(() => {}); }, []);
+  useEffect(() => { if (me) loadStats(); }, [me, loadStats]);
+  const statsLater = useDebounced(loadStats, 10_000);
+  useLive(me ? ["learner", "activity", "resync"] : [], statsLater);
 
-  const go = (id) => { window.history.pushState(null, "", `/admin/${id}`); setTab(id); };
+  if (me === undefined) return <div className="min-h-dvh bg-background"><Loading /></div>;
+  if (!me) return <><Login onDone={check} /><ToastHost /></>;
+
+  const go = (id) => { window.history.pushState(null, "", id ? `/admin/${id}` : "/admin"); setPage(id); window.scrollTo(0, 0); };
   const signOut = async () => { await call("/admin-auth/sign-out", { method: "POST", body: {} }).catch(() => {}); setMe(null); };
-  const [, label, , sections] = TABS.find(([id]) => id === tab);
+  const current = page || "home";
+  const [, label, , View, desc] = PAGES.find(([id]) => id === current);
+  const badges = { moderation: stats?.pendingReports, feedback: stats?.newLessonFb };
+
   return (
-    <div className="min-h-dvh bg-background md:flex">
-      <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card p-2 md:sticky md:top-0 md:h-dvh md:w-56 md:flex-col md:border-b-0 md:border-r">
-        <p className="hidden px-3 py-2 text-[15px] font-bold text-foreground md:block">Education Hugo</p>
-        <p className="flex shrink-0 items-center gap-2 px-3 text-[13px] text-muted-foreground"><Dot on={liveState === "on"} />{liveState === "on" ? "Trực tiếp" : "Đang nối lại…"}</p>
-        {TABS.map(([id, text, icon]) => (
-          <button key={id} type="button" onClick={() => go(id)} aria-current={tab === id ? "page" : undefined}
-            className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg px-3 text-[15px] ${tab === id ? "bg-muted font-semibold text-foreground" : "text-muted-foreground"}`}>
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">{icon}</span>{text}
-          </button>
-        ))}
-        <div className="md:mt-auto">
-          <p className="hidden truncate px-3 text-[13px] text-muted-foreground md:block">{me.email}</p>
-          <button type="button" onClick={signOut} className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg px-3 text-[15px] text-muted-foreground">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>Đăng xuất
-          </button>
+    <div className="min-h-dvh bg-background text-foreground md:flex">
+      {/* Thanh bên (≥ md). Trên điện thoại: chỉ hiện ở /admin, giống màn chính của Cài đặt iOS. */}
+      <nav aria-label="Quản trị" className={`${page ? "hidden md:flex" : "flex"} flex-col gap-5 px-4 pb-8 pt-6 md:sticky md:top-0 md:h-dvh md:w-[264px] md:shrink-0 md:overflow-y-auto md:border-r md:border-border md:bg-card md:px-3 md:pt-5`}>
+        <div className="flex items-center gap-2.5 px-2">
+          <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-foreground text-background"><Icon name="admin_panel_settings" /></span>
+          <div className="min-w-0 flex-1"><p className="text-[16px] font-bold leading-tight">Quản trị</p>
+            <p className="flex items-center gap-1.5 text-[12px] text-muted-foreground"><Dot on={liveState === "on"} label={liveState === "on" ? "Đang nhận dữ liệu trực tiếp" : "Mất kết nối"} />{liveState === "on" ? "Trực tiếp" : "Đang nối lại…"}</p></div>
         </div>
+        {NAV.map(([group, items]) => (
+          <div key={group || "top"}>
+            {group && <p className="mb-1 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>}
+            <ul className="overflow-hidden rounded-2xl border border-border bg-card md:rounded-none md:border-0 md:bg-transparent">
+              {items.map(([id, text, icon]) => {
+                const on = id === current && Boolean(page || window.matchMedia("(min-width: 768px)").matches);
+                return (
+                  <li key={id} className="border-t border-border first:border-t-0 md:border-0">
+                    <button type="button" onClick={() => go(id)} aria-current={on ? "page" : undefined}
+                      className={`flex min-h-[48px] w-full items-center gap-3 px-3 text-left text-[15px] md:min-h-[40px] md:rounded-[10px] ${on ? "md:bg-primary md:text-primary-foreground md:font-semibold" : "hover:bg-muted/60"}`}>
+                      <Icon name={icon} className={on ? "" : "text-primary"} />
+                      <span className="flex-1">{text}</span>
+                      {badges[id] > 0 && <span className="min-w-[22px] rounded-full bg-destructive px-1.5 text-center text-[12px] font-bold leading-[22px] text-destructive-foreground" aria-label={`${badges[id]} mục cần xử lý`}>{badges[id]}</span>}
+                      <Icon name="chevron_right" className="text-muted-foreground md:hidden" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+        <p className="mt-auto truncate px-3 text-[13px] text-muted-foreground">{me.email}</p>
       </nav>
-      <main className="min-w-0 flex-1 p-4 md:p-6">
-        <PasskeyOffer />
-        <h1 className="mb-4 text-[22px] font-bold text-foreground">{label}</h1>
-        <div key={tab} className="space-y-3">
-          {sections.map(([title, View, open]) => <Section key={title} title={title} open={Boolean(open)}><View /></Section>)}
+
+      <main className={`${page ? "block" : "hidden md:block"} min-w-0 flex-1`}>
+        <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur md:static md:border-0 md:bg-transparent">
+          <div className="flex min-h-[48px] items-center px-2 md:hidden">
+            <Btn tone="ghost" small icon="chevron_left" onClick={() => go("")} className="px-2">Quản trị</Btn>
+          </div>
+        </header>
+        <div className="mx-auto max-w-6xl px-4 pb-16 pt-2 md:px-8 md:pt-8">
+          <h1 className="text-[28px] font-bold leading-tight md:text-[32px]">{label}</h1>
+          {desc && <p className="mt-1 text-[15px] text-muted-foreground">{desc}</p>}
+          <div key={current} className="mt-6"><View stats={stats} me={me} go={go} openLearner={setLearner} signOut={signOut} /></div>
         </div>
       </main>
+
+      {learner && <LearnerDetail email={learner} onClose={() => setLearner(null)} />}
+      <DialogHost />
+      <ReauthHost email={me.email} />
+      <ToastHost />
     </div>
   );
 }

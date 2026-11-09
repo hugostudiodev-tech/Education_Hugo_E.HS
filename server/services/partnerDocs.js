@@ -40,32 +40,32 @@ export default function HocSQL() {
     ],
     zodiac: [
       { h: '1. Cài gói mascot' },
-      { p: 'Gói education-hugo-zodiac: 12 nhân vật cung hoàng đạo dạng SVG tự chuyển động, không phụ thuộc thư viện nào (dùng được với React, Vue, Svelte hay HTML thuần). Lệnh dưới đã điền sẵn key của bạn.' },
+      { p: 'Gói education-hugo-zodiac: 12 nhân vật cung hoàng đạo dạng SVG tự chuyển động, không phụ thuộc thư viện nào (React, Vue, Svelte hay HTML thuần). Gói không chứa hình: mỗi lần trang mở, hình được tải từ máy chủ Education Hugo bằng key của bạn, chỉ trên tên miền đã đăng ký.' },
       { code: `npm i ${EDU_ORIGIN}/sdk/${key}/education-hugo-zodiac.tgz` },
       { h: '2. Hiển thị' },
       { code: `import { ZODIAC, zodiacUrl, zodiacSvg, zodiacOf } from "education-hugo-zodiac";
+const KEY = import.meta.env.VITE_EDU_KEY;
 
 // Ảnh thường — chuyển động CSS trong SVG vẫn chạy
-<img src={zodiacUrl("leo")} alt="Sư Tử" width="160" height="160" />
+img.src = await zodiacUrl("leo", KEY);
 
 // Hoặc chèn thẳng SVG
-el.innerHTML = zodiacSvg("pisces");
+el.innerHTML = await zodiacSvg("pisces", KEY);
 
-// Cung theo ngày sinh
+// Cung theo ngày sinh (không cần mạng)
 zodiacOf("2005-04-12"); // "aries"
 
 // Danh sách 12 cung: { id, latin, symbol, vi, start }
-ZODIAC.map((z) => z.vi);
-
-// Bundler hỗ trợ import file: "education-hugo-zodiac/svg/leo.svg"` },
+ZODIAC.map((z) => z.vi);` },
+      { p: 'Key sai, hết hạn, bị thu hồi hoặc gọi từ tên miền khác thì zodiacSvg/zodiacUrl báo lỗi (err.status = 401). Nên hiện chỗ trống thay cho hình.' },
       { h: 'Tên 12 cung (id)' },
       { p: 'aries · taurus · geminus · cancer · leo · virgo · libra · scorpius · sagittarius · capricornus · aquarius · pisces' },
       { h: 'Bản quyền' },
       { list: [
-        '© Hugo Studio, bảo lưu mọi quyền. Mỗi file SVG có dòng bản quyền — không được gỡ.',
-        'Chỉ hiển thị trên tên miền đã đăng ký với key, trong thời hạn của key.',
-        'Không phân phối lại file, không sửa thành nhân vật khác, không dùng làm logo, hàng in ấn, NFT hay dữ liệu huấn luyện AI.',
-        'Người dùng bật "Giảm chuyển động" trong máy thì nhân vật tự đứng yên.',
+        '© Hugo Studio, bảo lưu mọi quyền. Mỗi hình tải về mang dấu riêng của key bạn (có cả dấu ẩn), nên bản sao rò rỉ luôn lần ra được key gốc.',
+        'Chỉ hiển thị trực tiếp từ máy chủ trên tên miền đã đăng ký, trong thời hạn của key. Không lưu hình về máy chủ riêng hay đóng gói lại.',
+        'Không phân phối lại, không sửa thành nhân vật khác, không dùng làm logo, hàng in ấn, NFT hay dữ liệu huấn luyện AI.',
+        'Vi phạm thì key bị thu hồi ngay: mọi hình trên trang của bạn ngừng tải từ lượt mở kế tiếp.',
       ] },
     ],
     api: [

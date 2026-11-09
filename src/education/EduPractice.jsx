@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/apiBase";
 import { notify } from "../lib/notify";
 import { playEduSound } from "./eduSound";
@@ -9,6 +9,7 @@ import { PersonaAvatar } from "./EduPersona";
 import QuizQuestion from "../components/member/hugoCoder/QuizQuestion";
 import "../styles/hugoCoderLearning.css";
 import EduSpotlight from "./EduSpotlight";
+import EduVersus from "./EduVersus";
 
 const QUEST_ICON = { lessons: "menu_book", quiz: "target", review: "replay" };
 
@@ -34,13 +35,17 @@ export default function EduPractice({ learner, onLearnerUpdate }) {
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState(false);
   const [friends, setFriends] = useState([]);
+  const [me, setMe] = useState(null);
+  const [versus, setVersus] = useState(null);
   const [run, setRun] = useState(null);
   const [busy, setBusy] = useState(false);
   const stepTitle = (item) => localizeStepTitle(item.title, item.index, lang, item.course);
 
   const load = useCallback(() => api("/practice").then((next) => { setData(next); setFailed(false); }).catch(() => setFailed(true)), []);
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { api("/social").then((s) => setFriends((s.friends || []).filter((f) => !f.me))).catch(() => {}); }, []);
+  useEffect(() => {
+    api("/social").then((s) => { setFriends((s.friends || []).filter((f) => !f.me)); setMe((s.friends || []).find((f) => f.me) || null); }).catch(() => {});
+  }, []);
 
   const act = async (fn) => {
     setBusy(true);
@@ -68,36 +73,114 @@ export default function EduPractice({ learner, onLearnerUpdate }) {
     });
   });
 
-  const challenge = (code) => act(async () => {
-    await api("/practice/challenges", { code });
-    notify.success(t("practice.challengeSent"));
-    await load();
-  });
-
-  const play = (c) => act(async () => {
-    const quiz = await api(`/practice/challenges/${c.id}/quiz?lang=${lang}`);
-    setRun({
-      title: `${t("practice.challengeTitle")} · ${stepTitle(c)}`,
-      items: quiz.questions.map((question) => ({ question })),
+  // Thách đấu một chạm: vào thẳng màn VS rồi làm bài, không qua bước "gửi lời thách" riêng.
+  const versusFor = async (id, opponent) => {
+    const quiz = await api(`/practice/challenges/${id}/quiz?lang=${lang}`);
+    setVersus({
+      opponent,
+      title: stepTitle(quiz),
+      questions: quiz.questions,
       submit: async (answers) => {
-        const r = await api(`/practice/challenges/${c.id}`, { answers });
-        if (Number.isFinite(r.balance)) onLearnerUpdate?.({ gems: r.balance });
-        const vars = { mine: r.mine, theirs: r.theirs, name: c.opponent.name };
-        const line = r.theirs === null ? t("practice.resultWait", { score: r.mine })
-          : t(r.mine > r.theirs ? "practice.resultWon" : r.mine < r.theirs ? "practice.resultLost" : "practice.resultTie", vars);
-        return { ...r, summary: r.reward ? `${line} ${t("practice.gemsLine", { gems: r.reward })}` : line };
+        try {
+          const r = await api(`/practice/challenges/${id}`, { answers });
+          if (Number.isFinite(r.balance)) onLearnerUpdate?.({ gems: r.balance });
+          const vars = { mine: r.mine, theirs: r.theirs, name: opponent.name };
+          const line = r.theirs === null ? t("practice.resultWait", { score: r.mine })
+            : t(r.mine > r.theirs ? "practice.resultWon" : r.mine < r.theirs ? "practice.resultLost" : "practice.resultTie", vars);
+          return { ...r, summary: r.reward ? `${line} ${t("practice.gemsLine", { gems: r.reward })}` : line };
+        } catch (error) { notify.error(error.message || t("practice.failed")); throw error; }
       },
     });
-  });
+  };
+  const fight = (friend) => { playEduSound("pop", { unlock: true }); return act(async () => {
+    const { id } = await api("/practice/challenges", { code: friend.code });
+    await versusFor(id, { name: friend.name, avatar: friend.avatar });
+  }); };
+  const play = (c) => { playEduSound("pop", { unlock: true }); return act(() => versusFor(c.id, c.opponent)); };
+  // Nút lớn "Đấu ngay": ưu tiên lời thách đang chờ, không có thì tự chọn một bạn có step chung.
+  const quickFight = () => {
+    playEduSound("pop", { unlock: true });
+    const waiting = data?.challenges.find((c) => c.mine === null);
+    if (waiting) return play(waiting);
+    if (!friends.length) return navigate("/friends");
+    return act(async () => {
+      for (const f of [...friends].sort(() => Math.random() - 0.5)) {
+        try {
+          const { id } = await api("/practice/challenges", { code: f.code });
+          return await versusFor(id, { name: f.name, avatar: f.avatar });
+        } catch (error) { if (!/step/i.test(error.message)) throw error; }
+      }
+      throw new Error(t("practice.noCommon"));
+    });
+  };
 
+  if (versus) {
+    return <EduVersus {...versus} me={{ name: me?.name || learner?.nickname || t("friends.social.you"), avatar: me?.avatar }} onClose={() => { setVersus(null); load(); }} />;
+  }
   if (run) return <QuizRun {...run} onClose={() => { setRun(null); load(); }} />;
   if (failed) return <section className="edu-page"><p>{t("practice.failed")}</p></section>;
   if (!data) return <section className="edu-page"><p className="practice-muted">…</p></section>;
 
   const { quests, reviews, mistakes, challenges } = data;
+  const pending = challenges.filter((c) => c.mine === null).length;
   return (
     <section className="edu-page practice">
       <h1 className="edu-page-title">{t("practice.title")}</h1>
+
+      {/* Thách đấu đứng đầu và nổi nhất; Thi đua tuần nằm kế bên (thẻ cố định, không có nút ẩn). */}
+      <div className="arena-row">
+        <button type="button" className="arena-tile" disabled={busy} onClick={quickFight}>
+          <span className="arena-vs" aria-hidden="true"><i>V</i><i>S</i></span>
+          <b className="arena-title">{t("practice.arenaTitle")}</b>
+          <small>{pending ? t("practice.arenaPending", { n: pending }) : t("practice.arenaBody", { gems: 10 })}</small>
+          <span className="arena-cta">{t("practice.arenaCta")}<span className="material-symbols-outlined" aria-hidden="true">bolt</span></span>
+          {pending > 0 && <span className="arena-badge" aria-hidden="true">{pending}</span>}
+        </button>
+        <Link to="/friends?tab=league" className="league-tile">
+          <span className="league-icon material-symbols-outlined" aria-hidden="true">trophy</span>
+          <b>{t("practice.leagueTile")}</b>
+          <small>{t("practice.leagueBody")}</small>
+          <span className="material-symbols-outlined league-go" aria-hidden="true">chevron_right</span>
+        </Link>
+      </div>
+
+      <div className="edu-card practice-card arena-card">
+        <h2 className="practice-h">{t("practice.rivals")}</h2>
+        {friends.length ? (
+          <ul className="arena-rivals">
+            {friends.map((f) => (
+              <li key={f.code}>
+                <button type="button" disabled={busy} onClick={() => fight(f)} aria-label={`${t("practice.challengeSend")} ${f.name}`}>
+                  <span className="arena-rival-av"><PersonaAvatar avatar={f.avatar} name={f.name} size={56} /><i className="material-symbols-outlined" aria-hidden="true">swords</i></span>
+                  <span className="nick-font">{f.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="practice-empty">{t("practice.challengeNoFriends")} <Link to="/friends">→</Link></p>}
+        {challenges.length > 0 && (<>
+          <h3 className="practice-sub">{t("practice.history")}</h3>
+          <ul className="practice-list">
+            {challenges.map((c) => (
+              <li key={c.id}>
+                <button type="button" className={`practice-item practice-person ${c.mine === null ? "is-live" : ""}`} disabled={busy || c.mine !== null} onClick={() => play(c)}>
+                  <PersonaAvatar avatar={c.opponent.avatar} name={c.opponent.name} size={40} />
+                  <span className="practice-item-text">
+                    <b>{t(c.sent ? "practice.to" : "practice.from", { name: c.opponent.name })}</b>
+                    <small>{stepTitle(c)}</small>
+                  </span>
+                  {c.mine === null
+                    ? <span className="edu-btn practice-small">{t("practice.arenaCta")}</span>
+                    : c.theirs === null
+                      ? <small className="practice-wait">{t("practice.waitShort", { mine: c.mine })}</small>
+                      : <b className={`practice-result ${c.mine > c.theirs ? "practice-win" : c.mine < c.theirs ? "practice-lose" : ""}`}>{c.mine}–{c.theirs}</b>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>)}
+      </div>
+
       {/* Điện thoại không có cột phải: gợi ý tính năng hiện ở đây. Máy tính đã có trong Rail. */}
       <div className="edu-spot-mobile"><EduSpotlight learner={learner} /></div>
 
@@ -159,39 +242,6 @@ export default function EduPractice({ learner, onLearnerUpdate }) {
         ) : <p className="practice-empty">{t("practice.mistakesEmpty")}</p>}
       </div>
 
-      <div className="edu-card practice-card">
-        <h2 className="practice-h">{t("practice.challengeTitle")}</h2>
-        <p className="practice-muted">{t("practice.challengeHint", { gems: 10 })}</p>
-        {challenges.length > 0 && (
-          <ul className="practice-list">
-            {challenges.map((c) => (
-              <li key={c.id} className="practice-person">
-                <PersonaAvatar avatar={c.opponent.avatar} name={c.opponent.name} size={40} />
-                <span className="practice-item-text">
-                  <b>{t(c.sent ? "practice.to" : "practice.from", { name: c.opponent.name })}</b>
-                  <small>{stepTitle(c)}</small>
-                </span>
-                {c.mine === null
-                  ? <button type="button" className="edu-btn practice-small" disabled={busy} onClick={() => play(c)}>{t("practice.play")}</button>
-                  : c.theirs === null
-                    ? <small className="practice-wait">{t("practice.waitShort", { mine: c.mine })}</small>
-                    : <b className={`practice-result ${c.mine > c.theirs ? "practice-win" : c.mine < c.theirs ? "practice-lose" : ""}`}>{c.mine}–{c.theirs}</b>}
-              </li>
-            ))}
-          </ul>
-        )}
-        {friends.length ? (
-          <ul className="practice-list">
-            {friends.map((f) => (
-              <li key={f.code} className="practice-person">
-                <PersonaAvatar avatar={f.avatar} name={f.name} size={40} />
-                <span className="practice-item-text"><b>{f.name}</b></span>
-                <button type="button" className="edu-btn edu-btn--ghost practice-small" disabled={busy} onClick={() => challenge(f.code)}>{t("practice.challengeSend")}</button>
-              </li>
-            ))}
-          </ul>
-        ) : <p className="practice-empty">{t("practice.challengeNoFriends")}</p>}
-      </div>
     </section>
   );
 }

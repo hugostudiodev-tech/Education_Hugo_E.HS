@@ -512,7 +512,7 @@ export default function EduDevelopers() {
         <ul className="dev-zodiac" aria-label="12 mascot trong gói education-hugo-zodiac">
           {ZODIAC_IDS.map((id) => <li key={id}><img src={`/edu/zodiac/${id}.svg`} alt="" width="64" height="64" loading="lazy" /><code>{id}</code></li>)}
         </ul>
-        <p>Gói <code>education-hugo-zodiac</code>: SVG tự chuyển động, không phụ thuộc thư viện nào. Bản quyền Hugo Studio, chỉ dùng với key còn hiệu lực.</p>
+        <p>Gói <code>education-hugo-zodiac</code>: SVG tự chuyển động, không phụ thuộc thư viện nào. Hình tải từ máy chủ bằng key, mang dấu riêng của từng key. Thu hồi key là hình ngừng tải ngay.</p>
         <Locked blocks={partner?.docs?.zodiac} />
         <details className="dev-more">
           <summary>Component · Tuỳ biến</summary>

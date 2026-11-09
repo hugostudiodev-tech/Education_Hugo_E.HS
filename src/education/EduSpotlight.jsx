@@ -13,7 +13,7 @@ const readHidden = () => { try { return JSON.parse(localStorage.getItem(HIDDEN))
  * Gợi ý MỘT tính năng người học chưa dùng, tự chọn theo thứ tự giá trị:
  *   1. Bật thông báo (một chạm, xin quyền ngay tại chỗ) — thông báo đẩy giữ người học quay lại.
  *   2. Cài app (máy tính chưa cài).
- *   3. Thi đua tuần.
+ * (Thi đua tuần là thẻ cố định cạnh Thách đấu ở trang Luyện tập — không gợi ý ở đây.)
  * Chỉ hiện sau bài học đầu tiên (đừng phân tâm trước khi người học thấy giá trị). Ẩn được từng gợi ý.
  */
 export default function EduSpotlight({ learner }) {
@@ -39,7 +39,6 @@ export default function EduSpotlight({ learner }) {
   const tips = [
     pushReady && permission === "default" && { key: "notify", icon: "notifications_active", tone: "#ff9600", onClick: enablePush },
     !standalone && { key: "install", icon: "install_mobile", tone: "#1cb0f6", onClick: install },
-    { key: "league", icon: "trophy", tone: "#ffc800", to: "/friends?tab=league" },
   ].filter((tip) => tip && !hidden.includes(tip.key));
   const tip = tips[0];
   if (!tip) return null;

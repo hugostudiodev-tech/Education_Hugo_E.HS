@@ -6,12 +6,15 @@ Bản quyền © 2026 Hugo Wishpax Le (Hugo Studio). Bảo lưu mọi quyền.
 Capricornus, Aquarius, Pisces) là thiết kế gốc của Hugo Studio: hình dáng, màu sắc, chuyển động và tên gọi.
 Gói không chứa và không phụ thuộc mã hay hình của bên thứ ba.
 
-Gói chỉ dùng được khi có **key đối tác còn hiệu lực** do Hugo Studio cấp.
+Gói chỉ dùng được khi có **key đối tác còn hiệu lực** do Hugo Studio cấp. Gói không chứa hình: hình được
+tải từ máy chủ Hugo Studio mỗi lần hiển thị, kiểm key và tên miền mỗi lượt. Mỗi hình mang dấu riêng của key
+(cả dấu nhìn thấy trong mã và dấu ẩn), dùng để truy ra key gốc của mọi bản sao.
 
 - Được: hiển thị các nhân vật trên website hoặc ứng dụng đã đăng ký với key, trong thời hạn của key;
   đổi kích thước, đặt vị trí, bật/tắt chuyển động.
-- Không được: phân phối lại gói hoặc file SVG; chia sẻ key; sửa hình để tạo nhân vật phái sinh;
+- Không được: lưu, tải về hoặc lưu đệm hình ngoài trình duyệt người xem; phân phối lại gói hoặc hình; chia sẻ key; sửa hình để tạo nhân vật phái sinh;
   dùng làm logo, nhãn hiệu, hàng hoá in ấn, NFT hay huấn luyện mô hình AI; gỡ dòng bản quyền trong file.
-- Key hết hạn hoặc bị thu hồi thì phải gỡ các nhân vật khỏi sản phẩm.
+- Hugo Studio có quyền thu hồi key bất cứ lúc nào khi có vi phạm; hình ngừng tải ngay từ lượt hiển thị kế tiếp.
+  Key hết hạn hoặc bị thu hồi thì phải gỡ các nhân vật khỏi sản phẩm. Vi phạm bản quyền có thể bị xử lý theo pháp luật.
 
 Liên hệ xin phép: contact@hugowishpax.studio
